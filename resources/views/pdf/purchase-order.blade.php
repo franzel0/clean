@@ -19,6 +19,21 @@
             border-bottom: 2px solid #333;
             padding-bottom: 20px;
             margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .header-brand {
+            display: block;
+            margin: 0 auto 15px auto;
+            width: 60px;
+            height: 60px;
+            background: #2563eb;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 60px;
+            text-align: center;
         }
         
         .header h1 {
@@ -134,6 +149,7 @@
 </head>
 <body>
     <div class="header">
+        <div class="header-brand">JG</div>
         <h1>Instrumenten-Bestellung</h1>
         <p>{{ $order->order_number }}</p>
         <p>Erstellt am {{ $order->requested_at->format('d.m.Y H:i') }}</p>
