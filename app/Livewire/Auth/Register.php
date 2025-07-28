@@ -30,6 +30,14 @@ class Register extends Component
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'name.required' => 'Der Name muss ausgefüllt werden.',
+            'name.max' => 'Der Name darf maximal 255 Zeichen lang sein.',
+            'email.required' => 'Die E-Mail-Adresse muss ausgefüllt werden.',
+            'email.email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+            'email.unique' => 'Diese E-Mail-Adresse ist bereits vergeben.',
+            'password.required' => 'Das Passwort muss ausgefüllt werden.',
+            'password.confirmed' => 'Die Passwort-Bestätigung stimmt nicht überein.',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);

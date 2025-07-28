@@ -60,20 +60,40 @@
 
                 <!-- Type Field -->
                 <div>
-                    <label for="type" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="type_id" class="block text-sm font-medium text-gray-700 mb-2">
                         Container Typ *
                     </label>
                     <select 
-                        id="type"
-                        wire:model="type" 
+                        id="type_id"
+                        wire:model="type_id" 
                         class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
                     >
                         <option value="">Typ auswählen...</option>
-                        <option value="surgical_set">Chirurgie Set</option>
-                        <option value="basic_set">Basis Set</option>
-                        <option value="special_set">Spezial Set</option>
+                        @foreach($containerTypes as $containerType)
+                            <option value="{{ $containerType->id }}">{{ $containerType->name }}</option>
+                        @endforeach
                     </select>
-                    @error('type')
+                    @error('type_id')
+                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Status Field -->
+                <div>
+                    <label for="status_id" class="block text-sm font-medium text-gray-700 mb-2">
+                        Container Status *
+                    </label>
+                    <select 
+                        id="status_id"
+                        wire:model="status_id" 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    >
+                        <option value="">Status auswählen...</option>
+                        @foreach($containerStatuses as $containerStatus)
+                            <option value="{{ $containerStatus->id }}">{{ $containerStatus->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('status_id')
                         <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
                     @enderror
                 </div>

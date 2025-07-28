@@ -15,14 +15,14 @@ class Instrument extends Model
     protected $fillable = [
         'name',
         'serial_number',
-        'manufacturer',
+        'manufacturer_id',
         'model',
-        'category',
+        'category_id',
         'purchase_price',
         'purchase_date',
         'warranty_until',
         'description',
-        'status',
+        'status_id',
         'current_container_id',
         'current_location_id',
         'is_active',
@@ -65,6 +65,21 @@ class Instrument extends Model
         return $this->belongsTo(Department::class, 'current_location_id');
     }
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(InstrumentCategory::class, 'category_id');
+    }
+
+    public function instrumentStatus(): BelongsTo
+    {
+        return $this->belongsTo(InstrumentStatus::class, 'status_id');
+    }
+
+    public function manufacturerRelation(): BelongsTo
+    {
+        return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
+    }
+
     public function defectReports(): HasMany
     {
         return $this->hasMany(DefectReport::class);
@@ -77,32 +92,17 @@ class Instrument extends Model
 
     public function getStatusDisplayAttribute(): string
     {
-        return match($this->status) {
-            'available' => 'Verfügbar',
-            'in_use' => 'Im Einsatz',
-            'defective' => 'Defekt',
-            'in_repair' => 'In Reparatur',
-            'out_of_service' => 'Außer Betrieb',
-            default => ucfirst($this->status),
-        };
+        return $this->instrumentStatus?->name ?? 'Unbekannt';
     }
 
     public function getCategoryDisplayAttribute(): string
     {
-        return match($this->category) {
-            'scissors' => 'Scheren',
-            'forceps' => 'Pinzetten',
-            'scalpel' => 'Skalpelle',
-            'clamp' => 'Klemmen',
-            'retractor' => 'Wundhaken',
-            'needle_holder' => 'Nadelhalter',
-            default => ucfirst($this->category),
-        };
+        return $this->category?->name ?? 'Unbekannt';
     }
 
     public function getIsUnderWarrantyAttribute(): bool
     {
-        return $this->warranty_until && $this->warranty_until->isFuture();
+        return $this->warranty_until && $this->warranty_until > now();
     }
 
     public function scopeActive($query)
@@ -112,11 +112,15 @@ class Instrument extends Model
 
     public function scopeDefective($query)
     {
-        return $query->where('status', 'defective');
+        return $query->whereHas('instrumentStatus', function($q) {
+            $q->where('name', 'LIKE', '%defekt%')->orWhere('name', 'LIKE', '%außer betrieb%');
+        });
     }
 
     public function scopeAvailable($query)
     {
-        return $query->where('status', 'available');
+        return $query->whereHas('instrumentStatus', function($q) {
+            $q->where('name', 'LIKE', '%verfügbar%');
+        });
     }
 }

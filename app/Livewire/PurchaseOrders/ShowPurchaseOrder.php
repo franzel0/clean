@@ -3,6 +3,7 @@
 namespace App\Livewire\PurchaseOrders;
 
 use App\Models\PurchaseOrder;
+use App\Models\Supplier;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -20,7 +21,7 @@ class ShowPurchaseOrder extends Component
     public $newStatus = '';
     public $notes = '';
     public $actualCost = '';
-    public $supplier = '';
+    public $supplier_id = '';
     public $expectedDelivery = '';
 
     public function mount(PurchaseOrder $order)
@@ -31,10 +32,11 @@ class ShowPurchaseOrder extends Component
             'defectReport.reportingDepartment',
             'requestedBy',
             'approvedBy',
-            'receivedBy'
+            'receivedBy',
+            'supplier'
         ]);
         
-        $this->supplier = $this->order->supplier;
+        $this->supplier_id = $this->order->supplier_id;
         $this->actualCost = $this->order->actual_cost;
         $this->notes = $this->order->notes;
         $this->expectedDelivery = $this->order->expected_delivery?->format('Y-m-d');
@@ -114,18 +116,26 @@ class ShowPurchaseOrder extends Component
     public function updateDetails()
     {
         $this->validate([
-            'supplier' => 'nullable|string|max:255',
+            'supplier_id' => 'nullable|exists:suppliers,id',
             'actualCost' => 'nullable|numeric|min:0',
             'expectedDelivery' => 'nullable|date',
             'notes' => 'nullable|string',
+        ], [
+            'supplier_id.exists' => 'Bitte wählen Sie einen gültigen Lieferanten aus.',
+            'actualCost.numeric' => 'Die tatsächlichen Kosten müssen eine Zahl sein.',
+            'actualCost.min' => 'Die tatsächlichen Kosten können nicht negativ sein.',
+            'expectedDelivery.date' => 'Bitte geben Sie ein gültiges Lieferdatum ein.',
         ]);
 
         $this->order->update([
-            'supplier' => $this->supplier,
+            'supplier_id' => $this->supplier_id,
             'actual_cost' => $this->actualCost,
             'expected_delivery' => $this->expectedDelivery,
             'notes' => $this->notes,
         ]);
+
+        // Reload the supplier relationship after update
+        $this->order->load('supplier');
 
         session()->flash('message', 'Bestelldetails erfolgreich aktualisiert.');
     }
@@ -186,6 +196,8 @@ class ShowPurchaseOrder extends Component
 
     public function render()
     {
-        return view('livewire.purchase-orders.show-purchase-order');
+        $suppliers = Supplier::active()->ordered()->get();
+        
+        return view('livewire.purchase-orders.show-purchase-order', compact('suppliers'));
     }
 }

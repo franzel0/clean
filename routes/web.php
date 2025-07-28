@@ -48,6 +48,9 @@ Route::middleware(['auth'])->group(function () {
     // Benutzerverwaltung (nur für Admins)
     Route::get('/users', \App\Livewire\Users\UsersIndex::class)->name('users.index');
     
+    // App Settings (nur für Admins)
+    Route::get('/app-settings', \App\Livewire\AppSettings\SettingsIndex::class)->name('app-settings.index');
+    
     // Berichte
     Route::get('/reports', \App\Livewire\Reports\SimpleReports::class)->name('reports.index');
 

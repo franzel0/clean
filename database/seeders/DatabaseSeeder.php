@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             InstrumentManagementSeeder::class,
+            SupplierSeeder::class,
             InstrumentMovementSeeder::class,
         ]);
     }

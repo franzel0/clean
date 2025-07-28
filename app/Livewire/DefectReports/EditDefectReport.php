@@ -5,6 +5,7 @@ namespace App\Livewire\DefectReports;
 use App\Models\DefectReport;
 use App\Models\Instrument;
 use App\Models\OperatingRoom;
+use App\Models\DefectType;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
@@ -22,6 +23,7 @@ class EditDefectReport extends Component
     public $instrument_id = '';
     public $operating_room_id = '';
     public $defect_type = '';
+    public $defect_type_id = '';
     public $description = '';
     public $severity = 'medium';
     public $status = '';
@@ -31,7 +33,8 @@ class EditDefectReport extends Component
     protected $rules = [
         'instrument_id' => 'required|exists:instruments,id',
         'operating_room_id' => 'nullable|exists:operating_rooms,id',
-        'defect_type' => 'required|in:broken,dull,bent,missing_parts,other',
+        'defect_type' => 'nullable|string|max:255',
+        'defect_type_id' => 'required|exists:defect_types,id',
         'description' => 'required|string|min:10',
         'severity' => 'required|in:low,medium,high,critical',
         'status' => 'required|in:reported,acknowledged,in_review,ordered,received,repaired,closed',
@@ -44,6 +47,7 @@ class EditDefectReport extends Component
         $this->instrument_id = $report->instrument_id;
         $this->operating_room_id = $report->operating_room_id;
         $this->defect_type = $report->defect_type;
+        $this->defect_type_id = $report->defect_type_id;
         $this->description = $report->description;
         $this->severity = $report->severity;
         $this->status = $report->status;
@@ -72,6 +76,7 @@ class EditDefectReport extends Component
             'instrument_id' => $this->instrument_id,
             'operating_room_id' => $this->operating_room_id ?: null,
             'defect_type' => $this->defect_type,
+            'defect_type_id' => $this->defect_type_id,
             'description' => $this->description,
             'severity' => $this->severity,
             'status' => $this->status,
@@ -80,9 +85,15 @@ class EditDefectReport extends Component
 
         // Update instrument status based on defect report status
         if ($this->status === 'closed' || $this->status === 'repaired') {
-            $this->report->instrument->update(['status' => 'active']);
+            $activeStatus = \App\Models\InstrumentStatus::where('name', 'Verfügbar')->first();
+            if ($activeStatus) {
+                $this->report->instrument->update(['status_id' => $activeStatus->id]);
+            }
         } else {
-            $this->report->instrument->update(['status' => 'defective']);
+            $defectiveStatus = \App\Models\InstrumentStatus::where('name', 'Außer Betrieb')->first();
+            if ($defectiveStatus) {
+                $this->report->instrument->update(['status_id' => $defectiveStatus->id]);
+            }
         }
 
         session()->flash('message', 'Defektmeldung wurde erfolgreich aktualisiert.');
@@ -94,7 +105,8 @@ class EditDefectReport extends Component
     {
         $instruments = Instrument::all(); // Alle Instrumente für Bearbeitung
         $operating_rooms = OperatingRoom::active()->get();
+        $defectTypes = DefectType::active()->ordered()->get();
         
-        return view('livewire.defect-reports.edit-defect-report', compact('instruments', 'operating_rooms'));
+        return view('livewire.defect-reports.edit-defect-report', compact('instruments', 'operating_rooms', 'defectTypes'));
     }
 }

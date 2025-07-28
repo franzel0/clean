@@ -92,10 +92,10 @@
                                     <p class="text-sm text-gray-600 font-mono bg-gray-100 px-2 py-1 rounded">{{ $instrument->serial_number }}</p>
                                 </div>
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold border
-                                    @if($instrument->status === 'available') bg-green-100 text-green-800 border-green-300
-                                    @elseif($instrument->status === 'in_use') bg-blue-100 text-blue-800 border-blue-300
-                                    @elseif($instrument->status === 'defective') bg-red-100 text-red-800 border-red-300
-                                    @elseif($instrument->status === 'in_repair') bg-yellow-100 text-yellow-800 border-yellow-300
+                                    @if($instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'verfügbar') !== false) bg-green-100 text-green-800 border-green-300
+                                    @elseif($instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'benutzung') !== false || stripos($instrument->instrumentStatus->name, 'einsatz') !== false)) bg-blue-100 text-blue-800 border-blue-300
+                                    @elseif($instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'defekt') !== false || stripos($instrument->instrumentStatus->name, 'außer betrieb') !== false)) bg-red-100 text-red-800 border-red-300
+                                    @elseif($instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'wartung') !== false) bg-yellow-100 text-yellow-800 border-yellow-300
                                     @else bg-gray-100 text-gray-800 border-gray-300
                                     @endif">
                                     {{ $instrument->status_display }}
@@ -107,10 +107,10 @@
                                     <span class="font-bold text-gray-700">Kategorie:</span>
                                     <span class="text-gray-600">{{ $instrument->category_display }}</span>
                                 </div>
-                                @if($instrument->manufacturer)
+                                @if($instrument->manufacturerRelation)
                                 <div class="text-xs">
                                     <span class="font-bold text-gray-700">Hersteller:</span>
-                                    <span class="text-gray-600">{{ $instrument->manufacturer }}</span>
+                                    <span class="text-gray-600">{{ $instrument->manufacturerRelation->name }}</span>
                                 </div>
                                 @endif
                                 @if($instrument->defectReports->count() > 0)
@@ -160,10 +160,21 @@
                 <div class="p-6">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         @php
-                            $availableCount = $container->instruments->where('status', 'available')->count();
-                            $inUseCount = $container->instruments->where('status', 'in_use')->count();
-                            $defectiveCount = $container->instruments->where('status', 'defective')->count();
-                            $repairCount = $container->instruments->where('status', 'in_repair')->count();
+                            $availableCount = $container->instruments->filter(function($instrument) {
+                                return $instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'verfügbar') !== false;
+                            })->count();
+                            
+                            $inUseCount = $container->instruments->filter(function($instrument) {
+                                return $instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'benutzung') !== false || stripos($instrument->instrumentStatus->name, 'einsatz') !== false);
+                            })->count();
+                            
+                            $defectiveCount = $container->instruments->filter(function($instrument) {
+                                return $instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'defekt') !== false || stripos($instrument->instrumentStatus->name, 'außer betrieb') !== false);
+                            })->count();
+                            
+                            $repairCount = $container->instruments->filter(function($instrument) {
+                                return $instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'wartung') !== false;
+                            })->count();
                         @endphp
                         
                         <div class="text-center bg-green-50 p-4 rounded-lg border-2 border-green-200">

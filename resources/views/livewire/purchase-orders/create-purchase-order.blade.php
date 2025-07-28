@@ -96,15 +96,23 @@
 
         <!-- Lieferant -->
         <div class="mb-6">
-            <label for="supplier" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="supplier_id" class="block text-sm font-medium text-gray-700 mb-2">
                 Lieferant *
             </label>
-            <input type="text" 
-                   wire:model="supplier" 
-                   id="supplier" 
-                   placeholder="Name des Lieferanten eingeben..."
-                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-            @error('supplier')
+            <select wire:model="supplier_id" 
+                    id="supplier_id" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Lieferant auswählen...</option>
+                @foreach($suppliers as $supplier)
+                    <option value="{{ $supplier->id }}">
+                        {{ $supplier->name }}
+                        @if($supplier->contact_person)
+                            - {{ $supplier->contact_person }}
+                        @endif
+                    </option>
+                @endforeach
+            </select>
+            @error('supplier_id')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>

@@ -16,7 +16,10 @@ class ShowContainer extends Component
     public function mount(Container $container)
     {
         $this->container = $container->load([
-            'instruments.defectReports'
+            'instruments.defectReports',
+            'instruments.instrumentStatus',
+            'instruments.category',
+            'instruments.manufacturerRelation'
         ]);
     }
 

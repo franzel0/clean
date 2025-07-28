@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Container extends Model
 {
@@ -14,9 +15,11 @@ class Container extends Model
         'name',
         'barcode',
         'type',
+        'type_id',
         'description',
         'is_active',
         'status',
+        'status_id',
     ];
 
     protected $casts = [
@@ -26,6 +29,16 @@ class Container extends Model
     public function instruments(): HasMany
     {
         return $this->hasMany(Instrument::class, 'current_container_id');
+    }
+
+    public function containerType(): BelongsTo
+    {
+        return $this->belongsTo(ContainerType::class, 'type_id');
+    }
+
+    public function containerStatus(): BelongsTo
+    {
+        return $this->belongsTo(ContainerStatus::class, 'status_id');
     }
 
     public function scopeActive($query)

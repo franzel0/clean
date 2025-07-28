@@ -1,5 +1,12 @@
 <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
+        <!-- Logo -->
+        <div class="text-center">
+            <div class="flex justify-center mb-4">
+                <img src="{{ asset('img/logo.png') }}" alt="Logo" class="h-24 w-auto object-contain">
+            </div>
+        </div>
+        
         <!-- Header -->
         <div class="text-center">
             <h2 class="text-3xl font-bold text-gray-900">Konto erstellen</h2>

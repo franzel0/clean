@@ -19,6 +19,7 @@ class DefectReport extends Model
         'reporting_department_id',
         'operating_room_id',
         'defect_type',
+        'defect_type_id',
         'description',
         'severity',
         'status',
@@ -66,6 +67,11 @@ class DefectReport extends Model
     public function operatingRoom(): BelongsTo
     {
         return $this->belongsTo(OperatingRoom::class);
+    }
+
+    public function defectType(): BelongsTo
+    {
+        return $this->belongsTo(DefectType::class, 'defect_type_id');
     }
 
     public function purchaseOrder(): HasOne

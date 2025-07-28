@@ -41,6 +41,12 @@ class Profile extends Component
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id),
             ],
+        ], [
+            'name.required' => 'Der Name muss ausgefüllt werden.',
+            'name.max' => 'Der Name darf maximal 255 Zeichen lang sein.',
+            'email.required' => 'Die E-Mail-Adresse muss ausgefüllt werden.',
+            'email.email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+            'email.unique' => 'Diese E-Mail-Adresse ist bereits vergeben.',
         ]);
 
         $user->fill($validated);

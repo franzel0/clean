@@ -5,6 +5,8 @@ namespace App\Livewire\Instruments;
 use App\Models\Instrument;
 use App\Models\Container;
 use App\Models\Department;
+use App\Models\InstrumentStatus;
+use App\Models\InstrumentCategory;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -65,19 +67,21 @@ class InstrumentsList extends Component
 
     public function render()
     {
-        $query = Instrument::with(['currentContainer', 'currentLocation'])
+        $query = Instrument::with(['currentContainer', 'currentLocation', 'category', 'instrumentStatus', 'manufacturerRelation'])
             ->when($this->search, function ($query) {
                 $query->where(function ($q) {
                     $q->where('name', 'like', '%' . $this->search . '%')
                       ->orWhere('serial_number', 'like', '%' . $this->search . '%')
-                      ->orWhere('manufacturer', 'like', '%' . $this->search . '%');
+                      ->orWhereHas('manufacturerRelation', function($mq) {
+                          $mq->where('name', 'like', '%' . $this->search . '%');
+                      });
                 });
             })
             ->when($this->statusFilter, function ($query) {
-                $query->where('status', $this->statusFilter);
+                $query->where('status_id', $this->statusFilter);
             })
             ->when($this->categoryFilter, function ($query) {
-                $query->where('category', $this->categoryFilter);
+                $query->where('category_id', $this->categoryFilter);
             })
             ->when($this->containerFilter, function ($query) {
                 $query->where('current_container_id', $this->containerFilter);
@@ -86,21 +90,8 @@ class InstrumentsList extends Component
         $instruments = $query->paginate(20);
 
         $containers = Container::all();
-        $statuses = [
-            'available' => 'Verfügbar',
-            'in_use' => 'In Verwendung', 
-            'defective' => 'Defekt',
-            'in_repair' => 'In Reparatur',
-            'out_of_service' => 'Außer Betrieb'
-        ];
-        $categories = [
-            'scissors' => 'Schere',
-            'forceps' => 'Pinzette', 
-            'scalpel' => 'Skalpell',
-            'clamp' => 'Klemme',
-            'retractor' => 'Retraktor',
-            'needle_holder' => 'Nadelhalter'
-        ];
+        $statuses = InstrumentStatus::active()->ordered()->get();
+        $categories = InstrumentCategory::active()->ordered()->get();
 
         return view('livewire.instruments.instruments-list', compact(
             'instruments', 

@@ -100,8 +100,8 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="py-3 px-4">
                                     <div class="font-medium text-gray-900">{{ $order->order_number }}</div>
-                                    @if($order->supplier)
-                                        <div class="text-sm text-gray-600">{{ $order->supplier }}</div>
+                                    @if($order->supplier_id || $order->supplier)
+                                        <div class="text-sm text-gray-600">{{ $order->supplier_display }}</div>
                                     @endif
                                 </td>
                                 <td class="py-3 px-4">

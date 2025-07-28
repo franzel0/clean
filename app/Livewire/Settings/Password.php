@@ -25,6 +25,11 @@ class Password extends Component
             $validated = $this->validate([
                 'current_password' => ['required', 'string', 'current_password'],
                 'password' => ['required', 'string', PasswordRule::defaults(), 'confirmed'],
+            ], [
+                'current_password.required' => 'Das aktuelle Passwort muss eingegeben werden.',
+                'current_password.current_password' => 'Das aktuelle Passwort ist nicht korrekt.',
+                'password.required' => 'Das neue Passwort muss eingegeben werden.',
+                'password.confirmed' => 'Die Passwort-Bestätigung stimmt nicht überein.',
             ]);
         } catch (ValidationException $e) {
             $this->reset('current_password', 'password', 'password_confirmation');

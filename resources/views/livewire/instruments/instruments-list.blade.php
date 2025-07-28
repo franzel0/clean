@@ -36,8 +36,8 @@
                 <select wire:model.live="statusFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Alle Status</option>
-                    @foreach($statuses as $status => $label)
-                        <option value="{{ $status }}">{{ $label }}</option>
+                    @foreach($statuses as $status)
+                        <option value="{{ $status->id }}">{{ $status->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -46,8 +46,8 @@
                 <select wire:model.live="categoryFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Alle Kategorien</option>
-                    @foreach($categories as $category => $label)
-                        <option value="{{ $category }}">{{ $label }}</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -92,18 +92,20 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="py-3 px-4">
                                     <div class="font-medium text-gray-900">{{ $instrument->name }}</div>
-                                    @if($instrument->manufacturer)
-                                        <div class="text-sm text-gray-600">{{ $instrument->manufacturer }}</div>
+                                    @if($instrument->manufacturerRelation)
+                                        <div class="text-sm text-gray-600">{{ $instrument->manufacturerRelation->name }}</div>
                                     @endif
                                 </td>
                                 <td class="py-3 px-4 font-mono text-sm text-gray-900">{{ $instrument->serial_number }}</td>
                                 <td class="py-3 px-4 text-gray-900">{{ $instrument->category_display }}</td>
                                 <td class="py-3 px-4">
                                     <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                        @if($instrument->status === 'available') bg-green-100 text-green-800
-                                        @elseif($instrument->status === 'in_use') bg-blue-100 text-blue-800
-                                        @elseif($instrument->status === 'defective') bg-red-100 text-red-800
-                                        @elseif($instrument->status === 'in_repair') bg-yellow-100 text-yellow-800
+                                        @if($instrument->instrumentStatus?->color === 'green') bg-green-100 text-green-800
+                                        @elseif($instrument->instrumentStatus?->color === 'blue') bg-blue-100 text-blue-800
+                                        @elseif($instrument->instrumentStatus?->color === 'red') bg-red-100 text-red-800
+                                        @elseif($instrument->instrumentStatus?->color === 'yellow') bg-yellow-100 text-yellow-800
+                                        @elseif($instrument->instrumentStatus?->color === 'purple') bg-purple-100 text-purple-800
+                                        @elseif($instrument->instrumentStatus?->color === 'orange') bg-orange-100 text-orange-800
                                         @else bg-gray-100 text-gray-800
                                         @endif">
                                         {{ $instrument->status_display }}

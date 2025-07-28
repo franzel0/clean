@@ -200,7 +200,7 @@
     @if($showCreateModal || $showEditModal)
     <div class="fixed inset-0 z-50 overflow-y-auto" wire:ignore.self>
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75" wire:click="closeModal"></div>
+            <div class="fixed inset-0" style="background-color: rgba(75, 85, 99, 0.5);" wire:click="closeModal"></div>
             
             <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl max-w-lg w-full">
                 <form wire:submit.prevent="{{ $showCreateModal ? 'createUser' : 'updateUser' }}">

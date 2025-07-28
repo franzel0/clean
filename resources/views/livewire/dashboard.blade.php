@@ -1,7 +1,79 @@
 <div class="container mx-auto px-4 py-8">
  <div class="mb-8">
  <h1 class="text-3xl font-bold text-gray-900">Instrumenten Management Dashboard</h1>
- </div>    <!-- Statistiken -->
+ </div>
+ 
+ <!-- Quick Actions -->
+ <div class="mb-8">
+     <h2 class="text-lg font-semibold text-gray-900 mb-4">Schnellaktionen</h2>
+     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+         <!-- Neues Instrument -->
+         <a href="{{ route('instruments.create') }}" 
+            class="group flex items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 shadow-sm hover:shadow-md">
+             <div class="flex-shrink-0">
+                 <div class="w-10 h-10 bg-blue-100 group-hover:bg-blue-200 rounded-lg flex items-center justify-center transition-colors">
+                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                     </svg>
+                 </div>
+             </div>
+             <div class="ml-4">
+                 <p class="text-sm font-medium text-gray-900 group-hover:text-blue-900">Neues Instrument</p>
+                 <p class="text-xs text-gray-500 group-hover:text-blue-700">Instrument registrieren</p>
+             </div>
+         </a>
+         
+         <!-- Defekt melden -->
+         <a href="{{ route('defect-reports.create') }}" 
+            class="group flex items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-red-300 hover:bg-red-50 transition-all duration-200 shadow-sm hover:shadow-md">
+             <div class="flex-shrink-0">
+                 <div class="w-10 h-10 bg-red-100 group-hover:bg-red-200 rounded-lg flex items-center justify-center transition-colors">
+                     <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                     </svg>
+                 </div>
+             </div>
+             <div class="ml-4">
+                 <p class="text-sm font-medium text-gray-900 group-hover:text-red-900">Defekt melden</p>
+                 <p class="text-xs text-gray-500 group-hover:text-red-700">Schnell Problem melden</p>
+             </div>
+         </a>
+         
+         <!-- Neue Bestellung -->
+         <a href="{{ route('purchase-orders.create') }}" 
+            class="group flex items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-200 shadow-sm hover:shadow-md">
+             <div class="flex-shrink-0">
+                 <div class="w-10 h-10 bg-purple-100 group-hover:bg-purple-200 rounded-lg flex items-center justify-center transition-colors">
+                     <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                     </svg>
+                 </div>
+             </div>
+             <div class="ml-4">
+                 <p class="text-sm font-medium text-gray-900 group-hover:text-purple-900">Neue Bestellung</p>
+                 <p class="text-xs text-gray-500 group-hover:text-purple-700">Ersatz bestellen</p>
+             </div>
+         </a>
+         
+         <!-- Container erstellen -->
+         <a href="{{ route('containers.create') }}" 
+            class="group flex items-center p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-all duration-200 shadow-sm hover:shadow-md">
+             <div class="flex-shrink-0">
+                 <div class="w-10 h-10 bg-green-100 group-hover:bg-green-200 rounded-lg flex items-center justify-center transition-colors">
+                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                     </svg>
+                 </div>
+             </div>
+             <div class="ml-4">
+                 <p class="text-sm font-medium text-gray-900 group-hover:text-green-900">Neuer Container</p>
+                 <p class="text-xs text-gray-500 group-hover:text-green-700">Container anlegen</p>
+             </div>
+         </a>
+     </div>
+ </div>
+ 
+    <!-- Statistiken -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="stats-card p-6 cursor-help" 
              title="Gesamtanzahl aller registrierten Instrumente im System, unabhängig vom Status.">

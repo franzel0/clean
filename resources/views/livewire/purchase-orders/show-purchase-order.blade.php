@@ -114,31 +114,50 @@
                     <h2 class="text-lg font-semibold text-gray-900">Bestelldetails</h2>
                 </div>
                 <div class="p-6">
-                    <form wire:submit.prevent="updateDetails">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Current Details Display -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Bestellnummer</h3>
+                            <p class="text-gray-900">{{ $order->order_number }}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Angefordert von</h3>
+                            <p class="text-gray-900">{{ $order->requestedBy->name }}</p>
+                        </div>
+                        @if($order->supplier_id || $order->supplier)
                             <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Bestellnummer</h3>
-                                <p class="text-gray-900">{{ $order->order_number }}</p>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Aktueller Lieferant</h3>
+                                <p class="text-gray-900">{{ $order->supplier_display }}</p>
                             </div>
-                            <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Angefordert von</h3>
-                                <p class="text-gray-900">{{ $order->requestedBy->name }}</p>
-                            </div>
-                            <div>
-                                <label for="supplier" class="text-sm font-medium text-gray-700 mb-2 block">Lieferant</label>
-                                <input type="text" 
-                                       id="supplier" 
-                                       wire:model="supplier" 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                                       placeholder="Lieferant eingeben">
-                                @error('supplier') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                            </div>
-                            @if($order->estimated_cost)
+                        @endif
+                        @if($order->estimated_cost)
                             <div>
                                 <h3 class="text-sm font-medium text-gray-700 mb-2">Geschätzte Kosten</h3>
                                 <p class="text-gray-900">{{ number_format($order->estimated_cost, 2) }} €</p>
                             </div>
-                            @endif
+                        @endif
+                    </div>
+                    
+                    <!-- Edit Form -->
+                    <form wire:submit.prevent="updateDetails">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="supplier_id" class="text-sm font-medium text-gray-700 mb-2 block">Lieferant ändern</label>
+                                <select id="supplier_id" 
+                                        wire:model="supplier_id" 
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Lieferant auswählen...</option>
+                                    @foreach($suppliers as $supplier)
+                                        <option value="{{ $supplier->id }}">
+                                            {{ $supplier->name }}
+                                            @if($supplier->contact_person)
+                                                - {{ $supplier->contact_person }}
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('supplier_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
                             <div>
                                 <label for="actualCost" class="text-sm font-medium text-gray-700 mb-2 block">Tatsächliche Kosten</label>
                                 <input type="number" 
@@ -401,7 +420,7 @@
     <div class="fixed inset-0 z-50 overflow-y-auto" wire:ignore.self>
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
             <!-- Background overlay -->
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75" wire:click="closeModal"></div>
+            <div class="fixed inset-0" style="background-color: rgba(75, 85, 99, 0.5);" wire:click="closeModal"></div>
             
             <!-- Modal content -->
             <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl max-w-lg w-full">

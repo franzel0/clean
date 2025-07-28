@@ -6,6 +6,7 @@ use App\Models\DefectReport;
 use App\Models\Instrument;
 use App\Models\OperatingRoom;
 use App\Models\Department;
+use App\Models\DefectType;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Livewire\Attributes\Layout;
@@ -21,6 +22,7 @@ class CreateDefectReport extends Component
     public $instrument_id = '';
     public $operating_room_id = '';
     public $defect_type = '';
+    public $defect_type_id = '';
     public $description = '';
     public $severity = 'medium';
     public $photos = [];
@@ -28,7 +30,8 @@ class CreateDefectReport extends Component
     protected $rules = [
         'instrument_id' => 'required|exists:instruments,id',
         'operating_room_id' => 'nullable|exists:operating_rooms,id',
-        'defect_type' => 'required|in:broken,dull,bent,missing_parts,other',
+        'defect_type' => 'nullable|string|max:255',
+        'defect_type_id' => 'required|exists:defect_types,id',
         'description' => 'required|string|min:10',
         'severity' => 'required|in:low,medium,high,critical',
         'photos.*' => 'nullable|image|max:2048',
@@ -56,6 +59,7 @@ class CreateDefectReport extends Component
             'reporting_department_id' => Auth::user()->department_id,
             'operating_room_id' => $this->operating_room_id ?: null,
             'defect_type' => $this->defect_type,
+            'defect_type_id' => $this->defect_type_id,
             'description' => $this->description,
             'severity' => $this->severity,
             'status' => 'reported',
@@ -65,18 +69,24 @@ class CreateDefectReport extends Component
 
         // Update instrument status
         $instrument = Instrument::find($this->instrument_id);
-        $oldStatus = $instrument->status;
-        $instrument->update(['status' => 'defective']);
-
-        // Log movement for defect reporting
-        \App\Services\MovementService::logMovement(
-            instrument: $instrument,
-            movementType: 'repair',
-            statusBefore: $oldStatus,
-            statusAfter: 'defective',
-            notes: 'Defekt gemeldet: ' . $this->defect_type . ' - ' . $report->report_number,
-            movedBy: Auth::user()->id
-        );
+        $oldStatusId = $instrument->status_id;
+        
+        // Find the 'Außer Betrieb' status for defective instruments
+        $defectiveStatus = \App\Models\InstrumentStatus::where('name', 'Außer Betrieb')->first();
+        
+        if ($defectiveStatus) {
+            $instrument->update(['status_id' => $defectiveStatus->id]);
+            
+            // Log movement for defect reporting
+            \App\Services\MovementService::logMovement(
+                instrument: $instrument,
+                movementType: 'repair',
+                statusBefore: $oldStatusId,
+                statusAfter: $defectiveStatus->id,
+                notes: 'Defekt gemeldet: ' . $this->defect_type . ' - ' . $report->report_number,
+                movedBy: Auth::user()->id
+            );
+        }
 
         session()->flash('message', 'Defektmeldung erfolgreich erstellt: ' . $report->report_number);
         
@@ -87,7 +97,8 @@ class CreateDefectReport extends Component
     {
         $instruments = Instrument::active()->get();
         $operating_rooms = OperatingRoom::active()->get();
+        $defectTypes = DefectType::active()->ordered()->get();
         
-        return view('livewire.defect-reports.create-defect-report', compact('instruments', 'operating_rooms'));
+        return view('livewire.defect-reports.create-defect-report', compact('instruments', 'operating_rooms', 'defectTypes'));
     }
 }

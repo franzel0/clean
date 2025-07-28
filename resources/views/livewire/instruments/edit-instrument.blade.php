@@ -73,14 +73,18 @@
 
                     <!-- Manufacturer -->
                     <div>
-                        <label for="manufacturer" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="manufacturer_id" class="block text-sm font-medium text-gray-700 mb-2">
                             Hersteller
                         </label>
-                        <input type="text" 
-                               wire:model="form.manufacturer" 
-                               id="manufacturer"
-                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                        @error('form.manufacturer') 
+                        <select wire:model="form.manufacturer_id" 
+                                id="manufacturer_id"
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            <option value="">Hersteller wählen</option>
+                            @foreach($manufacturers as $manufacturer)
+                                <option value="{{ $manufacturer->id }}">{{ $manufacturer->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('form.manufacturer_id') 
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p> 
                         @enderror
                     </div>
@@ -101,35 +105,36 @@
 
                     <!-- Category -->
                     <div>
-                        <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="category_id" class="block text-sm font-medium text-gray-700 mb-2">
                             Kategorie *
                         </label>
-                        <select wire:model="form.category" 
-                                id="category"
+                        <select wire:model="form.category_id" 
+                                id="category_id"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                             <option value="">Kategorie wählen</option>
-                            @foreach($categories as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
-                        @error('form.category') 
+                        @error('form.category_id') 
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p> 
                         @enderror
                     </div>
 
                     <!-- Status -->
                     <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+                        <label for="status_id" class="block text-sm font-medium text-gray-700 mb-2">
                             Status *
                         </label>
-                        <select wire:model="form.status" 
-                                id="status"
+                        <select wire:model="form.status_id" 
+                                id="status_id"
                                 class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                            @foreach($statuses as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
+                            <option value="">Status wählen</option>
+                            @foreach($statuses as $status)
+                                <option value="{{ $status->id }}">{{ $status->name }}</option>
                             @endforeach
                         </select>
-                        @error('form.status') 
+                        @error('form.status_id') 
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p> 
                         @enderror
                     </div>

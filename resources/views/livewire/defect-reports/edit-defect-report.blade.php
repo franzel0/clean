@@ -61,18 +61,16 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <!-- Defekttyp -->
                         <div>
-                            <label for="defect_type" class="block text-sm font-medium text-gray-700 mb-2">Defekttyp *</label>
-                            <select wire:model.live="defect_type" 
+                            <label for="defect_type_id" class="block text-sm font-medium text-gray-700 mb-2">Defekttyp *</label>
+                            <select wire:model.live="defect_type_id" 
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
                                     required>
                                 <option value="">Defekttyp auswählen</option>
-                                <option value="broken">Defekt/Kaputt</option>
-                                <option value="dull">Stumpf</option>
-                                <option value="bent">Verbogen</option>
-                                <option value="missing_parts">Fehlende Teile</option>
-                                <option value="other">Sonstiges</option>
+                                @foreach($defectTypes as $defectType)
+                                    <option value="{{ $defectType->id }}">{{ $defectType->name }}</option>
+                                @endforeach
                             </select>
-                            @error('defect_type') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            @error('defect_type_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
 
                         <!-- Schweregrad -->

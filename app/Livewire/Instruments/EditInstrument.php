@@ -5,6 +5,9 @@ namespace App\Livewire\Instruments;
 use App\Models\Instrument;
 use App\Models\Container;
 use App\Models\Department;
+use App\Models\InstrumentCategory;
+use App\Models\InstrumentStatus;
+use App\Models\Manufacturer;
 use Carbon\Carbon;
 use Livewire\Component;
 use Illuminate\Support\Facades\Log;
@@ -18,14 +21,14 @@ class EditInstrument extends Component
     public $form = [
         'name' => '',
         'serial_number' => '',
-        'manufacturer' => '',
+        'manufacturer_id' => '',
         'model' => '',
-        'category' => '',
+        'category_id' => '',
         'purchase_price' => '',
         'purchase_date' => '',
         'warranty_until' => '',
         'description' => '',
-        'status' => 'available',
+        'status_id' => '',
         'current_container_id' => '',
         'current_location_id' => '',
     ];
@@ -56,14 +59,14 @@ class EditInstrument extends Component
         $this->form = [
             'name' => $this->instrument->name,
             'serial_number' => $this->instrument->serial_number,
-            'manufacturer' => $this->instrument->manufacturer,
+            'manufacturer_id' => $this->instrument->manufacturer_id,
             'model' => $this->instrument->model,
-            'category' => $this->instrument->category,
+            'category_id' => $this->instrument->category_id,
             'purchase_price' => $this->instrument->purchase_price,
             'purchase_date' => $this->formatDateForInput($this->instrument->purchase_date),
             'warranty_until' => $this->formatDateForInput($this->instrument->warranty_until),
             'description' => $this->instrument->description,
-            'status' => $this->instrument->status,
+            'status_id' => $this->instrument->status_id,
             'current_container_id' => $this->instrument->current_container_id,
             'current_location_id' => $this->instrument->current_location_id,
         ];
@@ -98,14 +101,14 @@ class EditInstrument extends Component
         $this->form = [
             'name' => '',
             'serial_number' => '',
-            'manufacturer' => '',
+            'manufacturer_id' => '',
             'model' => '',
-            'category' => '',
+            'category_id' => '',
             'purchase_price' => '',
             'purchase_date' => '',
             'warranty_until' => '',
             'description' => '',
-            'status' => 'available',
+            'status_id' => '',
             'current_container_id' => '',
             'current_location_id' => '',
         ];
@@ -116,16 +119,34 @@ class EditInstrument extends Component
         $this->validate([
             'form.name' => 'required|string|max:255',
             'form.serial_number' => 'required|string|max:255|unique:instruments,serial_number,' . ($this->instrumentId ?? 'NULL'),
-            'form.manufacturer' => 'nullable|string|max:255',
+            'form.manufacturer_id' => 'nullable|exists:manufacturers,id',
             'form.model' => 'nullable|string|max:255',
-            'form.category' => 'required|in:scissors,forceps,scalpel,clamp,retractor,needle_holder',
+            'form.category_id' => 'required|exists:instrument_categories,id',
             'form.purchase_price' => 'nullable|numeric|min:0',
             'form.purchase_date' => 'nullable|date',
             'form.warranty_until' => 'nullable|date',
             'form.description' => 'nullable|string',
-            'form.status' => 'required|in:available,in_use,defective,in_repair,out_of_service',
+            'form.status_id' => 'required|exists:instrument_statuses,id',
             'form.current_container_id' => 'nullable|exists:containers,id',
             'form.current_location_id' => 'nullable|exists:departments,id',
+        ], [
+            'form.name.required' => 'Der Name des Instruments muss ausgefüllt werden.',
+            'form.name.max' => 'Der Name darf maximal 255 Zeichen lang sein.',
+            'form.serial_number.required' => 'Die Seriennummer muss ausgefüllt werden.',
+            'form.serial_number.unique' => 'Diese Seriennummer ist bereits vergeben.',
+            'form.serial_number.max' => 'Die Seriennummer darf maximal 255 Zeichen lang sein.',
+            'form.manufacturer_id.exists' => 'Bitte wählen Sie einen gültigen Hersteller aus.',
+            'form.model.max' => 'Das Modell darf maximal 255 Zeichen lang sein.',
+            'form.category_id.required' => 'Bitte wählen Sie eine Kategorie aus.',
+            'form.category_id.exists' => 'Bitte wählen Sie eine gültige Kategorie aus.',
+            'form.purchase_price.numeric' => 'Der Kaufpreis muss eine Zahl sein.',
+            'form.purchase_price.min' => 'Der Kaufpreis kann nicht negativ sein.',
+            'form.purchase_date.date' => 'Bitte geben Sie ein gültiges Kaufdatum ein.',
+            'form.warranty_until.date' => 'Bitte geben Sie ein gültiges Garantie-Ende-Datum ein.',
+            'form.status_id.required' => 'Bitte wählen Sie einen Status aus.',
+            'form.status_id.exists' => 'Bitte wählen Sie einen gültigen Status aus.',
+            'form.current_container_id.exists' => 'Bitte wählen Sie einen gültigen Container aus.',
+            'form.current_location_id.exists' => 'Bitte wählen Sie einen gültigen Standort aus.',
         ]);
 
         $data = $this->form;
@@ -165,27 +186,16 @@ class EditInstrument extends Component
     {
         $containers = Container::all();
         $departments = Department::all();
-        $statuses = [
-            'available' => 'Verfügbar',
-            'in_use' => 'In Verwendung',
-            'defective' => 'Defekt',
-            'in_repair' => 'In Reparatur',
-            'out_of_service' => 'Außer Betrieb'
-        ];
-        $categories = [
-            'scissors' => 'Schere',
-            'forceps' => 'Pinzette',
-            'scalpel' => 'Skalpell',
-            'clamp' => 'Klemme',
-            'retractor' => 'Retraktor',
-            'needle_holder' => 'Nadelhalter'
-        ];
+        $statuses = InstrumentStatus::active()->ordered()->get();
+        $categories = InstrumentCategory::active()->ordered()->get();
+        $manufacturers = Manufacturer::active()->ordered()->get();
 
         return view('livewire.instruments.edit-instrument', compact(
             'containers',
             'departments', 
             'statuses', 
-            'categories'
+            'categories',
+            'manufacturers'
         ));
     }
 }

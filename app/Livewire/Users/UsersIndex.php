@@ -43,6 +43,21 @@ class UsersIndex extends Component
         'is_active' => 'boolean',
     ];
 
+    protected $messages = [
+        'name.required' => 'Der Name muss ausgefüllt werden.',
+        'name.max' => 'Der Name darf maximal 255 Zeichen lang sein.',
+        'email.required' => 'Die E-Mail-Adresse muss ausgefüllt werden.',
+        'email.email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
+        'email.max' => 'Die E-Mail-Adresse darf maximal 255 Zeichen lang sein.',
+        'email.unique' => 'Diese E-Mail-Adresse ist bereits vergeben.',
+        'password.required' => 'Das Passwort muss ausgefüllt werden.',
+        'password.min' => 'Das Passwort muss mindestens 8 Zeichen lang sein.',
+        'password.confirmed' => 'Die Passwort-Bestätigung stimmt nicht überein.',
+        'role.required' => 'Bitte wählen Sie eine Rolle aus.',
+        'role.in' => 'Bitte wählen Sie eine gültige Rolle aus.',
+        'department_id.exists' => 'Bitte wählen Sie eine gültige Abteilung aus.',
+    ];
+
     public function mount()
     {
         $this->authorize('viewAny', User::class);
@@ -108,6 +123,11 @@ class UsersIndex extends Component
         $this->validate([
             'email' => 'unique:users,email',
             'password' => 'required|string|min:8|confirmed',
+        ], [
+            'email.unique' => 'Diese E-Mail-Adresse ist bereits vergeben.',
+            'password.required' => 'Das Passwort muss ausgefüllt werden.',
+            'password.min' => 'Das Passwort muss mindestens 8 Zeichen lang sein.',
+            'password.confirmed' => 'Die Passwort-Bestätigung stimmt nicht überein.',
         ]);
 
         User::create([

@@ -146,12 +146,12 @@
                         <h3 class="text-lg font-medium text-gray-900 mb-3">Fotos</h3>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             @foreach($report->photos as $photo)
-                                <div class="relative">
-                                    <img src="{{ asset('storage/' . $photo) }}" 
-                                         alt="Defektfoto" 
-                                         class="w-full h-32 object-cover rounded-lg border border-gray-200"
-                                         onerror="console.log('Image failed to load:', '{{ asset('storage/' . $photo) }}')">
-                                    <small class="text-xs text-gray-500">{{ asset('storage/' . $photo) }}</small>
+                                <div class="relative group">
+                                    <a href="{{ asset('storage/' . $photo) }}" target="_blank" class="block">
+                                        <img src="{{ asset('storage/' . $photo) }}" 
+                                             alt="Defektfoto" 
+                                             class="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-pointer hover:shadow-lg transition-shadow duration-200">
+                                    </a>
                                 </div>
                             @endforeach
                         </div>

@@ -14,14 +14,14 @@ class MovementService
         ?int $toDepartmentId = null,
         ?int $fromContainerId = null,
         ?int $toContainerId = null,
-        ?string $statusBefore = null,
-        ?string $statusAfter = null,
+        ?int $statusBefore = null,
+        ?int $statusAfter = null,
         ?string $notes = null,
         ?int $movedBy = null
     ): InstrumentMovement {
-        // Use current status if not provided
-        $statusBefore = $statusBefore ?? $instrument->getOriginal('status') ?? $instrument->status;
-        $statusAfter = $statusAfter ?? $instrument->status;
+        // Use current status_id if not provided
+        $statusBefore = $statusBefore ?? $instrument->getOriginal('status_id') ?? $instrument->status_id;
+        $statusAfter = $statusAfter ?? $instrument->status_id;
         
         // Use current user if not provided
         $movedBy = $movedBy ?? (\Illuminate\Support\Facades\Auth::id() ?? 1);
@@ -43,31 +43,35 @@ class MovementService
 
     public static function logStatusChange(
         Instrument $instrument,
-        string $newStatus,
+        int $newStatusId,
         ?string $notes = null,
         ?int $movedBy = null
     ): ?InstrumentMovement {
-        $oldStatus = $instrument->getOriginal('status');
+        $oldStatusId = $instrument->getOriginal('status_id');
         
         // Only log if status actually changed
-        if ($oldStatus === $newStatus) {
+        if ($oldStatusId === $newStatusId) {
             return null;
         }
 
+        // Get status names for notes
+        $oldStatusName = $instrument->getOriginal('status_id') ? \App\Models\InstrumentStatus::find($oldStatusId)?->name : 'Unknown';
+        $newStatusName = \App\Models\InstrumentStatus::find($newStatusId)?->name;
+
         // Determine movement type based on status change
-        $movementType = match($newStatus) {
-            'in_repair' => 'repair',
-            'available' => $oldStatus === 'in_use' ? 'return' : 'sterilization',
-            'in_use' => 'dispatch',
+        $movementType = match($newStatusName) {
+            'Wartung' => 'repair',
+            'Verfügbar' => ($oldStatusName === 'In Benutzung') ? 'return' : 'sterilization',
+            'In Benutzung' => 'dispatch',
             default => 'transfer'
         };
 
         return self::logMovement(
             instrument: $instrument,
             movementType: $movementType,
-            statusBefore: $oldStatus,
-            statusAfter: $newStatus,
-            notes: $notes ?? "Status geändert von {$oldStatus} zu {$newStatus}",
+            statusBefore: $oldStatusId,
+            statusAfter: $newStatusId,
+            notes: $notes ?? "Status geändert von {$oldStatusName} zu {$newStatusName}",
             movedBy: $movedBy
         );
     }
