@@ -46,6 +46,23 @@ class InstrumentsList extends Component
         $this->resetPage();
     }
 
+    public function createInstrument()
+    {
+        return redirect()->route('instruments.create');
+    }
+
+    public function editInstrument($instrumentId)
+    {
+        return redirect()->route('instruments.edit', $instrumentId);
+    }
+
+    public function deleteInstrument($instrumentId)
+    {
+        $instrument = Instrument::findOrFail($instrumentId);
+        $instrument->delete();
+        session()->flash('message', 'Instrument erfolgreich gelöscht.');
+    }
+
     public function render()
     {
         $query = Instrument::with(['currentContainer', 'currentLocation'])
@@ -68,9 +85,22 @@ class InstrumentsList extends Component
 
         $instruments = $query->paginate(20);
 
-        $containers = Container::active()->get();
-        $statuses = ['available', 'in_use', 'defective', 'in_repair', 'out_of_service'];
-        $categories = ['scissors', 'forceps', 'scalpel', 'clamp', 'retractor', 'needle_holder'];
+        $containers = Container::all();
+        $statuses = [
+            'available' => 'Verfügbar',
+            'in_use' => 'In Verwendung', 
+            'defective' => 'Defekt',
+            'in_repair' => 'In Reparatur',
+            'out_of_service' => 'Außer Betrieb'
+        ];
+        $categories = [
+            'scissors' => 'Schere',
+            'forceps' => 'Pinzette', 
+            'scalpel' => 'Skalpell',
+            'clamp' => 'Klemme',
+            'retractor' => 'Retraktor',
+            'needle_holder' => 'Nadelhalter'
+        ];
 
         return view('livewire.instruments.instruments-list', compact(
             'instruments', 

@@ -1,30 +1,34 @@
 <div class="container mx-auto px-4 py-8">
  <div class="mb-8">
- <h1 class="text-3xl font-bold text-gray-900">Instrument Management Dashboard</h1>
+ <h1 class="text-3xl font-bold text-gray-900">Instrumenten Management Dashboard</h1>
  </div>    <!-- Statistiken -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="stats-card p-6">
+        <div class="stats-card p-6 cursor-help" 
+             title="Gesamtanzahl aller registrierten Instrumente im System, unabhängig vom Status.">
             <div class="text-center">
                 <div class="text-3xl font-bold text-blue-600">{{ $stats['total_instruments'] }}</div>
                 <div class="text-sm text-gray-600">Instrumente gesamt</div>
             </div>
         </div>
 
-        <div class="stats-card p-6">
+        <div class="stats-card p-6 cursor-help" 
+             title="Anzahl der Instrumente mit Status 'Defekt' - diese sind beschädigt und dürfen nicht verwendet werden.">
             <div class="text-center">
                 <div class="text-3xl font-bold text-red-600">{{ $stats['defective_instruments'] }}</div>
                 <div class="text-sm text-gray-600">Defekte Instrumente</div>
             </div>
         </div>
 
-        <div class="stats-card p-6">
+        <div class="stats-card p-6 cursor-help" 
+             title="Defektmeldungen, die noch nicht abgeschlossen sind und weitere Bearbeitung oder Reparatur benötigen.">
             <div class="text-center">
                 <div class="text-3xl font-bold text-yellow-600">{{ $stats['open_reports'] }}</div>
                 <div class="text-sm text-gray-600">Offene Meldungen</div>
             </div>
         </div>
 
-        <div class="stats-card p-6">
+        <div class="stats-card p-6 cursor-help" 
+             title="Bestellungen für neue Instrumente oder Ersatzteile, die noch nicht abgeschlossen oder geliefert wurden.">
             <div class="text-center">
                 <div class="text-3xl font-bold text-purple-600">{{ $stats['pending_orders'] }}</div>
                 <div class="text-sm text-gray-600">Offene Bestellungen</div>
@@ -109,7 +113,8 @@
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 @foreach($reports_by_department as $department => $count)
-                    <div class="text-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200">
+                    <div class="text-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200 hover:shadow-md transition-all duration-200 cursor-help" 
+                         title="Anzahl der Defektmeldungen aus der Abteilung {{ $department }}. Hilft bei der Identifizierung von Abteilungen mit häufigen Problemen.">
                         <div class="text-2xl font-bold text-blue-600">{{ $count }}</div>
                         <div class="text-sm text-gray-600">{{ $department }}</div>
                     </div>

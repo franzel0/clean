@@ -6,6 +6,7 @@ use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Dashboard;
 use App\Livewire\Instruments\InstrumentsList;
+use App\Livewire\Instruments\EditInstrument;
 use App\Livewire\DefectReports\CreateDefectReport;
 use App\Livewire\DefectReports\DefectReportsList;
 
@@ -20,7 +21,8 @@ Route::middleware(['auth'])->group(function () {
     
     // Instrumente
     Route::get('/instruments', InstrumentsList::class)->name('instruments.index');
-    Route::view('/instruments/create', 'instruments.create')->name('instruments.create');
+    Route::get('/instruments/create', EditInstrument::class)->name('instruments.create');
+    Route::get('/instruments/{instrument}/edit', EditInstrument::class)->name('instruments.edit');
     Route::get('/instruments/{instrument}', \App\Livewire\Instruments\ShowInstrument::class)->name('instruments.show');
     
     // Defektmeldungen
@@ -42,6 +44,9 @@ Route::middleware(['auth'])->group(function () {
     
     // Movements
     Route::get('/movements', \App\Livewire\Movements\MovementsList::class)->name('movements.index');
+    
+    // Benutzerverwaltung (nur für Admins)
+    Route::get('/users', \App\Livewire\Users\UsersIndex::class)->name('users.index');
     
     // Berichte
     Route::get('/reports', \App\Livewire\Reports\SimpleReports::class)->name('reports.index');

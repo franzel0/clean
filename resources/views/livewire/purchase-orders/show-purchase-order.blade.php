@@ -10,6 +10,51 @@
                     </p>
                 </div>
                 <div class="flex space-x-3">
+                    <!-- Status Actions -->
+                    @if($order->status !== 'cancelled' && $order->status !== 'completed')
+                        <div x-data="{ open: false }" class="relative" wire:key="status-dropdown-{{ $order->status }}">
+                            <button @click="open = !open" 
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                Status ändern!!
+                            </button>
+                            <div x-show="open" @click.away="open = false" x-transition
+                                 class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                                <div class="py-1">
+                                    @php
+                                        // Alle möglichen Status-Optionen
+                                        $allStatusOptions = [
+                                            'requested' => 'Angefordert',
+                                            'approved' => 'Genehmigt', 
+                                            'ordered' => 'Bestellt',
+                                            'shipped' => 'Versandt',
+                                            'received' => 'Erhalten',
+                                            'completed' => 'Abgeschlossen',
+                                            'cancelled' => 'Storniert'
+                                        ];
+                                        
+                                        // Entferne aktuellen Status aus der Liste
+                                        $availableTransitions = array_filter($allStatusOptions, function($key) use ($order) {
+                                            return $key !== $order->status;
+                                        }, ARRAY_FILTER_USE_KEY);
+                                    @endphp
+                                    
+                                    @foreach($availableTransitions as $status => $label)
+                                        <button wire:click="openStatusModal('{{ $status }}')" 
+                                                class="block w-full text-left px-4 py-2 text-sm @if($status === 'cancelled') text-red-700 hover:bg-red-50 @else text-gray-700 hover:bg-gray-100 @endif">
+                                            {{ $label }}
+                                        </button>
+                                        @if($status === 'cancelled' && !$loop->last)
+                                            <div class="border-t border-gray-100"></div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    
                     <button wire:click="downloadPdf" 
                             class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,6 +75,12 @@
 
         <!-- Content -->
         <div class="space-y-6">
+            
+            @if(session()->has('message'))
+                <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+                    {{ session('message') }}
+                </div>
+            @endif
             <!-- Status Card -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="px-6 py-4 border-b border-gray-200">
@@ -63,45 +114,72 @@
                     <h2 class="text-lg font-semibold text-gray-900">Bestelldetails</h2>
                 </div>
                 <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Bestellnummer</h3>
-                            <p class="text-gray-900">{{ $order->order_number }}</p>
+                    <form wire:submit.prevent="updateDetails">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Bestellnummer</h3>
+                                <p class="text-gray-900">{{ $order->order_number }}</p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Angefordert von</h3>
+                                <p class="text-gray-900">{{ $order->requestedBy->name }}</p>
+                            </div>
+                            <div>
+                                <label for="supplier" class="text-sm font-medium text-gray-700 mb-2 block">Lieferant</label>
+                                <input type="text" 
+                                       id="supplier" 
+                                       wire:model="supplier" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="Lieferant eingeben">
+                                @error('supplier') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            @if($order->estimated_cost)
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Geschätzte Kosten</h3>
+                                <p class="text-gray-900">{{ number_format($order->estimated_cost, 2) }} €</p>
+                            </div>
+                            @endif
+                            <div>
+                                <label for="actualCost" class="text-sm font-medium text-gray-700 mb-2 block">Tatsächliche Kosten</label>
+                                <input type="number" 
+                                       id="actualCost" 
+                                       wire:model="actualCost" 
+                                       step="0.01" 
+                                       min="0" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="0.00">
+                                @error('actualCost') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label for="expectedDelivery" class="text-sm font-medium text-gray-700 mb-2 block">Erwartete Lieferung</label>
+                                <input type="date" 
+                                       id="expectedDelivery" 
+                                       wire:model="expectedDelivery" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                @error('expectedDelivery') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Angefordert von</h3>
-                            <p class="text-gray-900">{{ $order->requestedBy->name }}</p>
+                        
+                        <div class="mt-6">
+                            <label for="notes" class="text-sm font-medium text-gray-700 mb-2 block">Notizen</label>
+                            <textarea id="notes" 
+                                      wire:model="notes" 
+                                      rows="4" 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                      placeholder="Zusätzliche Informationen zur Bestellung..."></textarea>
+                            @error('notes') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Lieferant</h3>
-                            <p class="text-gray-900">{{ $order->supplier }}</p>
+                        
+                        <div class="mt-6">
+                            <button type="submit" 
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Details speichern
+                            </button>
                         </div>
-                        @if($order->estimated_cost)
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Geschätzte Kosten</h3>
-                            <p class="text-gray-900">{{ number_format($order->estimated_cost, 2) }} €</p>
-                        </div>
-                        @endif
-                        @if($order->actual_cost)
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Tatsächliche Kosten</h3>
-                            <p class="text-gray-900">{{ number_format($order->actual_cost, 2) }} €</p>
-                        </div>
-                        @endif
-                        @if($order->expected_delivery)
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Erwartete Lieferung</h3>
-                            <p class="text-gray-900">{{ $order->expected_delivery->format('d.m.Y') }}</p>
-                        </div>
-                        @endif
-                    </div>
-                    
-                    @if($order->notes)
-                    <div class="mt-6">
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Notizen</h3>
-                        <p class="text-gray-900 whitespace-pre-wrap">{{ $order->notes }}</p>
-                    </div>
-                    @endif
+                    </form>
                 </div>
             </div>
 
@@ -240,6 +318,41 @@
                                             </div>
                                         </div>
                                     </div>
+                                    @if($order->status === 'shipped' || $order->received_at)
+                                        <div class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
+                                    @endif
+                                </div>
+                            </li>
+                            @endif
+
+                            <!-- Shipped -->
+                            @if($order->status === 'shipped' || $order->received_at)
+                            <li>
+                                <div class="relative pb-8">
+                                    <div class="relative flex space-x-3">
+                                        <div>
+                                            <span class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center ring-8 ring-white">
+                                                <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+                                                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-1-1h-3z"/>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                        <div class="min-w-0 flex-1 pt-1.5">
+                                            <div>
+                                                <p class="text-sm text-gray-500">Bestellung versandt</p>
+                                            </div>
+                                            <div class="mt-2 text-sm text-gray-700">
+                                                <p>
+                                                    @if($order->received_at)
+                                                        Versandt (vor Lieferung)
+                                                    @else
+                                                        Status gesetzt
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
                                     @if($order->received_at)
                                         <div class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
                                     @endif
@@ -282,4 +395,58 @@
             </div>
         </div>
     </div>
+    
+    <!-- Status Update Modal -->
+    @if($showStatusModal)
+    <div class="fixed inset-0 z-50 overflow-y-auto" wire:ignore.self>
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75" wire:click="closeModal"></div>
+            
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl max-w-lg w-full">
+                <div class="bg-white px-6 pt-6 pb-4">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        Status ändern
+                    </h3>
+                    <p class="text-sm text-gray-500 mb-4">
+                        Sind Sie sicher, dass Sie den Status zu 
+                        <strong>
+                            @switch($newStatus)
+                                @case('requested') Angefordert @break
+                                @case('approved') Genehmigt @break
+                                @case('ordered') Bestellt @break
+                                @case('shipped') Versandt @break
+                                @case('received') Erhalten @break
+                                @case('completed') Abgeschlossen @break
+                                @case('cancelled') Storniert @break
+                                @default {{ $newStatus }}
+                            @endswitch
+                        </strong>
+                        ändern möchten?
+                    </p>
+                    
+                    @if($newStatus === 'cancelled')
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                            <p class="text-sm text-red-700">
+                                ⚠️ Achtung: Diese Bestellung wird storniert und kann nicht rückgängig gemacht werden.
+                            </p>
+                        </div>
+                    @endif
+                </div>
+                
+                <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+                    <button wire:click="closeModal" 
+                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg text-sm font-medium">
+                        Abbrechen
+                    </button>
+                    <button wire:click="confirmStatusUpdate" 
+                            class="px-4 py-2 @if($newStatus === 'cancelled') bg-red-600 hover:bg-red-700 @else bg-blue-600 hover:bg-blue-700 @endif text-white rounded-lg text-sm font-medium">
+                        @if($newStatus === 'cancelled') Stornieren @else Bestätigen @endif
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

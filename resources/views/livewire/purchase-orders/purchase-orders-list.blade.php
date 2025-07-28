@@ -122,11 +122,13 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                        @if($order->status === 'requested') bg-gray-100 text-gray-800
+                                        @if($order->status === 'requested') bg-yellow-100 text-yellow-800
                                         @elseif($order->status === 'approved') bg-blue-100 text-blue-800
-                                        @elseif($order->status === 'ordered') bg-yellow-100 text-yellow-800
-                                        @elseif($order->status === 'received') bg-purple-100 text-purple-800
+                                        @elseif($order->status === 'ordered') bg-purple-100 text-purple-800
+                                        @elseif($order->status === 'shipped') bg-indigo-100 text-indigo-800
+                                        @elseif($order->status === 'received') bg-green-100 text-green-800
                                         @elseif($order->status === 'completed') bg-green-100 text-green-800
+                                        @elseif($order->status === 'cancelled') bg-red-100 text-red-800
                                         @else bg-gray-100 text-gray-800
                                         @endif">
                                         {{ $order->status_display }}

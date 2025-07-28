@@ -20,7 +20,8 @@
         <!-- Key Metrics -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Instruments -->
-            <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6">
+            <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6 cursor-help" 
+                 title="Gesamtanzahl aller registrierten Instrumente im System. {{ $functionalInstruments }} davon sind funktionsfähig und einsatzbereit.">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -36,7 +37,8 @@
             </div>
 
             <!-- Available -->
-            <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6">
+            <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6 cursor-help" 
+                 title="Instrumente mit Status 'Verfügbar' - diese sind sofort einsatzbereit und können für Operationen verwendet werden.">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -52,7 +54,8 @@
             </div>
 
             <!-- Defective -->
-            <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6">
+            <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6 cursor-help" 
+                 title="Instrumente mit Status 'Defekt' - diese sind beschädigt und dürfen nicht verwendet werden bis sie repariert sind.">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
@@ -68,7 +71,8 @@
             </div>
 
             <!-- Containers -->
-            <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6">
+            <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6 cursor-help" 
+                 title="Gesamtanzahl aller Container im System. {{ $activeContainers }} Container sind aktiv und werden verwendet.">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -135,7 +139,8 @@
                 <div class="p-6">
                     <div class="space-y-6">
                         <!-- Complete Containers -->
-                        <div class="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200">
+                        <div class="text-center p-4 bg-green-50 rounded-lg border-2 border-green-200 cursor-help" 
+                             title="Container, in denen alle Instrumente funktionsfähig und einsatzbereit sind.">
                             <div class="flex items-center justify-center mb-2">
                                 <i class="fas fa-check-circle text-green-600 text-2xl mr-2"></i>
                                 <span class="text-2xl font-bold text-green-800">{{ $completeContainers }}</span>
@@ -145,7 +150,8 @@
                         </div>
                         
                         <!-- Incomplete Containers -->
-                        <div class="text-center p-4 bg-orange-50 rounded-lg border-2 border-orange-200">
+                        <div class="text-center p-4 bg-orange-50 rounded-lg border-2 border-orange-200 cursor-help" 
+                             title="Container mit mindestens einem defekten oder nicht verfügbaren Instrument - nur eingeschränkt verwendbar.">
                             <div class="flex items-center justify-center mb-2">
                                 <i class="fas fa-exclamation-triangle text-orange-600 text-2xl mr-2"></i>
                                 <span class="text-2xl font-bold text-orange-800">{{ $incompleteContainers }}</span>
@@ -156,7 +162,8 @@
 
                         <!-- Out of Service Containers -->
                         @if($outOfServiceContainers > 0)
-                        <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200">
+                        <div class="text-center p-4 bg-red-50 rounded-lg border-2 border-red-200 cursor-help" 
+                             title="Container, die außer Betrieb sind und nicht für Operationen verwendet werden können.">
                             <div class="flex items-center justify-center mb-2">
                                 <i class="fas fa-times-circle text-red-600 text-2xl mr-2"></i>
                                 <span class="text-2xl font-bold text-red-800">{{ $outOfServiceContainers }}</span>
@@ -199,15 +206,18 @@
                     <div class="space-y-6">
                         <!-- Statistics -->
                         <div class="grid grid-cols-3 gap-4">
-                            <div class="text-center">
+                            <div class="text-center cursor-help" 
+                                 title="Gesamtanzahl aller Defektmeldungen, die jemals im System erstellt wurden.">
                                 <p class="text-2xl font-bold text-gray-900">{{ $totalDefectReports }}</p>
                                 <p class="text-sm text-gray-600">Gesamt</p>
                             </div>
-                            <div class="text-center">
+                            <div class="text-center cursor-help" 
+                                 title="Defektmeldungen die noch nicht abgeschlossen sind - diese Instrumente benötigen Reparatur oder weitere Bearbeitung.">
                                 <p class="text-2xl font-bold text-red-600">{{ $openDefectReports }}</p>
                                 <p class="text-sm text-gray-600">Offen</p>
                             </div>
-                            <div class="text-center">
+                            <div class="text-center cursor-help" 
+                                 title="Defektmeldungen, die in den letzten 30 Tagen erstellt wurden - zeigt aktuelle Probleme auf.">
                                 <p class="text-2xl font-bold text-blue-600">{{ $recentDefectReports }}</p>
                                 <p class="text-sm text-gray-600">30 Tage</p>
                             </div>
@@ -245,7 +255,7 @@
                 <h3 class="text-lg font-semibold text-gray-900">Schnellzugriff</h3>
             </div>
             <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <a href="{{ route('instruments.index') }}" 
                        class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all">
                         <i class="fas fa-tools text-blue-600 text-lg mr-3"></i>
@@ -269,15 +279,15 @@
                         <i class="fas fa-route text-green-600 text-lg mr-3"></i>
                         <span class="font-medium text-gray-900">Bewegungshistorie</span>
                     </a>
+                    
+                    <a href="{{ route('purchase-orders.index') }}" 
+                       class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-yellow-300 hover:bg-yellow-50 transition-all">
+                        <i class="fas fa-shopping-cart text-yellow-600 text-lg mr-3"></i>
+                        <span class="font-medium text-gray-900">Bestellungen verwalten</span>
+                    </a>
                 </div>
             </div>
         </div>
 
-        <!-- Info -->
-        <div class="mt-8 text-center">
-            <p class="text-sm text-gray-500">
-                Detaillierte Berichte und Statistiken werden in einer späteren Version verfügbar sein.
-            </p>
-        </div>
     </div>
 </div>

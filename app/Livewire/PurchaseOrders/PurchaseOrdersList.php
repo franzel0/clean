@@ -105,7 +105,7 @@ class PurchaseOrdersList extends Component
 
         $orders = $query->latest()->paginate(15);
 
-        $statuses = ['requested', 'approved', 'ordered', 'received', 'completed'];
+        $statuses = ['requested', 'approved', 'ordered', 'shipped', 'received', 'completed', 'cancelled'];
         $departments = Department::active()->get();
 
         return view('livewire.purchase-orders.purchase-orders-list', compact(

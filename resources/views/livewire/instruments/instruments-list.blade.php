@@ -1,13 +1,25 @@
 <div class="container mx-auto px-4 py-8">
+    @if (session()->has('message'))
+        <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+            {{ session('message') }}
+        </div>
+    @endif
+
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Instrumente</h1>
             <p class="text-sm text-gray-600 mt-1">{{ $instruments->total() }} Instrumente gefunden</p>
         </div>
-        <a href="{{ route('defect-reports.create') }}" 
-           class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-            Defekt melden
-        </a>
+        <div class="flex space-x-3">
+            <button wire:click="createInstrument" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                Neues Instrument
+            </button>
+            <a href="{{ route('defect-reports.create') }}" 
+               class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                Defekt melden
+            </a>
+        </div>
     </div>
 
     <!-- Filter -->
@@ -24,17 +36,8 @@
                 <select wire:model.live="statusFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Alle Status</option>
-                    @foreach($statuses as $status)
-                        <option value="{{ $status }}">
-                            @switch($status)
-                                @case('available') Verfügbar @break
-                                @case('in_use') Im Einsatz @break
-                                @case('defective') Defekt @break
-                                @case('in_repair') In Reparatur @break
-                                @case('out_of_service') Außer Betrieb @break
-                                @default {{ $status }}
-                            @endswitch
-                        </option>
+                    @foreach($statuses as $status => $label)
+                        <option value="{{ $status }}">{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
@@ -43,18 +46,8 @@
                 <select wire:model.live="categoryFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Alle Kategorien</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category }}">
-                            @switch($category)
-                                @case('scissors') Scheren @break
-                                @case('forceps') Pinzetten @break
-                                @case('scalpel') Skalpelle @break
-                                @case('clamp') Klemmen @break
-                                @case('retractor') Wundhaken @break
-                                @case('needle_holder') Nadelhalter @break
-                                @default {{ $category }}
-                            @endswitch
-                        </option>
+                    @foreach($categories as $category => $label)
+                        <option value="{{ $category }}">{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
@@ -129,9 +122,20 @@
                                             Anzeigen
                                         </a>
                                         
+                                        <button wire:click="editInstrument({{ $instrument->id }})" 
+                                                class="text-green-600 hover:text-green-800 text-sm">
+                                            Bearbeiten
+                                        </button>
+                                        
+                                        <button wire:click="deleteInstrument({{ $instrument->id }})" 
+                                                onclick="return confirm('Sind Sie sicher, dass Sie dieses Instrument löschen möchten?')"
+                                                class="text-red-600 hover:text-red-800 text-sm">
+                                            Löschen
+                                        </button>
+                                        
                                         @if($instrument->status !== 'defective')
                                             <a href="{{ route('defect-reports.create', ['instrument' => $instrument->id]) }}" 
-                                               class="text-red-600 hover:text-red-800 text-sm">
+                                               class="text-orange-600 hover:text-orange-800 text-sm">
                                                 Defekt melden
                                             </a>
                                         @endif
