@@ -95,13 +95,19 @@ class DefectReport extends Model
 
     public function getDefectTypeDisplayAttribute(): string
     {
+        // Bevorzuge die DefectType-Beziehung, falls vorhanden
+        if ($this->defectType) {
+            return $this->defectType->name;
+        }
+        
+        // Fallback auf die String-Eigenschaft
         return match($this->defect_type) {
             'broken' => 'Kaputt',
             'dull' => 'Stumpf',
             'bent' => 'Verbogen',
             'missing_parts' => 'Fehlende Teile',
             'other' => 'Sonstiges',
-            default => ucfirst($this->defect_type),
+            default => ucfirst($this->defect_type ?? 'Unbekannt'),
         };
     }
 

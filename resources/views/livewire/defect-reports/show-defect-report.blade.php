@@ -87,16 +87,7 @@
                         <dl class="space-y-3">
                             <div>
                                 <dt class="text-sm font-medium text-gray-700">Defekttyp</dt>
-                                <dd class="text-sm text-gray-900">
-                                    @switch($report->defect_type)
-                                        @case('broken') Defekt/Kaputt @break
-                                        @case('dull') Stumpf @break
-                                        @case('bent') Verbogen @break
-                                        @case('missing_parts') Fehlende Teile @break
-                                        @case('other') Sonstiges @break
-                                        @default {{ $report->defect_type }}
-                                    @endswitch
-                                </dd>
+                                <dd class="text-sm text-gray-900">{{ $report->defect_type_display }}</dd>
                             </div>
                             <div>
                                 <dt class="text-sm font-medium text-gray-700">Schweregrad</dt>

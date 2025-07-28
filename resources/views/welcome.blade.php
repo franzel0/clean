@@ -3,7 +3,7 @@
  <head>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width, initial-scale=1">
- <title>Krankenhaus Instrument Management</title>
+ <title>{{ config('app.name') }}</title>
  <link rel="icon" href="/favicon.ico" sizes="any">
  @vite(['resources/css/app.css', 'resources/js/app.js'])
  </head>
@@ -21,7 +21,7 @@
  </div>
  </div>
  <h1 class="text-3xl font-bold text-slate-900 mb-2">
- Instrument Management
+ {{ config('app.name') }}
  </h1>
  <p class="text-slate-600">
  Krankenhaus Sterilisations- und Defektmeldesystem

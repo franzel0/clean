@@ -9,7 +9,8 @@
         
         <!-- Header -->
         <div class="text-center">
-            <h2 class="text-3xl font-bold text-gray-900">Konto erstellen</h2>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ config('app.name') }}</h1>
+            <h2 class="text-xl text-gray-700">Konto erstellen</h2>
             <p class="mt-2 text-sm text-gray-600">Geben Sie Ihre Details ein, um ein Konto zu erstellen</p>
         </div>
 

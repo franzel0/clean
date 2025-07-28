@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Instrumenten Management' }}</title>
+    <title>{{ $title ?? config('app.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -19,7 +19,7 @@
                         <img src="{{ asset('img/logo.png') }}" alt="Logo" class="w-full h-32 object-contain">
                     </div>
                     <h1 class="text-lg font-bold text-gray-900">
-                        Chirurgische Instrumente
+                        {{ config('app.name') }}
                     </h1>
                 </div>
             </div>

@@ -81,6 +81,7 @@ class DefectReportsList extends Component
             'reportedBy', 
             'reportingDepartment',
             'operatingRoom',
+            'defectType',
             'purchaseOrder'
         ])
         ->when($this->search, function ($query) {
