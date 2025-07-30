@@ -86,7 +86,7 @@ class PurchaseOrdersList extends Component
             'defectReport.reportingDepartment',
             'requestedBy',
             'receivedBy',
-            'supplier'
+            'manufacturer'
         ])
         ->when($this->search, function ($query) {
             $query->whereHas('defectReport.instrument', function ($q) {

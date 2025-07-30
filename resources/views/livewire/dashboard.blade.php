@@ -1,11 +1,12 @@
 <div class="container mx-auto px-4 py-8">
  <div class="mb-8">
- <h1 class="text-3xl font-bold text-gray-900">Instrumenten Management Dashboard</h1>
+ <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.dashboard') }} - {{ __('messages.instruments') }} {{ __('messages.management') }}</h1>
+ <p class="mt-1 text-sm text-gray-600">{{ __('messages.overview') }}</p>
  </div>
  
  <!-- Quick Actions -->
  <div class="mb-8">
-     <h2 class="text-lg font-semibold text-gray-900 mb-4">Schnellaktionen</h2>
+     <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('messages.quick_actions') }}</h2>
      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
          <!-- Neues Instrument -->
          <a href="{{ route('instruments.create') }}" 
@@ -18,8 +19,8 @@
                  </div>
              </div>
              <div class="ml-4">
-                 <p class="text-sm font-medium text-gray-900 group-hover:text-blue-900">Neues Instrument</p>
-                 <p class="text-xs text-gray-500 group-hover:text-blue-700">Instrument registrieren</p>
+                 <p class="text-sm font-medium text-gray-900 group-hover:text-blue-900">{{ __('messages.create_instrument') }}</p>
+                 <p class="text-xs text-gray-500 group-hover:text-blue-700">{{ __('messages.register_new_instrument') }}</p>
              </div>
          </a>
          
@@ -34,8 +35,8 @@
                  </div>
              </div>
              <div class="ml-4">
-                 <p class="text-sm font-medium text-gray-900 group-hover:text-red-900">Defekt melden</p>
-                 <p class="text-xs text-gray-500 group-hover:text-red-700">Schnell Problem melden</p>
+                 <p class="text-sm font-medium text-gray-900 group-hover:text-red-900">{{ __('messages.report_defect') }}</p>
+                 <p class="text-xs text-gray-500 group-hover:text-red-700">{{ __('messages.report_problem_quickly') }}</p>
              </div>
          </a>
          
@@ -50,8 +51,8 @@
                  </div>
              </div>
              <div class="ml-4">
-                 <p class="text-sm font-medium text-gray-900 group-hover:text-purple-900">Neue Bestellung</p>
-                 <p class="text-xs text-gray-500 group-hover:text-purple-700">Ersatz bestellen</p>
+                 <p class="text-sm font-medium text-gray-900 group-hover:text-purple-900">{{ __('messages.new_order') }}</p>
+                 <p class="text-xs text-gray-500 group-hover:text-purple-700">{{ __('messages.order_replacement') }}</p>
              </div>
          </a>
          
@@ -66,8 +67,8 @@
                  </div>
              </div>
              <div class="ml-4">
-                 <p class="text-sm font-medium text-gray-900 group-hover:text-green-900">Neuer Container</p>
-                 <p class="text-xs text-gray-500 group-hover:text-green-700">Container anlegen</p>
+                 <p class="text-sm font-medium text-gray-900 group-hover:text-green-900">{{ __('messages.create_container') }}</p>
+                 <p class="text-xs text-gray-500 group-hover:text-green-700">{{ __('messages.setup_new_container') }}</p>
              </div>
          </a>
      </div>
@@ -76,34 +77,34 @@
     <!-- Statistiken -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="stats-card p-6 cursor-help" 
-             title="Gesamtanzahl aller registrierten Instrumente im System, unabhängig vom Status.">
+             title="{{ __('messages.total_instruments_tooltip') }}">
             <div class="text-center">
                 <div class="text-3xl font-bold text-blue-600">{{ $stats['total_instruments'] }}</div>
-                <div class="text-sm text-gray-600">Instrumente gesamt</div>
+                <div class="text-sm text-gray-600">{{ __('messages.total_instruments') }}</div>
             </div>
         </div>
 
         <div class="stats-card p-6 cursor-help" 
-             title="Anzahl der Instrumente mit Status 'Defekt' - diese sind beschädigt und dürfen nicht verwendet werden.">
+             title="{{ __('messages.defective_instruments_tooltip') }}">
             <div class="text-center">
                 <div class="text-3xl font-bold text-red-600">{{ $stats['defective_instruments'] }}</div>
-                <div class="text-sm text-gray-600">Defekte Instrumente</div>
+                <div class="text-sm text-gray-600">{{ __('messages.defective_instruments') }}</div>
             </div>
         </div>
 
         <div class="stats-card p-6 cursor-help" 
-             title="Defektmeldungen, die noch nicht abgeschlossen sind und weitere Bearbeitung oder Reparatur benötigen.">
+             title="{{ __('messages.open_reports_tooltip') }}">
             <div class="text-center">
                 <div class="text-3xl font-bold text-yellow-600">{{ $stats['open_reports'] }}</div>
-                <div class="text-sm text-gray-600">Offene Meldungen</div>
+                <div class="text-sm text-gray-600">{{ __('messages.open_reports') }}</div>
             </div>
         </div>
 
         <div class="stats-card p-6 cursor-help" 
-             title="Bestellungen für neue Instrumente oder Ersatzteile, die noch nicht abgeschlossen oder geliefert wurden.">
+             title="{{ __('messages.pending_orders_tooltip') }}">
             <div class="text-center">
                 <div class="text-3xl font-bold text-purple-600">{{ $stats['pending_orders'] }}</div>
-                <div class="text-sm text-gray-600">Offene Bestellungen</div>
+                <div class="text-sm text-gray-600">{{ __('messages.pending_orders') }}</div>
             </div>
         </div>
     </div>
@@ -112,10 +113,10 @@
         <!-- Aktuelle Meldungen -->
         <div class="dashboard-card p-6">
  <div class="flex justify-between items-center mb-4">
- <h2 class="text-xl font-semibold text-gray-900">Aktuelle Defektmeldungen</h2>
+ <h2 class="text-xl font-semibold text-gray-900">{{ __('messages.current_defect_reports') }}</h2>
  <a href="{{ route('defect-reports.create') }}" 
  class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
- Neue Meldung
+ {{ __('messages.new_report') }}
  </a>
  </div>
 
@@ -134,7 +135,7 @@
  {{ $report->report_number }} - {{ $report->defect_type_display }}
  </div>
  <div class="text-xs text-gray-500">
- von {{ $report->reportedBy->name }} am {{ $report->reported_at->format('d.m.Y H:i') }}
+ {{ __('messages.by') }} {{ $report->reportedBy->name }} {{ __('messages.on') }} {{ $report->reported_at->format('d.m.Y H:i') }}
  </div>
  </div>
  @endforeach
@@ -142,14 +143,14 @@
  
  <a href="{{ route('defect-reports.index') }}" 
  class="inline-block mt-4 text-blue-600 hover:text-blue-800 text-sm">
- Alle Meldungen anzeigen →
+ {{ __('messages.show_all_reports') }} →
  </a>
  @else
- <p class="text-gray-500">Keine aktuellen Meldungen vorhanden.</p>
+ <p class="text-gray-500">{{ __('messages.no_current_reports') }}</p>
  @endif
  </div>        <!-- Instrumente nach Status -->
         <div class="dashboard-card p-6">
- <h2 class="text-xl font-semibold text-gray-900 mb-4">Instrumente nach Status</h2>
+ <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('messages.instrument_status_distribution') }}</h2>
  
  @if($instruments_by_status->count() > 0)
  <div class="space-y-3">
@@ -181,7 +182,7 @@
  </div>    <!-- Meldungen nach Abteilung -->
     @if($reports_by_department->count() > 0)
         <div class="dashboard-card p-6 mt-8">
-            <h2 class="text-xl font-semibold text-gray-900 mb-4">Meldungen nach Abteilung</h2>
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ __('messages.reports_by_department') }}</h2>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 @foreach($reports_by_department as $department => $count)

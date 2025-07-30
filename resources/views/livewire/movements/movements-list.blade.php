@@ -1,8 +1,8 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Bewegungshistorie</h1>
-            <p class="text-sm text-gray-600 mt-1">{{ $movements->total() }} Bewegungen gefunden</p>
+            <h1 class="text-2xl font-bold text-gray-900">{{ __('messages.movement_history') }}</h1>
+            <p class="text-sm text-gray-600 mt-1">{{ $movements->total() }} {{ __('messages.movements_found') }}</p>
         </div>
     </div>
 
@@ -10,26 +10,26 @@
     <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Suche</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.search') }}</label>
                 <input type="text" 
                        wire:model.live="search" 
-                       placeholder="Instrument oder Notizen..." 
+                       placeholder="{{ __('messages.instrument') }} {{ __('messages.notes') }}..." 
                        class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Bewegungstyp</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.movement_type') }}</label>
                 <select wire:model.live="typeFilter" 
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Alle Typen</option>
+                    <option value="">{{ __('messages.all_types') }}</option>
                     @foreach($movementTypes as $type)
                         <option value="{{ $type }}">
                             @switch($type)
-                                @case('dispatch') Ausgabe @break
-                                @case('return') Rückgabe @break
-                                @case('transfer') Transfer @break
-                                @case('sterilization') Sterilisation @break
-                                @case('repair') Reparatur @break
+                                @case('dispatch') {{ __('messages.dispatch') }} @break
+                                @case('return') {{ __('messages.return') }} @break
+                                @case('transfer') {{ __('messages.transfer') }} @break
+                                @case('sterilization') {{ __('messages.sterilization') }} @break
+                                @case('repair') {{ __('messages.repair') }} @break
                                 @default {{ ucfirst($type) }}
                             @endswitch
                         </option>
@@ -38,10 +38,10 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Instrument</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.instrument') }}</label>
                 <select wire:model.live="instrumentFilter" 
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Alle Instrumente</option>
+                    <option value="">{{ __('messages.all_instruments') }}</option>
                     @foreach($instruments as $instrument)
                         <option value="{{ $instrument->id }}">{{ $instrument->name }} ({{ $instrument->serial_number }})</option>
                     @endforeach
@@ -49,14 +49,14 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Von Datum</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.from_date') }}</label>
                 <input type="date" 
                        wire:model.live="startDate" 
                        class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Bis Datum</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.to_date') }}</label>
                 <input type="date" 
                        wire:model.live="endDate" 
                        class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -122,16 +122,31 @@
                                         
                                         <!-- Movement Details -->
                                         <div class="space-y-1 text-sm text-gray-700">
-                                            @if($movement->status_before !== $movement->status_after)
+                                            @php
+                                                $statusBefore = $movement->status_before_display;
+                                                $statusAfter = $movement->status_after_display;
+                                                $hasStatusChange = $statusBefore && $statusAfter && $statusBefore !== $statusAfter;
+                                                $hasStatus = $statusBefore || $statusAfter;
+                                            @endphp
+
+                                            @if($hasStatusChange)
                                                 <p>
                                                     <i class="fas fa-exchange-alt text-gray-400 mr-2"></i>
                                                     Status: 
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-300">
-                                                        {{ $movement->status_before }}
+                                                        {{ $statusBefore }}
                                                     </span>
                                                     <i class="fas fa-arrow-right mx-2 text-gray-400"></i>
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-300">
-                                                        {{ $movement->status_after }}
+                                                        {{ $statusAfter }}
+                                                    </span>
+                                                </p>
+                                            @elseif($hasStatus)
+                                                <p>
+                                                    <i class="fas fa-info-circle text-gray-400 mr-2"></i>
+                                                    Status: 
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300">
+                                                        {{ $statusAfter ?: $statusBefore }}
                                                     </span>
                                                 </p>
                                             @endif

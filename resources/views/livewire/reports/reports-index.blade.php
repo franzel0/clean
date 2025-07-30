@@ -2,9 +2,9 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Berichte & Statistiken</h1>
+            <h1 class="text-3xl font-bold text-gray-900">{{ __('messages.reports_statistics') }}</h1>
             <p class="mt-1 text-sm text-gray-600">
-                Übersicht über Instrumente, Defekte, Bestellungen und Bewegungen
+                {{ __('messages.overview_instruments_defects_orders_movements') }}
             </p>
         </div>
 
@@ -12,20 +12,20 @@
         <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200 p-6 mb-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Zeitraum</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.period') }}</label>
                     <select wire:model.live="selectedPeriod" 
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="7">Letzte 7 Tage</option>
-                        <option value="30">Letzte 30 Tage</option>
-                        <option value="90">Letzte 90 Tage</option>
-                        <option value="365">Letztes Jahr</option>
+                        <option value="7">{{ __('messages.last_7_days') }}</option>
+                        <option value="30">{{ __('messages.last_30_days') }}</option>
+                        <option value="90">{{ __('messages.last_90_days') }}</option>
+                        <option value="365">{{ __('messages.last_year') }}</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Abteilung</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.department') }}</label>
                     <select wire:model.live="selectedDepartment" 
                             class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Alle Abteilungen</option>
+                        <option value="">{{ __('messages.all_departments') }}</option>
                         @foreach($departments as $department)
                             <option value="{{ $department->id }}">{{ $department->name }}</option>
                         @endforeach
@@ -45,9 +45,9 @@
                         </div>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Instrumente</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('messages.instruments') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ number_format($totalInstruments) }}</p>
-                        <p class="text-xs text-gray-500">{{ $activeInstruments }} aktiv</p>
+                        <p class="text-xs text-gray-500">{{ $activeInstruments }} {{ __('messages.active') }}</p>
                     </div>
                 </div>
             </div>
@@ -61,9 +61,9 @@
                         </div>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Container</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('messages.containers') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ number_format($totalContainers) }}</p>
-                        <p class="text-xs text-gray-500">{{ $activeContainers }} aktiv</p>
+                        <p class="text-xs text-gray-500">{{ $activeContainers }} {{ __('messages.active') }}</p>
                     </div>
                 </div>
             </div>
@@ -77,9 +77,9 @@
                         </div>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Defektmeldungen</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('messages.defect_reports') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ number_format($totalDefectReports) }}</p>
-                        <p class="text-xs text-gray-500">{{ $openDefectReports }} offen</p>
+                        <p class="text-xs text-gray-500">{{ $openDefectReports }} {{ __('messages.open') }}</p>
                     </div>
                 </div>
             </div>
@@ -93,9 +93,9 @@
                         </div>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Bewegungen</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('messages.movements') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ number_format($totalMovements) }}</p>
-                        <p class="text-xs text-gray-500">{{ $recentMovements }} in {{ $selectedPeriod }} Tagen</p>
+                        <p class="text-xs text-gray-500">{{ $recentMovements }} {{ __('messages.in_days', ['days' => $selectedPeriod]) }}</p>
                     </div>
                 </div>
             </div>
@@ -106,11 +106,11 @@
             <!-- Instrument Status Distribution -->
             <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200">
                 <div class="px-6 py-4 border-b-2 border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Instrument Status</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.instrument_status') }}</h3>
                 </div>
                 <div class="p-6">
                     <div class="space-y-4">
-                        @foreach(['available' => 'Verfügbar', 'in_use' => 'Im Einsatz', 'defective' => 'Defekt', 'in_repair' => 'In Reparatur', 'out_of_service' => 'Außer Betrieb'] as $status => $label)
+                        @foreach(['available' => __('messages.available'), 'in_use' => __('messages.in_use'), 'defective' => __('messages.defective'), 'in_repair' => __('messages.in_repair'), 'out_of_service' => __('messages.out_of_service')] as $status => $label)
                             @php
                                 $count = $statusDistribution->get($status)?->count ?? 0;
                                 $percentage = $totalInstruments > 0 ? ($count / $totalInstruments) * 100 : 0;
@@ -146,8 +146,8 @@
 
             <!-- Defect Type Distribution -->
             <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200">
-                <div class="px-6 py-4 border-b-2 border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Defekttypen ({{ $selectedPeriod }} Tage)</h3>
+                                <div class="px-6 py-4 border-b-2 border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.defect_type_distribution') }}</h3>
                 </div>
                 <div class="p-6">
                     <div class="space-y-4">
@@ -179,7 +179,7 @@
             <!-- Recent Defects -->
             <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200">
                 <div class="px-6 py-4 border-b-2 border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Aktuelle Defekte</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.recent_defects') }}</h3>
                 </div>
                 <div class="p-6">
                     @if($recentDefects->count() > 0)
@@ -205,11 +205,11 @@
                         </div>
                         <div class="mt-4 text-center">
                             <a href="{{ route('defect-reports.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
-                                Alle Defektmeldungen anzeigen
+                                {{ __('messages.show_all') }} {{ __('messages.defect_reports') }}
                             </a>
                         </div>
                     @else
-                        <p class="text-sm text-gray-500 text-center py-4">Keine aktuellen Defekte</p>
+                        <p class="text-sm text-gray-500 text-center py-4">{{ __('messages.no_recent_defects') }}</p>
                     @endif
                 </div>
             </div>
@@ -217,7 +217,7 @@
             <!-- Recent Movements -->
             <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200">
                 <div class="px-6 py-4 border-b-2 border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Aktuelle Bewegungen</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.recent_movements') }}</h3>
                 </div>
                 <div class="p-6">
                     @if($recentMovementsList->count() > 0)
@@ -257,11 +257,11 @@
                         </div>
                         <div class="mt-4 text-center">
                             <a href="{{ route('movements.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
-                                Alle Bewegungen anzeigen
+                                {{ __('messages.show_all') }} {{ __('messages.movements') }}
                             </a>
                         </div>
                     @else
-                        <p class="text-sm text-gray-500 text-center py-4">Keine aktuellen Bewegungen</p>
+                        <p class="text-sm text-gray-500 text-center py-4">{{ __('messages.no_recent_movements') }}</p>
                     @endif
                 </div>
             </div>
@@ -269,7 +269,7 @@
             <!-- Top Defective Instruments -->
             <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200">
                 <div class="px-6 py-4 border-b-2 border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Häufigste Defekte</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">{{ __('messages.top_defective_instruments') }}</h3>
                 </div>
                 <div class="p-6">
                     @if($topDefectiveInstruments->count() > 0)
@@ -286,14 +286,14 @@
                                     </div>
                                     <div class="flex-shrink-0">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-300">
-                                            {{ $instrument->defect_reports_count }} Defekte
+                                            {{ $instrument->defect_reports_count }} {{ __('messages.defects') }}
                                         </span>
                                     </div>
                                 </div>
                             @endforeach
                         </div>
                     @else
-                        <p class="text-sm text-gray-500 text-center py-4">Keine Defekte im Zeitraum</p>
+                        <p class="text-sm text-gray-500 text-center py-4">{{ __('messages.no_defects_in_period') }}</p>
                     @endif
                 </div>
             </div>

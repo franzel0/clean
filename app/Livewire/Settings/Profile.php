@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Models\User;
+use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
@@ -14,6 +15,8 @@ class Profile extends Component
 
     public string $email = '';
 
+    public ?int $department_id = null;
+
     /**
      * Mount the component.
      */
@@ -21,6 +24,7 @@ class Profile extends Component
     {
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        $this->department_id = Auth::user()->department_id;
     }
 
     /**
@@ -41,12 +45,15 @@ class Profile extends Component
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id),
             ],
+            
+            'department_id' => ['nullable', 'exists:departments,id'],
         ], [
             'name.required' => 'Der Name muss ausgefüllt werden.',
             'name.max' => 'Der Name darf maximal 255 Zeichen lang sein.',
             'email.required' => 'Die E-Mail-Adresse muss ausgefüllt werden.',
             'email.email' => 'Bitte geben Sie eine gültige E-Mail-Adresse ein.',
             'email.unique' => 'Diese E-Mail-Adresse ist bereits vergeben.',
+            'department_id.exists' => 'Die ausgewählte Abteilung ist nicht gültig.',
         ]);
 
         $user->fill($validated);
@@ -76,5 +83,15 @@ class Profile extends Component
         $user->sendEmailVerificationNotification();
 
         Session::flash('status', 'verification-link-sent');
+    }
+
+    /**
+     * Render the component.
+     */
+    public function render()
+    {
+        $departments = Department::active()->orderBy('name')->get();
+
+        return view('livewire.settings.profile', compact('departments'));
     }
 }

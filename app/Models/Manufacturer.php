@@ -10,6 +10,7 @@ class Manufacturer extends Model
     protected $fillable = [
         'name',
         'website',
+        'contact_person',
         'contact_email',
         'contact_phone',
         'description',

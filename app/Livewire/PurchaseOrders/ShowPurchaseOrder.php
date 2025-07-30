@@ -3,7 +3,7 @@
 namespace App\Livewire\PurchaseOrders;
 
 use App\Models\PurchaseOrder;
-use App\Models\Supplier;
+use App\Models\Manufacturer;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -21,11 +21,14 @@ class ShowPurchaseOrder extends Component
     public $newStatus = '';
     public $notes = '';
     public $actualCost = '';
-    public $supplier_id = '';
+    public $manufacturer_id = '';
     public $expectedDelivery = '';
 
     public function mount(PurchaseOrder $order)
     {
+        // Authorization: Nur berechtigt Benutzer können Bestellungen anzeigen
+        $this->authorize('view', $order);
+        
         $this->order = $order->load([
             'defectReport.instrument',
             'defectReport.reportedBy',
@@ -33,10 +36,10 @@ class ShowPurchaseOrder extends Component
             'requestedBy',
             'approvedBy',
             'receivedBy',
-            'supplier'
+            'manufacturer'
         ]);
         
-        $this->supplier_id = $this->order->supplier_id;
+        $this->manufacturer_id = $this->order->manufacturer_id;
         $this->actualCost = $this->order->actual_cost;
         $this->notes = $this->order->notes;
         $this->expectedDelivery = $this->order->expected_delivery?->format('Y-m-d');
@@ -69,6 +72,9 @@ class ShowPurchaseOrder extends Component
 
     public function updateStatus()
     {
+        // Authorization: Nur berechtigt Benutzer können Status ändern
+        $this->authorize('updateStatus', $this->order);
+        
         Log::info('updateStatus called with newStatus: ' . $this->newStatus);
         
         if (empty($this->newStatus)) {
@@ -115,27 +121,33 @@ class ShowPurchaseOrder extends Component
 
     public function updateDetails()
     {
+        // Authorization: Nur berechtigt Benutzer können Bestelldetails ändern
+        $this->authorize('update', $this->order);
+        
         $this->validate([
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'actualCost' => 'nullable|numeric|min:0',
-            'expectedDelivery' => 'nullable|date',
-            'notes' => 'nullable|string',
+            'manufacturer_id' => 'nullable|exists:manufacturers,id',
+            'actualCost' => 'nullable|numeric|min:0|max:999999.99', // Max-Limit für Sicherheit
+            'expectedDelivery' => 'nullable|date|after_or_equal:today',
+            'notes' => 'nullable|string|max:2000', // Limit für Notes
         ], [
-            'supplier_id.exists' => 'Bitte wählen Sie einen gültigen Lieferanten aus.',
+            'manufacturer_id.exists' => 'Bitte wählen Sie einen gültigen Hersteller aus.',
             'actualCost.numeric' => 'Die tatsächlichen Kosten müssen eine Zahl sein.',
             'actualCost.min' => 'Die tatsächlichen Kosten können nicht negativ sein.',
+            'actualCost.max' => 'Die tatsächlichen Kosten sind zu hoch (max. 999.999,99 €).',
             'expectedDelivery.date' => 'Bitte geben Sie ein gültiges Lieferdatum ein.',
+            'expectedDelivery.after_or_equal' => 'Das Lieferdatum kann nicht in der Vergangenheit liegen.',
+            'notes.max' => 'Notizen dürfen maximal 2000 Zeichen lang sein.',
         ]);
 
         $this->order->update([
-            'supplier_id' => $this->supplier_id,
+            'manufacturer_id' => $this->manufacturer_id,
             'actual_cost' => $this->actualCost,
             'expected_delivery' => $this->expectedDelivery,
             'notes' => $this->notes,
         ]);
 
-        // Reload the supplier relationship after update
-        $this->order->load('supplier');
+        // Reload the manufacturer relationship after update
+        $this->order->load('manufacturer');
 
         session()->flash('message', 'Bestelldetails erfolgreich aktualisiert.');
     }
@@ -194,10 +206,33 @@ class ShowPurchaseOrder extends Component
         session()->flash('message', 'Bestellung storniert.');
     }
 
+    public function downloadPdf()
+    {
+        // Authorization: Nur berechtigt Benutzer können PDFs herunterladen
+        $this->authorize('view', $this->order);
+        
+        // Vollständig geladene Order für PDF
+        $order = PurchaseOrder::with([
+            'defectReport.instrument',
+            'defectReport.reportedBy',
+            'defectReport.reportingDepartment',
+            'requestedBy',
+            'approvedBy',
+            'receivedBy',
+            'manufacturer'
+        ])->findOrFail($this->order->id);
+
+        $pdf = Pdf::loadView('pdf.purchase-order', ['order' => $order]);
+        
+        return response()->streamDownload(function () use ($pdf) {
+            echo $pdf->output();
+        }, 'bestellung-' . $order->order_number . '.pdf');
+    }
+
     public function render()
     {
-        $suppliers = Supplier::active()->ordered()->get();
-        
-        return view('livewire.purchase-orders.show-purchase-order', compact('suppliers'));
+        $manufacturers = Manufacturer::active()->ordered()->get();
+
+        return view('livewire.purchase-orders.show-purchase-order', compact('manufacturers'));
     }
 }

@@ -15,25 +15,51 @@
         }
         
         .header {
-            text-align: center;
             border-bottom: 2px solid #333;
             padding-bottom: 20px;
             margin-bottom: 30px;
             position: relative;
+            display: table;
+            width: 100%;
+        }
+        
+        .header-left {
+            display: table-cell;
+            width: 30%;
+            vertical-align: middle;
+        }
+        
+        .header-center {
+            display: table-cell;
+            width: 40%;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .header-right {
+            display: table-cell;
+            width: 30%;
+            text-align: right;
+            vertical-align: middle;
         }
         
         .header-brand {
-            display: block;
-            margin: 0 auto 15px auto;
-            width: 60px;
-            height: 60px;
+            display: inline-block;
+            width: 80px;
+            height: 80px;
             background: #2563eb;
-            border-radius: 50%;
+            border-radius: 12px;
             color: white;
-            font-size: 24px;
+            font-size: 32px;
             font-weight: bold;
-            line-height: 60px;
+            line-height: 80px;
             text-align: center;
+        }
+        
+        .company-info {
+            font-size: 10px;
+            color: #666;
+            line-height: 1.3;
         }
         
         .header h1 {
@@ -149,18 +175,25 @@
 </head>
 <body>
     <div class="header">
-        <div class="header-brand">JG</div>
-        <h1>Instrumenten-Bestellung</h1>
-        <p>{{ $order->order_number }}</p>
-        <p>Erstellt am {{ $order->requested_at->format('d.m.Y H:i') }}</p>
-    </div>
-
-    <!-- Status -->
-    <div class="section">
-        <div class="section-title">Status</div>
-        <span class="status-badge status-{{ $order->status }}">
-            {{ $order->status_display }}
-        </span>
+        <div class="header-left">
+            <div class="header-brand">IMS</div>
+            <div class="company-info">
+                Instrumenten-<br>
+                Management-<br>
+                System
+            </div>
+        </div>
+        <div class="header-center">
+            <h1>Instrumenten-Bestellung</h1>
+            <p>{{ $order->order_number }}</p>
+        </div>
+        <div class="header-right">
+            <div class="company-info">
+                Erstellt am<br>
+                {{ $order->requested_at->format('d.m.Y H:i') }}<br><br>
+                Status: <strong>{{ $order->status_display }}</strong>
+            </div>
+        </div>
     </div>
 
     <!-- Bestelldetails -->
@@ -176,8 +209,19 @@
                 <div class="info-value">{{ $order->requestedBy->name }}</div>
             </div>
             <div class="info-row">
-                <div class="info-label">Lieferant:</div>
-                <div class="info-value">{{ $order->supplier }}</div>
+                <div class="info-label">Hersteller:</div>
+                <div class="info-value">
+                    {{ $order->manufacturer->name ?? 'N/A' }}
+                    @if($order->manufacturer && $order->manufacturer->contact_person)
+                        <br><small style="color: #666;">Kontakt: {{ $order->manufacturer->contact_person }}</small>
+                    @endif
+                    @if($order->manufacturer && $order->manufacturer->contact_phone)
+                        <br><small style="color: #666;">Tel: {{ $order->manufacturer->contact_phone }}</small>
+                    @endif
+                    @if($order->manufacturer && $order->manufacturer->contact_email)
+                        <br><small style="color: #666;">E-Mail: {{ $order->manufacturer->contact_email }}</small>
+                    @endif
+                </div>
             </div>
             @if($order->estimated_cost)
             <div class="info-row">

@@ -167,7 +167,21 @@ class EditInstrument extends Component
         }
 
         if ($this->isEditing) {
+            // Speichere den alten Status für Movement-Logging
+            $oldStatusId = $this->instrument->status_id;
+            $newStatusId = $data['status_id'];
+            
             $this->instrument->update($data);
+            
+            // Erstelle Movement wenn Status geändert wurde
+            if ($oldStatusId != $newStatusId) {
+                \App\Services\MovementService::logStatusChange(
+                    $this->instrument,
+                    $newStatusId,
+                    'Status geändert über Instrumentenbearbeitung'
+                );
+            }
+            
             session()->flash('message', 'Instrument erfolgreich aktualisiert.');
         } else {
             Instrument::create($data);

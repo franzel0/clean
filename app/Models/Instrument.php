@@ -39,9 +39,28 @@ class Instrument extends Model
     {
         parent::boot();
 
+        static::updating(function ($instrument) {
+            // Log status change as movement if status_id is changing
+            if ($instrument->isDirty('status_id') && $instrument->getOriginal('status_id')) {
+                $oldStatusId = $instrument->getOriginal('status_id');
+                $newStatusId = $instrument->status_id;
+                
+                // Create movement manually to avoid recursion
+                \App\Models\InstrumentMovement::create([
+                    'instrument_id' => $instrument->id,
+                    'movement_type' => 'transfer', // Default type
+                    'status_before' => $oldStatusId,
+                    'status_after' => $newStatusId,
+                    'moved_by' => \Illuminate\Support\Facades\Auth::id() ?? 1,
+                    'notes' => 'Status automatisch geändert',
+                    'moved_at' => now(),
+                ]);
+            }
+        });
+
         static::saved(function ($instrument) {
             // Update container status when instrument status or container changes
-            if ($instrument->isDirty(['status', 'current_container_id']) && $instrument->currentContainer) {
+            if ($instrument->isDirty(['status_id', 'current_container_id']) && $instrument->currentContainer) {
                 $instrument->currentContainer->updateStatusBasedOnInstruments();
             }
             

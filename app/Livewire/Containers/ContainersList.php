@@ -37,9 +37,7 @@ class ContainersList extends Component
     public function render()
     {
         $query = Container::query()
-            ->with(['instruments' => function($query) {
-                $query->select('id', 'name', 'status', 'current_container_id');
-            }])
+            ->with(['instruments.instrumentStatus'])
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%')
                       ->orWhere('barcode', 'like', '%' . $this->search . '%');
@@ -49,13 +47,6 @@ class ContainersList extends Component
             });
 
         $containers = $query->latest()->paginate(15);
-
-        // Add unavailable instruments count to each container
-        foreach ($containers as $container) {
-            $container->unavailable_instruments_count = $container->instruments
-                ->whereIn('status', ['defective', 'in_repair', 'out_of_service'])
-                ->count();
-        }
 
         $types = ['surgical_set', 'basic_set', 'special_set'];
 

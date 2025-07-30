@@ -14,8 +14,6 @@ class PurchaseOrder extends Model
         'order_number',
         'defect_report_id',
         'requested_by',
-        'supplier',
-        'supplier_id',
         'manufacturer_id',
         'estimated_cost',
         'actual_cost',
@@ -66,14 +64,9 @@ class PurchaseOrder extends Model
         return $this->belongsTo(PurchaseOrderStatus::class, 'status_id');
     }
 
-    public function manufacturerRelation(): BelongsTo
+    public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
-    }
-
-    public function supplier(): BelongsTo
-    {
-        return $this->belongsTo(Supplier::class, 'supplier_id');
     }
 
     public function getStatusDisplayAttribute(): string
@@ -90,39 +83,34 @@ class PurchaseOrder extends Model
         };
     }
 
-    public function getSupplierDisplayAttribute(): string
+    public function getManufacturerDisplayAttribute(): string
     {
-        // Wenn supplier_id vorhanden ist und Beziehung geladen ist
-        if ($this->supplier_id && $this->relationLoaded('supplier') && $this->supplier && is_object($this->supplier)) {
-            $display = $this->supplier->name;
-            if ($this->supplier->contact_person) {
-                $display .= ' - ' . $this->supplier->contact_person;
+        // Wenn manufacturer_id vorhanden ist und Beziehung geladen ist
+        if ($this->manufacturer_id && $this->relationLoaded('manufacturer') && $this->manufacturer && is_object($this->manufacturer)) {
+            $display = $this->manufacturer->name;
+            if ($this->manufacturer->contact_person) {
+                $display .= ' - ' . $this->manufacturer->contact_person;
             }
             return $display;
         }
         
-        // Fallback: Versuche supplier_id zu laden falls nicht geladen
-        if ($this->supplier_id && !$this->relationLoaded('supplier')) {
+        // Fallback: Versuche manufacturer_id zu laden falls nicht geladen
+        if ($this->manufacturer_id && !$this->relationLoaded('manufacturer')) {
             try {
-                $supplier = $this->supplier;
-                if ($supplier) {
-                    $display = $supplier->name;
-                    if ($supplier->contact_person) {
-                        $display .= ' - ' . $supplier->contact_person;
+                $manufacturer = $this->manufacturer;
+                if ($manufacturer) {
+                    $display = $manufacturer->name;
+                    if ($manufacturer->contact_person) {
+                        $display .= ' - ' . $manufacturer->contact_person;
                     }
                     return $display;
                 }
             } catch (\Exception $e) {
-                // Falls das fehlschlägt, fallen wir auf das String-Feld zurück
+                // Falls das fehlschlägt, Default-Text zurückgeben
             }
         }
         
-        // Fallback auf das alte String-Feld
-        if ($this->attributes['supplier'] && is_string($this->attributes['supplier'])) {
-            return $this->attributes['supplier'];
-        }
-        
-        return 'Kein Lieferant angegeben';
+        return 'Kein Hersteller angegeben';
     }
 
     public function scopeOpen($query)

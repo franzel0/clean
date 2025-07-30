@@ -13,12 +13,12 @@
 
  <flux:navlist variant="outline">
  <flux:navlist.group :heading="__('Instrument Management')" class="grid">
- <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
- <flux:navlist.item icon="wrench-screwdriver" :href="route('instruments.index')" :current="request()->routeIs('instruments.*')" wire:navigate>Instrumente</flux:navlist.item>
- <flux:navlist.item icon="exclamation-triangle" :href="route('defect-reports.index')" :current="request()->routeIs('defect-reports.*')" wire:navigate>Defektmeldungen</flux:navlist.item>
- <flux:navlist.item icon="shopping-cart" :href="route('purchase-orders.index')" :current="request()->routeIs('purchase-orders.*')" wire:navigate>Bestellungen</flux:navlist.item>
- <flux:navlist.item icon="archive-box" :href="route('containers.index')" :current="request()->routeIs('containers.*')" wire:navigate>Container</flux:navlist.item>
- <flux:navlist.item icon="chart-bar" :href="route('reports.index')" :current="request()->routeIs('reports.*')" wire:navigate>Berichte</flux:navlist.item>
+ <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('messages.dashboard') }}</flux:navlist.item>
+ <flux:navlist.item icon="wrench-screwdriver" :href="route('instruments.index')" :current="request()->routeIs('instruments.*')" wire:navigate>{{ __('messages.instruments') }}</flux:navlist.item>
+ <flux:navlist.item icon="exclamation-triangle" :href="route('defect-reports.index')" :current="request()->routeIs('defect-reports.*')" wire:navigate>{{ __('messages.defect_reports') }}</flux:navlist.item>
+ <flux:navlist.item icon="shopping-cart" :href="route('purchase-orders.index')" :current="request()->routeIs('purchase-orders.*')" wire:navigate>{{ __('messages.purchase_orders') }}</flux:navlist.item>
+ <flux:navlist.item icon="archive-box" :href="route('containers.index')" :current="request()->routeIs('containers.*')" wire:navigate>{{ __('messages.containers') }}</flux:navlist.item>
+ <flux:navlist.item icon="chart-bar" :href="route('reports.index')" :current="request()->routeIs('reports.*')" wire:navigate>{{ __('messages.reports') }}</flux:navlist.item>
  </flux:navlist.group>
  </flux:navlist>
 
@@ -65,7 +65,7 @@
  <flux:menu.separator />
 
  <flux:menu.radio.group>
- <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+ <flux:menu.item :href="route('settings.profile')" icon="user" wire:navigate>Profil-Einstellungen</flux:menu.item>
  </flux:menu.radio.group>
 
  <flux:menu.separator />
@@ -73,7 +73,7 @@
  <form method="POST" action="{{ route('logout') }}" class="w-full">
  @csrf
  <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
- {{ __('Log Out') }}
+ Abmelden
  </flux:menu.item>
  </form>
  </flux:menu>
@@ -115,7 +115,7 @@
  <flux:menu.separator />
 
  <flux:menu.radio.group>
- <flux:menu.item :href="route('settings.profile')" icon="cog" wire:navigate>{{ __('Settings') }}</flux:menu.item>
+ <flux:menu.item :href="route('settings.profile')" icon="user" wire:navigate>Profil-Einstellungen</flux:menu.item>
  </flux:menu.radio.group>
 
  <flux:menu.separator />
@@ -123,7 +123,7 @@
  <form method="POST" action="{{ route('logout') }}" class="w-full">
  @csrf
  <flux:menu.item as="button" type="submit" icon="arrow-right-start-on-rectangle" class="w-full">
- {{ __('Log Out') }}
+ Abmelden
  </flux:menu.item>
  </form>
  </flux:menu>

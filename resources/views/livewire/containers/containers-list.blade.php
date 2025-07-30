@@ -1,13 +1,13 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Container</h1>
-            <p class="text-sm text-gray-600 mt-1">{{ $containers->total() }} Container gefunden</p>
+            <h1 class="text-2xl font-bold text-gray-900">{{ __('messages.containers') }}</h1>
+            <p class="text-sm text-gray-600 mt-1">{{ $containers->total() }} {{ __('messages.containers_found') }}</p>
         </div>
         <div class="flex space-x-3">
             <a href="{{ route('containers.create') }}" 
                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium border-2 border-blue-700 shadow-lg hover:shadow-xl transition-all duration-200">
-                <i class="fas fa-plus mr-2"></i>Neuer Container
+                <i class="fas fa-plus mr-2"></i>{{ __('messages.create_container') }}
             </a>
         </div>
     </div>
@@ -18,14 +18,14 @@
             <div>
                 <input type="text" 
                        wire:model.live="search" 
-                       placeholder="Container suchen..." 
+                       placeholder="{{ __('messages.search') }} {{ __('messages.containers') }}..." 
                        class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             
             <div>
                 <select wire:model.live="typeFilter" 
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Alle Typen</option>
+                    <option value="">{{ __('messages.all_types') }}</option>
                     @foreach($types as $type)
                         <option value="{{ $type }}">
                             @switch($type)

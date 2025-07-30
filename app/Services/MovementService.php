@@ -23,10 +23,18 @@ class MovementService
         $statusBefore = $statusBefore ?? $instrument->getOriginal('status_id') ?? $instrument->status_id;
         $statusAfter = $statusAfter ?? $instrument->status_id;
         
+        // Ensure status values are numeric IDs
+        if (!is_numeric($statusBefore)) {
+            $statusBefore = self::convertStatusNameToId($statusBefore);
+        }
+        if (!is_numeric($statusAfter)) {
+            $statusAfter = self::convertStatusNameToId($statusAfter);
+        }
+        
         // Use current user if not provided
         $movedBy = $movedBy ?? (\Illuminate\Support\Facades\Auth::id() ?? 1);
 
-        return InstrumentMovement::create([
+        $movement = InstrumentMovement::create([
             'instrument_id' => $instrument->id,
             'from_department_id' => $fromDepartmentId,
             'to_department_id' => $toDepartmentId,
@@ -39,6 +47,13 @@ class MovementService
             'notes' => $notes,
             'moved_at' => now(),
         ]);
+
+        // Update instrument's current status to the new status
+        if ($statusAfter && is_numeric($statusAfter)) {
+            $instrument->update(['status_id' => $statusAfter]);
+        }
+
+        return $movement;
     }
 
     public static function logStatusChange(
@@ -108,5 +123,39 @@ class MovementService
             notes: $notes ?? 'Abteilungs-Transfer',
             movedBy: $movedBy
         );
+    }
+
+    /**
+     * Convert status name to numeric ID
+     */
+    private static function convertStatusNameToId($statusName): int
+    {
+        if (is_numeric($statusName)) {
+            return (int)$statusName;
+        }
+
+        // Mapping für englische Status-Namen zu Standard-IDs
+        $statusMap = [
+            'available' => 1,        // Verfügbar
+            'in_use' => 2,          // In Verwendung  
+            'maintenance' => 3,      // Wartung
+            'out_of_service' => 4,   // Außer Betrieb
+            'lost' => 5,            // Vermisst
+            'disposed' => 6,        // Aussortiert
+            'defective' => 4,       // Fallback zu "Außer Betrieb"
+            'broken' => 4,          // Fallback zu "Außer Betrieb"
+            'clean' => 1,           // Fallback zu "Verfügbar"
+            'dirty' => 1,           // Fallback zu "Verfügbar"
+            'sterile' => 1,         // Fallback zu "Verfügbar"
+            'in_sterilization' => 1, // Fallback zu "Verfügbar"
+            'repair' => 4,          // Fallback zu "Außer Betrieb"
+            'repaired' => 1,        // Fallback zu "Verfügbar"
+            'returned' => 1,        // Fallback zu "Verfügbar"
+            'dispatched' => 2,      // Fallback zu "In Verwendung"
+            'transferred' => 1,     // Fallback zu "Verfügbar"
+            'reserved' => 2,        // Fallback zu "In Verwendung"
+        ];
+
+        return $statusMap[strtolower($statusName)] ?? 1; // Default: Verfügbar
     }
 }

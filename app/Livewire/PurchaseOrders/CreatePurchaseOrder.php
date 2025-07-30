@@ -4,7 +4,8 @@ namespace App\Livewire\PurchaseOrders;
 
 use App\Models\PurchaseOrder;
 use App\Models\DefectReport;
-use App\Models\Supplier;
+use App\Models\Manufacturer;
+use App\Models\PurchaseOrderStatus;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\Attributes\Validate;
@@ -19,8 +20,8 @@ class CreatePurchaseOrder extends Component
     #[Validate('required|exists:defect_reports,id')]
     public $defect_report_id = '';
 
-    #[Validate('required|exists:suppliers,id')]
-    public $supplier_id = '';
+    #[Validate('required|exists:manufacturers,id')]
+    public $manufacturer_id = '';
 
     #[Validate('nullable|numeric|min:0|max:999999.99')]
     public $estimated_cost = '';
@@ -30,6 +31,9 @@ class CreatePurchaseOrder extends Component
 
     #[Validate('nullable|string|max:1000')]
     public $notes = '';
+
+    #[Validate('nullable|exists:purchase_order_statuses,id')]
+    public $status_id = '';
 
     public $defectReports = [];
 
@@ -46,15 +50,16 @@ class CreatePurchaseOrder extends Component
     {
         $this->validate([
             'defect_report_id' => 'required|exists:defect_reports,id',
-            'supplier_id' => 'required|exists:suppliers,id',
+            'manufacturer_id' => 'required|exists:manufacturers,id',
             'estimated_cost' => 'nullable|numeric|min:0|max:999999.99',
             'estimated_delivery_date' => 'nullable|date',
             'notes' => 'nullable|string|max:1000',
+            'status_id' => 'nullable|exists:purchase_order_statuses,id',
         ], [
             'defect_report_id.required' => 'Bitte wählen Sie eine Defektmeldung aus.',
             'defect_report_id.exists' => 'Die ausgewählte Defektmeldung ist nicht gültig.',
-            'supplier_id.required' => 'Bitte wählen Sie einen Lieferanten aus.',
-            'supplier_id.exists' => 'Der ausgewählte Lieferant ist nicht gültig.',
+            'manufacturer_id.required' => 'Bitte wählen Sie einen Hersteller aus.',
+            'manufacturer_id.exists' => 'Der ausgewählte Hersteller ist nicht gültig.',
             'estimated_cost.numeric' => 'Die geschätzten Kosten müssen eine Zahl sein.',
             'estimated_cost.min' => 'Die geschätzten Kosten können nicht negativ sein.',
             'estimated_cost.max' => 'Die geschätzten Kosten sind zu hoch.',
@@ -64,11 +69,12 @@ class CreatePurchaseOrder extends Component
 
         $purchaseOrder = PurchaseOrder::create([
             'defect_report_id' => $this->defect_report_id,
-            'supplier_id' => $this->supplier_id,
+            'manufacturer_id' => $this->manufacturer_id,
             'estimated_cost' => $this->estimated_cost ?: null,
             'expected_delivery' => $this->estimated_delivery_date ?: null,
             'notes' => $this->notes,
             'status' => 'requested',
+            'status_id' => $this->status_id,
             'requested_by' => Auth::id(),
             'requested_at' => now(),
         ]);
@@ -90,8 +96,9 @@ class CreatePurchaseOrder extends Component
 
     public function render()
     {
-        $suppliers = Supplier::active()->ordered()->get();
+        $manufacturers = Manufacturer::active()->ordered()->get();
+        $purchaseOrderStatuses = PurchaseOrderStatus::active()->ordered()->get();
         
-        return view('livewire.purchase-orders.create-purchase-order', compact('suppliers'));
+        return view('livewire.purchase-orders.create-purchase-order', compact('manufacturers', 'purchaseOrderStatuses'));
     }
 }

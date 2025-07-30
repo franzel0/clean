@@ -124,10 +124,10 @@
                             <h3 class="text-sm font-medium text-gray-700 mb-2">Angefordert von</h3>
                             <p class="text-gray-900">{{ $order->requestedBy->name }}</p>
                         </div>
-                        @if($order->supplier_id || $order->supplier)
+                        @if($order->manufacturer_id)
                             <div>
-                                <h3 class="text-sm font-medium text-gray-700 mb-2">Aktueller Lieferant</h3>
-                                <p class="text-gray-900">{{ $order->supplier_display }}</p>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Aktueller Hersteller</h3>
+                                <p class="text-gray-900">{{ $order->manufacturer_display }}</p>
                             </div>
                         @endif
                         @if($order->estimated_cost)
@@ -142,21 +142,18 @@
                     <form wire:submit.prevent="updateDetails">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label for="supplier_id" class="text-sm font-medium text-gray-700 mb-2 block">Lieferant ändern</label>
-                                <select id="supplier_id" 
-                                        wire:model="supplier_id" 
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="">Lieferant auswählen...</option>
-                                    @foreach($suppliers as $supplier)
-                                        <option value="{{ $supplier->id }}">
-                                            {{ $supplier->name }}
-                                            @if($supplier->contact_person)
-                                                - {{ $supplier->contact_person }}
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('supplier_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                <label for="manufacturer_id" class="text-sm font-medium text-gray-700 mb-2 block">Hersteller ändern</label>
+                                <x-alpine-autocomplete 
+                                    :options="$manufacturers->toArray()"
+                                    wire-model="manufacturer_id"
+                                    :value="$manufacturer_id"
+                                    placeholder="Hersteller auswählen..."
+                                    display-field="name"
+                                    value-field="id"
+                                    :search-fields="['name', 'contact_person']"
+                                    secondary-display-field="contact_person"
+                                    :error="$errors->first('manufacturer_id')"
+                                />
                             </div>
                             <div>
                                 <label for="actualCost" class="text-sm font-medium text-gray-700 mb-2 block">Tatsächliche Kosten</label>

@@ -49,7 +49,7 @@
                 class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm ml-8 {{ $activeTab === 'purchase-order-statuses' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                 Bestellstatus
             </button>
-            <button 
+                        <button 
                 wire:click="setActiveTab('manufacturers')"
                 class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm ml-8 {{ $activeTab === 'manufacturers' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                 Hersteller
@@ -72,126 +72,115 @@
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold text-gray-900">{{ $this->getActiveTitle() }}</h2>
-                @if(!in_array($activeTab, ['operating-rooms', 'departments']))
-                    <button 
-                        wire:click="openCreateModal"
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                        Neu hinzufügen
-                    </button>
-                @endif
+                <button 
+                    wire:click="openCreateModal"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    Neu hinzufügen
+                </button>
             </div>
         </div>
 
         <div class="px-6 py-4">
-            @if(in_array($activeTab, ['operating-rooms', 'departments']))
-                <!-- Database Model Tables -->
-                @if($activeTab === 'operating-rooms')
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beschreibung</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($operatingRooms as $room)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $room->name }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $room->description ?? 'N/A' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full {{ $room->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                {{ $room->is_active ? 'Aktiv' : 'Inaktiv' }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="px-6 py-4 text-center text-gray-500">Keine OP-Säle gefunden</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                @elseif($activeTab === 'departments')
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beschreibung</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($departments as $department)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $department->name }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $department->description ?? 'N/A' }}
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="2" class="px-6 py-4 text-center text-gray-500">Keine Abteilungen gefunden</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
-            @else
-                <!-- Array-based Settings -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    @foreach($data as $item)
-                        <div class="bg-gray-50 rounded-lg p-4 flex justify-between items-center">
-                            <div>
-                                <span class="text-sm font-medium text-gray-900">{{ $item->name }}</span>
-                                @if($item->description)
-                                    <p class="text-xs text-gray-500 mt-1">{{ $item->description }}</p>
+            <!-- Database Model Tables -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Beschreibung</th>
+                            @if(in_array($activeTab, ['operating-rooms', 'departments']))
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Standort</th>
+                            @endif
+                            @if($activeTab === 'operating-rooms')
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Abteilung</th>
+                            @endif
+                            @if(in_array($activeTab, ['instrument-statuses', 'container-statuses', 'purchase-order-statuses']))
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Farbe</th>
+                            @endif
+                            @if($activeTab === 'defect-types')
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Schweregrad</th>
+                            @endif
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse($this->getActiveData() as $item)
+                            <tr class="{{ !$item->is_active ? 'bg-gray-50 opacity-75' : '' }}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $item->is_active ? 'text-gray-900' : 'text-gray-500' }}">
+                                    {{ $item->name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $item->description ?? 'N/A' }}
+                                </td>
+                                @if(in_array($activeTab, ['operating-rooms', 'departments']))
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $item->code ?? 'N/A' }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $item->location ?? 'N/A' }}
+                                    </td>
                                 @endif
-                                @if(isset($item->color))
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1 bg-{{ $item->color }}-100 text-{{ $item->color }}-800">
-                                        {{ $item->color }}
-                                    </span>
+                                @if($activeTab === 'operating-rooms')
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {{ $item->department->name ?? 'N/A' }}
+                                    </td>
                                 @endif
-                                @if(isset($item->severity))
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1 
-                                        {{ $item->severity === 'critical' ? 'bg-red-100 text-red-800' : '' }}
-                                        {{ $item->severity === 'high' ? 'bg-orange-100 text-orange-800' : '' }}
-                                        {{ $item->severity === 'medium' ? 'bg-yellow-100 text-yellow-800' : '' }}
-                                        {{ $item->severity === 'low' ? 'bg-green-100 text-green-800' : '' }}">
-                                        {{ ucfirst($item->severity) }}
-                                    </span>
+                                @if(in_array($activeTab, ['instrument-statuses', 'container-statuses', 'purchase-order-statuses']))
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-{{ $item->color }}-100 text-{{ $item->color }}-800">
+                                            {{ ucfirst($item->color) }}
+                                        </span>
+                                    </td>
                                 @endif
-                            </div>
-                            <div class="flex space-x-2">
-                                <button 
-                                    wire:click="openEditModal({{ $item->id }})"
-                                    class="text-blue-600 hover:text-blue-800 text-sm">
-                                    Bearbeiten
-                                </button>
-                                <button 
-                                    wire:click="openDeleteModal({{ $item->id }})"
-                                    class="text-red-600 hover:text-red-800 text-sm">
-                                    Löschen
-                                </button>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
+                                @if($activeTab === 'defect-types')
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                            {{ $item->severity === 'critical' ? 'bg-red-100 text-red-800' : '' }}
+                                            {{ $item->severity === 'high' ? 'bg-orange-100 text-orange-800' : '' }}
+                                            {{ $item->severity === 'medium' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                            {{ $item->severity === 'low' ? 'bg-green-100 text-green-800' : '' }}">
+                                            {{ ucfirst($item->severity) }}
+                                        </span>
+                                    </td>
+                                @endif
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <button 
+                                        wire:click="toggleStatus({{ $item->id }})"
+                                        class="inline-flex px-2 py-1 text-xs font-semibold rounded-full transition-colors duration-200 hover:opacity-80 {{ $item->is_active ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 hover:bg-red-200' }}"
+                                        title="Klicken zum {{ $item->is_active ? 'Deaktivieren' : 'Aktivieren' }}">
+                                        {{ $item->is_active ? 'Aktiv' : 'Inaktiv' }}
+                                    </button>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button 
+                                        wire:click="openEditModal({{ $item->id }})"
+                                        class="text-blue-600 hover:text-blue-900 mr-3">
+                                        Bearbeiten
+                                    </button>
+                                    <button 
+                                        wire:click="openDeleteModal({{ $item->id }})"
+                                        class="text-red-600 hover:text-red-900">
+                                        Löschen
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="{{ $activeTab === 'operating-rooms' ? '7' : ($activeTab === 'departments' ? '6' : ($activeTab === 'defect-types' ? '5' : (in_array($activeTab, ['instrument-statuses', 'container-statuses', 'purchase-order-statuses']) ? '5' : '4'))) }}" class="px-6 py-4 text-center text-gray-500">
+                                    Keine Einträge gefunden. Fügen Sie Ihren ersten Eintrag hinzu.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
-                @if($data->isEmpty())
-                    <div class="text-center py-8">
-                        <p class="text-gray-500">Keine Einträge gefunden. Fügen Sie Ihren ersten Eintrag hinzu.</p>
-                    </div>
-                @endif
+            @if($data->isEmpty())
+                <div class="text-center py-8">
+                    <p class="text-gray-500">Keine Einträge gefunden. Fügen Sie Ihren ersten Eintrag hinzu.</p>
+                </div>
             @endif
         </div>
     </div>
@@ -254,6 +243,124 @@
                                 <option value="high">Hoch</option>
                                 <option value="critical">Kritisch</option>
                             </select>
+                        </div>
+                    @endif
+
+                    @if(!in_array($activeTab, ['operating-rooms', 'departments']))
+                        <div class="mb-4">
+                            <div class="flex items-center mb-2">
+                                <label for="newSortOrder" class="block text-sm font-medium text-gray-700">Sortierung</label>
+                                <div class="ml-2 relative inline-block" x-data="{ showTooltip: false }">
+                                    <button 
+                                        type="button"
+                                        @mouseenter="showTooltip = true" 
+                                        @mouseleave="showTooltip = false"
+                                        class="w-4 h-4 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-blue-600 transition-colors">
+                                        i
+                                    </button>
+                                    <div 
+                                        x-show="showTooltip" 
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 transform scale-95"
+                                        x-transition:enter-end="opacity-100 transform scale-100"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100 transform scale-100"
+                                        x-transition:leave-end="opacity-0 transform scale-95"
+                                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg whitespace-nowrap z-50">
+                                        <div class="text-center">
+                                            <div>0 = automatisch zuweisen (nächste verfügbare Nummer)</div>
+                                            <div>Zahl eingeben = manuelle Sortierung</div>
+                                        </div>
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input 
+                                type="number" 
+                                id="newSortOrder"
+                                wire:model="newSortOrder"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="0 = automatisch zuweisen..."
+                                min="0">
+                        </div>
+                    @endif
+
+                    @if(in_array($activeTab, ['operating-rooms', 'departments']))
+                        <div class="mb-4">
+                            <label for="newCode" class="block text-sm font-medium text-gray-700 mb-2">Code</label>
+                            <input 
+                                type="text" 
+                                id="newCode"
+                                wire:model="newCode"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Code eingeben...">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="newLocation" class="block text-sm font-medium text-gray-700 mb-2">Standort</label>
+                            <input 
+                                type="text" 
+                                id="newLocation"
+                                wire:model="newLocation"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Standort eingeben...">
+                        </div>
+                    @endif
+
+                    @if($activeTab === 'operating-rooms')
+                        <div class="mb-4">
+                            <label for="newDepartmentId" class="block text-sm font-medium text-gray-700 mb-2">Abteilung</label>
+                            <select 
+                                id="newDepartmentId"
+                                wire:model="newDepartmentId"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Abteilung auswählen...</option>
+                                @foreach($this->getDepartments() as $department)
+                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+
+                    @if($activeTab === 'manufacturers')
+                        <div class="mb-4">
+                            <label for="newContactPerson" class="block text-sm font-medium text-gray-700 mb-2">Ansprechpartner</label>
+                            <input 
+                                type="text" 
+                                id="newContactPerson"
+                                wire:model="newContactPerson"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Name des Ansprechpartners...">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="newContactEmail" class="block text-sm font-medium text-gray-700 mb-2">E-Mail</label>
+                            <input 
+                                type="email" 
+                                id="newContactEmail"
+                                wire:model="newContactEmail"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="email@beispiel.de">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="newContactPhone" class="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                            <input 
+                                type="tel" 
+                                id="newContactPhone"
+                                wire:model="newContactPhone"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="+49 123 456789">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="newWebsite" class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                            <input 
+                                type="url" 
+                                id="newWebsite"
+                                wire:model="newWebsite"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="https://www.beispiel.de">
                         </div>
                     @endif
 
@@ -331,6 +438,117 @@
                                 <option value="medium">Mittel</option>
                                 <option value="high">Hoch</option>
                                 <option value="critical">Kritisch</option>
+                            </select>
+                        </div>
+                    @endif
+
+                    @if(!in_array($activeTab, ['operating-rooms', 'departments']))
+                        <div class="mb-4">
+                            <div class="flex items-center mb-2">
+                                <label for="editingSortOrder" class="block text-sm font-medium text-gray-700">Sortierung</label>
+                                <div class="ml-2 relative inline-block" x-data="{ showTooltip: false }">
+                                    <button 
+                                        type="button"
+                                        @mouseenter="showTooltip = true" 
+                                        @mouseleave="showTooltip = false"
+                                        class="w-4 h-4 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold hover:bg-blue-600 transition-colors">
+                                        i
+                                    </button>
+                                    <div 
+                                        x-show="showTooltip" 
+                                        x-transition:enter="transition ease-out duration-200"
+                                        x-transition:enter-start="opacity-0 transform scale-95"
+                                        x-transition:enter-end="opacity-100 transform scale-100"
+                                        x-transition:leave="transition ease-in duration-150"
+                                        x-transition:leave-start="opacity-100 transform scale-100"
+                                        x-transition:leave-end="opacity-0 transform scale-95"
+                                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg whitespace-nowrap z-50">
+                                        <div class="text-center">
+                                            <div>0 = automatisch zuweisen (nächste verfügbare Nummer)</div>
+                                            <div>Zahl eingeben = manuelle Sortierung</div>
+                                        </div>
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input 
+                                type="number" 
+                                id="editingSortOrder"
+                                wire:model="editingSortOrder"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                min="0">
+                        </div>
+                    @endif
+
+                    @if($activeTab === 'manufacturers')
+                        <div class="mb-4">
+                            <label for="editingContactPerson" class="block text-sm font-medium text-gray-700 mb-2">Kontaktperson</label>
+                            <input 
+                                type="text" 
+                                id="editingContactPerson"
+                                wire:model="editingContactPerson"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="editingContactEmail" class="block text-sm font-medium text-gray-700 mb-2">E-Mail</label>
+                            <input 
+                                type="email" 
+                                id="editingContactEmail"
+                                wire:model="editingContactEmail"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="editingContactPhone" class="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                            <input 
+                                type="tel" 
+                                id="editingContactPhone"
+                                wire:model="editingContactPhone"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="editingWebsite" class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                            <input 
+                                type="url" 
+                                id="editingWebsite"
+                                wire:model="editingWebsite"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    @endif
+
+                    @if(in_array($activeTab, ['operating-rooms', 'departments']))
+                        <div class="mb-4">
+                            <label for="editingCode" class="block text-sm font-medium text-gray-700 mb-2">Code</label>
+                            <input 
+                                type="text" 
+                                id="editingCode"
+                                wire:model="editingCode"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="editingLocation" class="block text-sm font-medium text-gray-700 mb-2">Standort</label>
+                            <input 
+                                type="text" 
+                                id="editingLocation"
+                                wire:model="editingLocation"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    @endif
+
+                    @if($activeTab === 'operating-rooms')
+                        <div class="mb-4">
+                            <label for="editingDepartmentId" class="block text-sm font-medium text-gray-700 mb-2">Abteilung</label>
+                            <select 
+                                id="editingDepartmentId"
+                                wire:model="editingDepartmentId"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Abteilung auswählen...</option>
+                                @foreach($this->getDepartments() as $department)
+                                    <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                     @endif

@@ -1,12 +1,12 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Defektmeldungen</h1>
-            <p class="text-sm text-gray-600 mt-1">{{ $reports->total() }} Meldungen gefunden</p>
+            <h1 class="text-2xl font-bold text-gray-900">{{ __('messages.defect_reports') }}</h1>
+            <p class="text-sm text-gray-600 mt-1">{{ $reports->total() }} {{ __('messages.defect_reports_found') }}</p>
         </div>
         <a href="{{ route('defect-reports.create') }}" 
            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-            Neue Meldung
+            {{ __('messages.create_defect_report') }}
         </a>
     </div>
 
@@ -16,24 +16,24 @@
             <div>
                 <input type="text" 
                        wire:model.live="search" 
-                       placeholder="Suchen..." 
+                       placeholder="{{ __('messages.search') }}..." 
                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
             </div>
             
             <div>
                 <select wire:model.live="statusFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Alle Status</option>
+                    <option value="">{{ __('messages.all_status') }}</option>
                     @foreach($statuses as $status)
                         <option value="{{ $status }}">
                             @switch($status)
-                                @case('reported') Gemeldet @break
-                                @case('acknowledged') Bestätigt @break
-                                @case('in_review') In Bearbeitung @break
-                                @case('ordered') Bestellt @break
-                                @case('received') Erhalten @break
-                                @case('repaired') Repariert @break
-                                @case('closed') Abgeschlossen @break
+                                @case('reported') {{ __('messages.reported') }} @break
+                                @case('acknowledged') {{ __('messages.acknowledged') }} @break
+                                @case('in_review') {{ __('messages.in_progress') }} @break
+                                @case('ordered') {{ __('messages.ordered') }} @break
+                                @case('received') {{ __('messages.received') }} @break
+                                @case('repaired') {{ __('messages.repaired') }} @break
+                                @case('closed') {{ __('messages.closed') }} @break
                                 @default {{ $status }}
                             @endswitch
                         </option>
@@ -44,7 +44,7 @@
             <div>
                 <select wire:model.live="severityFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Alle Schweregrade</option>
+                    <option value="">{{ __('messages.all_severities') }}</option>
                     @foreach($severities as $severity)
                         <option value="{{ $severity }}">
                             @switch($severity)
@@ -88,13 +88,13 @@
                 <table class="w-full">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                         <tr>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Meldung</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Instrument</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Schweregrad</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Gemeldet von</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Datum</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Aktionen</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.report_number') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.instruments') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.severity') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.status') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.reported_by') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.date') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -142,20 +142,20 @@
                                         <a href="{{ route('defect-reports.show', $report->id) }}" 
                                            wire:navigate
                                            class="text-blue-600 hover:text-blue-800 text-sm">
-                                            Anzeigen
+                                            {{ __('messages.view') }}
                                         </a>
                                         
                                         @if($report->status === 'reported' && auth()->user()->role === 'sterilization')
                                             <button wire:click="acknowledgeReport({{ $report->id }})" 
                                                     class="text-green-600 hover:text-green-800 text-sm">
-                                                Bestätigen
+                                                {{ __('messages.confirm') }}
                                             </button>
                                         @endif
                                         
                                         @if($report->status === 'acknowledged' && auth()->user()->role === 'procurement')
                                             <button wire:click="createPurchaseOrder({{ $report->id }})" 
                                                     class="text-purple-600 hover:text-purple-800 text-sm">
-                                                Bestellen
+                                                {{ __('messages.order') }}
                                             </button>
                                         @endif
                                     </div>

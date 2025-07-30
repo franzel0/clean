@@ -7,17 +7,17 @@
 
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Instrumente</h1>
-            <p class="text-sm text-gray-600 mt-1">{{ $instruments->total() }} Instrumente gefunden</p>
+            <h1 class="text-2xl font-bold text-gray-900">{{ __('messages.instruments') }}</h1>
+            <p class="text-sm text-gray-600 mt-1">{{ $instruments->total() }} {{ __('messages.instruments_found') }}</p>
         </div>
         <div class="flex space-x-3">
             <button wire:click="createInstrument" 
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                Neues Instrument
+                {{ __('messages.create_instrument') }}
             </button>
             <a href="{{ route('defect-reports.create') }}" 
                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
-                Defekt melden
+                {{ __('messages.create_defect_report') }}
             </a>
         </div>
     </div>
@@ -28,14 +28,14 @@
             <div>
                 <input type="text" 
                        wire:model.live="search" 
-                       placeholder="Suchen..." 
+                       placeholder="{{ __('messages.search') }}..." 
                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
             </div>
             
             <div>
                 <select wire:model.live="statusFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Alle Status</option>
+                    <option value="">{{ __('messages.all_status') }}</option>
                     @foreach($statuses as $status)
                         <option value="{{ $status->id }}">{{ $status->name }}</option>
                     @endforeach
@@ -45,7 +45,7 @@
             <div>
                 <select wire:model.live="categoryFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Alle Kategorien</option>
+                    <option value="">{{ __('messages.all_categories') }}</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
@@ -55,7 +55,7 @@
             <div>
                 <select wire:model.live="containerFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Alle Container</option>
+                    <option value="">{{ __('messages.all_containers') }}</option>
                     @foreach($containers as $container)
                         <option value="{{ $container->id }}">{{ $container->name }}</option>
                     @endforeach

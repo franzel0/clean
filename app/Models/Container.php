@@ -69,7 +69,7 @@ class Container extends Model
     public function updateStatusBasedOnInstruments(): void
     {
         $hasDefectiveInstruments = $this->instruments()
-            ->whereIn('status', ['defective', 'in_repair', 'out_of_service'])
+            ->whereIn('status_id', [3, 4, 5, 6]) // Wartung, Außer Betrieb, Verloren/Vermisst, Aussortiert
             ->exists();
 
         $newStatus = $hasDefectiveInstruments ? 'incomplete' : 'complete';
@@ -77,6 +77,13 @@ class Container extends Model
         if ($this->status !== $newStatus) {
             $this->update(['status' => $newStatus]);
         }
+    }
+
+    public function getUnavailableInstrumentsCountAttribute(): int
+    {
+        return $this->instruments()
+            ->whereIn('status_id', [3, 4, 5, 6]) // Wartung, Außer Betrieb, Verloren/Vermisst, Aussortiert
+            ->count();
     }
 
     public function scopeComplete($query)

@@ -27,6 +27,9 @@ class SettingsIndex extends Component
     public $editingColor = '';
     public $editingSeverity = '';
     public $editingSortOrder = 0;
+    public $editingCode = '';
+    public $editingLocation = '';
+    public $editingDepartmentId = null;
     
     // Modal states
     public $showCreateModal = false;
@@ -39,6 +42,20 @@ class SettingsIndex extends Component
     public $newColor = 'gray';
     public $newSeverity = 'medium';
     public $newSortOrder = 0;
+    public $newCode = '';
+    public $newLocation = '';
+    public $newDepartmentId = null;
+    
+    // Manufacturer contact fields
+    public $newContactPerson = '';
+    public $newContactPhone = '';
+    public $newContactEmail = '';
+    public $newWebsite = '';
+    public $editingContactPerson = '';
+    public $editingContactPhone = '';
+    public $editingContactEmail = '';
+    public $editingWebsite = '';
+    
     public $deleteItem = null;
     
     protected $rules = [
@@ -52,6 +69,20 @@ class SettingsIndex extends Component
         'editingSeverity' => 'nullable|string|max:50',
         'newSortOrder' => 'nullable|integer|min:0',
         'editingSortOrder' => 'nullable|integer|min:0',
+        'newCode' => 'nullable|string|max:50',
+        'editingCode' => 'nullable|string|max:50',
+        'newLocation' => 'nullable|string|max:255',
+        'editingLocation' => 'nullable|string|max:255',
+        'newDepartmentId' => 'nullable|integer|exists:departments,id',
+        'editingDepartmentId' => 'nullable|integer|exists:departments,id',
+        'newContactPerson' => 'nullable|string|max:255',
+        'editingContactPerson' => 'nullable|string|max:255',
+        'newContactEmail' => 'nullable|email|max:255',
+        'editingContactEmail' => 'nullable|email|max:255',
+        'newContactPhone' => 'nullable|string|max:50',
+        'editingContactPhone' => 'nullable|string|max:50',
+        'newWebsite' => 'nullable|url|max:255',
+        'editingWebsite' => 'nullable|url|max:255',
     ];
 
     public function mount()
@@ -64,10 +95,7 @@ class SettingsIndex extends Component
         $operatingRooms = OperatingRoom::orderBy('name')->get();
         $departments = Department::orderBy('name')->get();
         
-        $data = [];
-        if (in_array($this->activeTab, ['instrument-categories', 'instrument-statuses', 'container-types', 'container-statuses', 'defect-types', 'purchase-order-statuses'])) {
-            $data = $this->getActiveData();
-        }
+        $data = $this->getActiveData();
         
         return view('livewire.app-settings.settings-index', [
             'operatingRooms' => $operatingRooms,
@@ -100,7 +128,29 @@ class SettingsIndex extends Component
             $this->editingDescription = $item->description ?? '';
             $this->editingColor = $item->color ?? 'gray';
             $this->editingSeverity = $item->severity ?? 'medium';
-            $this->editingSortOrder = $item->sort_order ?? 0;
+            
+            // Only set sort_order for models that have it
+            if (!in_array($this->activeTab, ['operating-rooms', 'departments'])) {
+                $this->editingSortOrder = $item->sort_order ?? 0;
+            }
+            
+            // Load model-specific fields
+            if (in_array($this->activeTab, ['operating-rooms', 'departments'])) {
+                $this->editingCode = $item->code ?? '';
+                $this->editingLocation = $item->location ?? '';
+            }
+
+            if ($this->activeTab === 'operating-rooms') {
+                $this->editingDepartmentId = $item->department_id;
+            }
+
+            if ($this->activeTab === 'manufacturers') {
+                $this->editingContactPerson = $item->contact_person ?? '';
+                $this->editingContactEmail = $item->contact_email ?? '';
+                $this->editingContactPhone = $item->contact_phone ?? '';
+                $this->editingWebsite = $item->website ?? '';
+            }
+            
             $this->showEditModal = true;
         }
     }
@@ -128,21 +178,51 @@ class SettingsIndex extends Component
         $this->editingColor = 'gray';
         $this->editingSeverity = 'medium';
         $this->editingSortOrder = 0;
+        $this->editingCode = '';
+        $this->editingLocation = '';
+        $this->editingDepartmentId = null;
         $this->newValue = '';
         $this->newDescription = '';
         $this->newColor = 'gray';
         $this->newSeverity = 'medium';
         $this->newSortOrder = 0;
+        $this->newCode = '';
+        $this->newLocation = '';
+        $this->newDepartmentId = null;
+        $this->newContactPerson = '';
+        $this->newContactEmail = '';
+        $this->newContactPhone = '';
+        $this->newWebsite = '';
+        $this->editingContactPerson = '';
+        $this->editingContactEmail = '';
+        $this->editingContactPhone = '';
+        $this->editingWebsite = '';
         $this->deleteItem = null;
         $this->resetValidation();
     }
 
     public function create()
     {
-        $this->validate(['newValue' => 'required|string|max:255'], [
+        $validationRules = ['newValue' => 'required|string|max:255'];
+        $validationMessages = [
             'newValue.required' => 'Der Wert muss ausgefüllt werden.',
             'newValue.max' => 'Der Wert darf maximal 255 Zeichen lang sein.',
-        ]);
+        ];
+        
+        // Add validation for model-specific fields
+        if (in_array($this->activeTab, ['operating-rooms', 'departments'])) {
+            $validationRules['newCode'] = 'required|string|max:50';
+            $validationRules['newLocation'] = 'required|string|max:255';
+            $validationMessages['newCode.required'] = 'Der Code muss ausgefüllt werden.';
+            $validationMessages['newLocation.required'] = 'Der Standort muss ausgefüllt werden.';
+        }
+        
+        if ($this->activeTab === 'operating-rooms') {
+            $validationRules['newDepartmentId'] = 'required|integer|exists:departments,id';
+            $validationMessages['newDepartmentId.required'] = 'Die Abteilung muss ausgewählt werden.';
+        }
+        
+        $this->validate($validationRules, $validationMessages);
         
         $model = $this->getActiveModel();
         
@@ -156,19 +236,37 @@ class SettingsIndex extends Component
             'name' => $this->newValue,
             'description' => $this->newDescription,
             'is_active' => true,
-            'sort_order' => $this->newSortOrder ?: $model::max('sort_order') + 1,
         ];
-        
+
+        // Add sort_order only for models that support it
+        if (!in_array($this->activeTab, ['operating-rooms', 'departments'])) {
+            $data['sort_order'] = $this->newSortOrder ?: ($model::max('sort_order') ?? 0) + 1;
+        }
+
         // Add model-specific fields
         if (in_array($this->activeTab, ['instrument-statuses', 'container-statuses', 'purchase-order-statuses'])) {
             $data['color'] = $this->newColor;
         }
-        
+
         if ($this->activeTab === 'defect-types') {
             $data['severity'] = $this->newSeverity;
         }
-        
-        $model::create($data);
+
+        if (in_array($this->activeTab, ['operating-rooms', 'departments'])) {
+            $data['code'] = $this->newCode;
+            $data['location'] = $this->newLocation;
+        }
+
+        if ($this->activeTab === 'operating-rooms') {
+            $data['department_id'] = $this->newDepartmentId;
+        }
+
+        if ($this->activeTab === 'manufacturers') {
+            $data['contact_person'] = $this->newContactPerson;
+            $data['contact_email'] = $this->newContactEmail;
+            $data['contact_phone'] = $this->newContactPhone;
+            $data['website'] = $this->newWebsite;
+        }        $model::create($data);
         
         $this->resetModal();
         session()->flash('message', 'Eintrag erfolgreich hinzugefügt.');
@@ -176,10 +274,26 @@ class SettingsIndex extends Component
 
     public function update()
     {
-        $this->validate(['editingValue' => 'required|string|max:255'], [
+        $validationRules = ['editingValue' => 'required|string|max:255'];
+        $validationMessages = [
             'editingValue.required' => 'Der Wert muss ausgefüllt werden.',
             'editingValue.max' => 'Der Wert darf maximal 255 Zeichen lang sein.',
-        ]);
+        ];
+        
+        // Add validation for model-specific fields
+        if (in_array($this->activeTab, ['operating-rooms', 'departments'])) {
+            $validationRules['editingCode'] = 'required|string|max:50';
+            $validationRules['editingLocation'] = 'required|string|max:255';
+            $validationMessages['editingCode.required'] = 'Der Code muss ausgefüllt werden.';
+            $validationMessages['editingLocation.required'] = 'Der Standort muss ausgefüllt werden.';
+        }
+        
+        if ($this->activeTab === 'operating-rooms') {
+            $validationRules['editingDepartmentId'] = 'required|integer|exists:departments,id';
+            $validationMessages['editingDepartmentId.required'] = 'Die Abteilung muss ausgewählt werden.';
+        }
+        
+        $this->validate($validationRules, $validationMessages);
         
         $model = $this->getActiveModel();
         $item = $model::find($this->editingItem);
@@ -198,19 +312,37 @@ class SettingsIndex extends Component
         $data = [
             'name' => $this->editingValue,
             'description' => $this->editingDescription,
-            'sort_order' => $this->editingSortOrder,
         ];
-        
+
+        // Add sort_order only for models that have it
+        if (!in_array($this->activeTab, ['operating-rooms', 'departments'])) {
+            $data['sort_order'] = $this->editingSortOrder;
+        }
+
         // Add model-specific fields
         if (in_array($this->activeTab, ['instrument-statuses', 'container-statuses', 'purchase-order-statuses'])) {
             $data['color'] = $this->editingColor;
         }
-        
+
         if ($this->activeTab === 'defect-types') {
             $data['severity'] = $this->editingSeverity;
         }
-        
-        $item->update($data);
+
+        if (in_array($this->activeTab, ['operating-rooms', 'departments'])) {
+            $data['code'] = $this->editingCode;
+            $data['location'] = $this->editingLocation;
+        }
+
+        if ($this->activeTab === 'operating-rooms') {
+            $data['department_id'] = $this->editingDepartmentId;
+        }
+
+        if ($this->activeTab === 'manufacturers') {
+            $data['contact_person'] = $this->editingContactPerson;
+            $data['contact_email'] = $this->editingContactEmail;
+            $data['contact_phone'] = $this->editingContactPhone;
+            $data['website'] = $this->editingWebsite;
+        }        $item->update($data);
         
         $this->resetModal();
         session()->flash('message', 'Eintrag erfolgreich aktualisiert.');
@@ -237,6 +369,20 @@ class SettingsIndex extends Component
         session()->flash('message', 'Eintrag erfolgreich gelöscht.');
     }
 
+    public function toggleStatus($id)
+    {
+        $model = $this->getActiveModel();
+        $item = $model::find($id);
+        
+        if ($item) {
+            $item->is_active = !$item->is_active;
+            $item->save();
+            
+            $status = $item->is_active ? 'aktiviert' : 'deaktiviert';
+            session()->flash('message', "Eintrag erfolgreich {$status}.");
+        }
+    }
+
     private function getActiveModel()
     {
         return match ($this->activeTab) {
@@ -247,6 +393,8 @@ class SettingsIndex extends Component
             'defect-types' => DefectType::class,
             'purchase-order-statuses' => PurchaseOrderStatus::class,
             'manufacturers' => Manufacturer::class,
+            'operating-rooms' => OperatingRoom::class,
+            'departments' => Department::class,
             default => InstrumentCategory::class
         };
     }
@@ -261,6 +409,8 @@ class SettingsIndex extends Component
             'defect-types' => $item->defectReports()->count(),
             'purchase-order-statuses' => $item->purchaseOrders()->count(),
             'manufacturers' => $item->instruments()->count() + $item->purchaseOrders()->count(),
+            'operating-rooms' => $item->defectReports()->count(),
+            'departments' => $item->operatingRooms()->count(),
             default => 0
         };
     }
@@ -268,7 +418,15 @@ class SettingsIndex extends Component
     public function getActiveData()
     {
         $model = $this->getActiveModel();
-        return $model::active()->ordered()->get();
+        // Zeige ALLE Einträge (aktiv und inaktiv) für bessere Verwaltung
+        $query = $model::query();
+        
+        // Different ordering for different models
+        if (in_array($this->activeTab, ['operating-rooms', 'departments'])) {
+            return $query->orderBy('is_active', 'desc')->orderBy('name')->get();
+        } else {
+            return $query->orderBy('is_active', 'desc')->orderBy('sort_order')->orderBy('name')->get();
+        }
     }
 
     public function getActiveTitle()
@@ -285,5 +443,10 @@ class SettingsIndex extends Component
             'departments' => 'Abteilungen',
             default => 'Einstellungen'
         };
+    }
+    
+    public function getDepartments()
+    {
+        return Department::active()->orderBy('name')->get();
     }
 }

@@ -29,46 +29,51 @@
                 <!-- Instrument auswählen -->
                 <div>
                     <label for="instrument" class="block text-sm font-medium text-gray-700 mb-2">Instrument *</label>
-                    <select wire:model.live="instrument_id" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
-                            required>
-                        <option value="">Instrument auswählen</option>
-                        @foreach($instruments as $instrument)
-                            <option value="{{ $instrument->id }}">
-                                {{ $instrument->name }} ({{ $instrument->serial_number }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('instrument_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    <x-alpine-autocomplete 
+                        :options="$instruments->toArray()"
+                        wire-model="instrument_id"
+                        :value="$instrument_id"
+                        placeholder="Instrument auswählen..."
+                        :required="true"
+                        display-field="name"
+                        value-field="id"
+                        :search-fields="['name', 'serial_number']"
+                        secondary-display-field="serial_number"
+                        :error="$errors->first('instrument_id')"
+                    />
                 </div>
 
                 <!-- OP-Saal -->
                 <div>
                     <label for="operating_room" class="block text-sm font-medium text-gray-700 mb-2">OP-Saal</label>
-                    <select wire:model.live="operating_room_id" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">OP-Saal auswählen</option>
-                        @foreach($operating_rooms as $room)
-                            <option value="{{ $room->id }}">
-                                {{ $room->name }} ({{ $room->department->name }})
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('operating_room_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    <x-alpine-autocomplete 
+                        :options="$operating_rooms->toArray()"
+                        wire-model="operating_room_id"
+                        :value="$operating_room_id"
+                        placeholder="OP-Saal auswählen..."
+                        :required="false"
+                        display-field="name"
+                        value-field="id"
+                        :search-fields="['name']"
+                        :error="$errors->first('operating_room_id')"
+                    />
                 </div>
 
                 <!-- Defekttyp -->
                 <div>
                     <label for="defect_type_id" class="block text-sm font-medium text-gray-700 mb-2">Defekttyp *</label>
-                    <select wire:model.live="defect_type_id" 
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
-                            required>
-                        <option value="">Defekttyp auswählen</option>
-                        @foreach($defectTypes as $defectType)
-                            <option value="{{ $defectType->id }}">{{ $defectType->name }}</option>
-                        @endforeach
-                    </select>
-                    @error('defect_type_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    <x-alpine-autocomplete 
+                        :options="$defectTypes->toArray()"
+                        wire-model="defect_type_id"
+                        :value="$defect_type_id"
+                        placeholder="Defekttyp auswählen..."
+                        :required="true"
+                        display-field="name"
+                        value-field="id"
+                        :search-fields="['name', 'description']"
+                        secondary-display-field="description"
+                        :error="$errors->first('defect_type_id')"
+                    />
                 </div>
 
                 <!-- Schweregrad -->
