@@ -1,6 +1,26 @@
 <?php
 
 return [
+    'requested_by' => 'Talep Eden',
+    'order_number' => 'Sipariş Numarası',
+    // Purchase Orders (additional)
+    'manage_purchase_orders' => 'Arızalı aletler için yedek siparişleri yönetin',
+    'create_purchase_order' => 'Yeni Sipariş Oluştur',
+    'purchase_orders_found' => 'sipariş bulundu',
+    'all_statuses' => 'Tüm Durumlar',
+    'all_departments' => 'Tüm Departmanlar',
+    'of' => '/',
+    'purchase_orders_displayed' => 'gösterilen sipariş',
+    'reset_filters' => 'Filtreleri sıfırla',
+    'no_purchase_orders_found' => 'Sipariş bulunamadı.',
+    'pdf' => 'PDF',
+    'mark_as_received' => 'Alındı olarak işaretle',
+    'status_requested' => 'Talep Edildi',
+    'status_approved' => 'Onaylandı',
+    'status_ordered' => 'Sipariş Verildi',
+    'status_received' => 'Alındı',
+    'status_completed' => 'Tamamlandı',
+    'status_cancelled' => 'İptal Edildi',
     // Navigation
     'navigation' => 'Navigasyon',
     'dashboard' => 'Gösterge Paneli',

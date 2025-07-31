@@ -78,13 +78,13 @@
                 <table class="w-full">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                         <tr>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Instrument</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Seriennummer</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Kategorie</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Container</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Standort</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Aktionen</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.instrument') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.serial_number') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.category') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.status') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.container') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.current_location') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">

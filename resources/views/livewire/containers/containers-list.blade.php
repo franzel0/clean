@@ -55,27 +55,13 @@
                 <table class="min-w-full divide-y-2 divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                Name
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                Typ
-                            </th>
-                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                Aktiv
-                            </th>
-                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                Status
-                            </th>
-                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                Instrumente
-                            </th>
-                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">
-                                Nicht verfügbar
-                            </th>
-                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">
-                                Aktionen
-                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">{{ __('messages.name') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">{{ __('messages.type') }}</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">{{ __('messages.active') }}</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">{{ __('messages.status') }}</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">{{ __('messages.instruments') }}</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-gray-200">{{ __('messages.not_available') }}</th>
+                            <th class="px-6 py-3 text-center text-xs font-bold text-gray-700 uppercase tracking-wider">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">

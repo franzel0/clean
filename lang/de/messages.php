@@ -1,6 +1,26 @@
- <?php
+<?php
 
 return [
+    'requested_by' => 'Angefordert von',
+    'order_number' => 'Bestellnummer',
+    // Purchase Orders (additional)
+    'manage_purchase_orders' => 'Verwalten Sie Ersatzbestellungen für defekte Instrumente',
+    'create_purchase_order' => 'Neue Bestellung',
+    'purchase_orders_found' => 'Bestellungen gefunden',
+    'all_statuses' => 'Alle Status',
+    'all_departments' => 'Alle Abteilungen',
+    'of' => 'von',
+    'purchase_orders_displayed' => 'Bestellungen angezeigt',
+    'reset_filters' => 'Filter zurücksetzen',
+    'no_purchase_orders_found' => 'Keine Bestellungen gefunden.',
+    'pdf' => 'PDF',
+    'mark_as_received' => 'Als erhalten markieren',
+    'status_requested' => 'Angefordert',
+    'status_approved' => 'Genehmigt',
+    'status_ordered' => 'Bestellt',
+    'status_received' => 'Erhalten',
+    'status_completed' => 'Abgeschlossen',
+    'status_cancelled' => 'Storniert',
     // Navigation
     'navigation' => 'Navigation',
     'dashboard' => 'Dashboard',

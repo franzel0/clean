@@ -1,7 +1,26 @@
-
 <?php
 
 return [
+    'requested_by' => 'Requested By',
+    'order_number' => 'Order Number',
+    // Purchase Orders (additional)
+    'manage_purchase_orders' => 'Manage replacement orders for defective instruments',
+    'create_purchase_order' => 'Create Purchase Order',
+    'purchase_orders_found' => 'purchase orders found',
+    'all_statuses' => 'All Statuses',
+    'all_departments' => 'All Departments',
+    'of' => 'of',
+    'purchase_orders_displayed' => 'purchase orders displayed',
+    'reset_filters' => 'Reset filters',
+    'no_purchase_orders_found' => 'No purchase orders found.',
+    'pdf' => 'PDF',
+    'mark_as_received' => 'Mark as received',
+    'status_requested' => 'Requested',
+    'status_approved' => 'Approved',
+    'status_ordered' => 'Ordered',
+    'status_received' => 'Received',
+    'status_completed' => 'Completed',
+    'status_cancelled' => 'Cancelled',
     // Navigation
     'navigation' => 'Navigation',
     'dashboard' => 'Dashboard',
