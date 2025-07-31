@@ -66,3 +66,15 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+use Illuminate\Support\Facades\Mail;
+
+Route::get('/mail-test', function () {
+    Mail::raw('Das ist ein Test von Strato SMTP', function ($message) {
+        $message->to('drfrankfischer@web.de')
+                ->subject('Strato Mail Test');
+    });
+
+    return 'Mail wurde gesendet!';
+});
+
