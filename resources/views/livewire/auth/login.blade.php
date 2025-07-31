@@ -90,7 +90,7 @@
         @if (Route::has('register'))
             <div class="text-center">
                 <span class="text-sm text-gray-600">Noch kein Konto?
-                    Bitte kontaktieren Sie <a href="mailto:{{ env('APP_EMAIL') }}" class="text-blue-600 hover:text-blue-800">{{ env('APP_EMAIL') }}</a>, um ein Konto
+                    Bitte kontaktieren Sie <a href="mailto:{{ env('MAIL_FROM_ADDRESS') }}" class="text-blue-600 hover:text-blue-800">{{ env('MAIL_FROM_ADDRESS') }}</a>, um ein Konto
                     zu erhalten.
                 </span>
             </div>

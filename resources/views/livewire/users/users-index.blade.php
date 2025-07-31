@@ -155,6 +155,7 @@
                                     {{ $user->created_at->format('d.m.Y') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    @if(env("APP_DEMO") == false)
                                     <div class="flex items-center justify-end space-x-2">
                                         <button wire:click="openEditModal({{ $user->id }})" 
                                                 class="text-blue-600 hover:text-blue-900 text-sm">
@@ -174,6 +175,9 @@
                                             </button>
                                         @endif
                                     </div>
+                                    @else
+                                        <span class="text-gray-500">Im Demo Modus deaktiviert.</span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
