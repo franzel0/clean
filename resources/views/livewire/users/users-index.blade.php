@@ -110,7 +110,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Erstellt
                             </th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Aktionen
                             </th>
                         </tr>
@@ -154,26 +154,39 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ $user->created_at->format('d.m.Y') }}
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium">
                                     @if(env("APP_DEMO") == false)
-                                    <div class="flex items-center justify-end space-x-2">
-                                        <button wire:click="openEditModal({{ $user->id }})" 
-                                                class="text-blue-600 hover:text-blue-900 text-sm">
-                                            Bearbeiten
-                                        </button>
-                                        
-                                        <button wire:click="toggleUserStatus({{ $user->id }})" 
-                                                class="@if($user->is_active) text-orange-600 hover:text-orange-900 @else text-green-600 hover:text-green-900 @endif text-sm">
-                                            @if($user->is_active) Deaktivieren @else Aktivieren @endif
-                                        </button>
-                                        
-                                        @if($user->id !== auth()->id())
-                                            <button wire:click="deleteUser({{ $user->id }})" 
-                                                    wire:confirm="Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?"
-                                                    class="text-red-600 hover:text-red-900 text-sm">
-                                                Löschen
+                                    <div x-data="{ open: false }" class="relative inline-block text-left">
+                                        <div>
+                                            <button @click="open = !open" type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500" id="options-menu" aria-haspopup="true" aria-expanded="true">
+                                                Aktionen
+                                                <svg class="-mr-1 ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                </svg>
                                             </button>
-                                        @endif
+                                        </div>
+
+                                        <div x-show="open" 
+                                             @click.away="open = false"
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="transform opacity-0 scale-95"
+                                             x-transition:enter-end="transform opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="transform opacity-100 scale-100"
+                                             x-transition:leave-end="transform opacity-0 scale-95"
+                                             class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
+                                             style="display: none;">
+                                            <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                                                <a href="#" wire:click.prevent="openEditModal({{ $user->id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">Bearbeiten</a>
+                                                <a href="#" wire:click.prevent="toggleUserStatus({{ $user->id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
+                                                    @if($user->is_active) Deaktivieren @else Aktivieren @endif
+                                                </a>
+                                                <a href="#" wire:click.prevent="openEmailModal({{ $user->id }})" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">E-Mail senden</a>
+                                                @if($user->id !== auth()->id())
+                                                    <a href="#" wire:click.prevent="deleteUser({{ $user->id }})" wire:confirm="Sind Sie sicher, dass Sie diesen Benutzer löschen möchten?" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 hover:text-red-800" role="menuitem">Löschen</a>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                     @else
                                         <span class="text-gray-500">Im Demo Modus deaktiviert.</span>
@@ -295,6 +308,55 @@
                         <button type="submit" 
                                 class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
                             @if($showCreateModal) Erstellen @else Speichern @endif
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Email Modal -->
+    @if($showEmailModal)
+    <div class="fixed inset-0 z-50 overflow-y-auto" wire:ignore.self>
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
+            <div class="fixed inset-0" style="background-color: rgba(75, 85, 99, 0.5);" wire:click="closeEmailModal"></div>
+            
+            <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl max-w-lg w-full">
+                <form wire:submit.prevent="sendEmail">
+                    <div class="bg-white px-6 pt-6 pb-4">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">
+                            E-Mail an Benutzer senden
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Betreff</label>
+                                <input type="text" 
+                                       wire:model="emailSubject"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                       required>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nachricht</label>
+                                <textarea wire:model="emailBody" 
+                                          rows="4" 
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                          required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
+                        <button type="button" 
+                                wire:click="closeEmailModal"
+                                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg text-sm font-medium">
+                            Abbrechen
+                        </button>
+                        <button type="submit" 
+                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium">
+                            Senden
                         </button>
                     </div>
                 </form>

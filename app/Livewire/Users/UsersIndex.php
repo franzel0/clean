@@ -10,6 +10,8 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\UserMessageMail;
 
 #[Layout('components.layouts.app')]
 #[Title('Benutzerverwaltung')]
@@ -24,6 +26,10 @@ class UsersIndex extends Component
     public $showCreateModal = false;
     public $showEditModal = false;
     public $editingUser = null;
+    public $showEmailModal = false;
+    public $emailSubject = '';
+    public $emailBody = '';
+    public $selectedUserId;
 
     // Form fields
     public $name = '';
@@ -200,6 +206,32 @@ class UsersIndex extends Component
         $user->delete();
         
         session()->flash('message', "Benutzer {$userName} wurde gelöscht.");
+    }
+
+    public function openEmailModal($userId)
+    {
+        $this->selectedUserId = $userId;
+        $this->showEmailModal = true;
+    }
+
+    public function closeEmailModal()
+    {
+        $this->showEmailModal = false;
+        $this->emailSubject = '';
+        $this->emailBody = '';
+        $this->selectedUserId = null;
+    }
+
+    public function sendEmail()
+    {
+        $user = User::find($this->selectedUserId);
+
+        if ($user) {
+            Mail::to($user->email)->send(new UserMessageMail($this->emailSubject, $this->emailBody));
+
+            session()->flash('message', 'E-Mail erfolgreich an ' . $user->name . ' gesendet.');
+            $this->closeEmailModal();
+        }
     }
 
     public function closeModal()
