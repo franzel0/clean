@@ -119,9 +119,44 @@ class Instrument extends Model
         return $this->category?->name ?? 'Unbekannt';
     }
 
+    public function getManufacturerDisplayAttribute(): string
+    {
+        return $this->manufacturerRelation?->name ?? 'Unbekannt';
+    }
+
+    public function getContainerDisplayAttribute(): string
+    {
+        return $this->currentContainer?->name ?? 'Kein Container';
+    }
+
+    public function getLocationDisplayAttribute(): string
+    {
+        return $this->currentLocation?->name ?? 'Unbekannter Standort';
+    }
+
     public function getIsUnderWarrantyAttribute(): bool
     {
         return $this->warranty_until && $this->warranty_until > now();
+    }
+
+    public function getPurchasePriceFormattedAttribute(): string
+    {
+        return $this->purchase_price ? '€ ' . number_format($this->purchase_price, 2, ',', '.') : 'Nicht angegeben';
+    }
+
+    public function getSerialNumberDisplayAttribute(): string
+    {
+        return $this->serial_number ?? 'Keine Seriennummer';
+    }
+
+    public function getDefectReportsCountAttribute(): int
+    {
+        return $this->defectReports?->count() ?? 0;
+    }
+
+    public function getMovementsCountAttribute(): int
+    {
+        return $this->movements?->count() ?? 0;
     }
 
     public function scopeActive($query)

@@ -48,6 +48,10 @@ class Container extends Model
 
     public function getTypeDisplayAttribute(): string
     {
+        if (!$this->type) {
+            return 'Unbekannter Typ';
+        }
+        
         return match($this->type) {
             'surgical_set' => 'Chirurgie-Set',
             'basic_set' => 'Basis-Set',
@@ -58,12 +62,41 @@ class Container extends Model
 
     public function getStatusDisplayAttribute(): string
     {
+        if (!$this->status) {
+            return 'Unbekannter Status';
+        }
+        
         return match($this->status) {
             'complete' => 'Vollständig',
             'incomplete' => 'Unvollständig',
             'out_of_service' => 'Außer Betrieb',
             default => ucfirst($this->status),
         };
+    }
+
+    public function getBarcodeDisplayAttribute(): string
+    {
+        return $this->barcode ?? 'Kein Barcode';
+    }
+
+    public function getDescriptionDisplayAttribute(): string
+    {
+        return $this->description ?? 'Keine Beschreibung';
+    }
+
+    public function getInstrumentCountAttribute(): int
+    {
+        return $this->instruments?->count() ?? 0;
+    }
+
+    public function getTypeDisplayFromRelationAttribute(): string
+    {
+        return $this->containerType?->name ?? $this->type_display;
+    }
+
+    public function getStatusDisplayFromRelationAttribute(): string
+    {
+        return $this->containerStatus?->name ?? $this->status_display;
     }
 
     public function updateStatusBasedOnInstruments(): void

@@ -111,45 +111,45 @@ class InstrumentManagementSeeder extends Seeder
             User::create($user);
         }
 
-        // Instrumente erstellen
+        // Instrumente erstellen mit korrekten Foreign Keys
         $containers = Container::all();
         $instruments = [
             [
                 'name' => 'Chirurgische Schere Mayo',
                 'serial_number' => 'INS-001',
-                'manufacturer' => 'Aesculap',
+                'manufacturer_id' => 1, // Aesculap
                 'model' => 'BC123',
-                'category' => 'scissors',
+                'category_id' => 1, // Scheren
                 'purchase_price' => 89.50,
                 'purchase_date' => '2024-01-15',
                 'warranty_until' => '2026-01-15',
-                'status' => 'available',
+                'status_id' => 1, // Verfügbar
                 'current_container_id' => $containers[0]->id,
                 'current_location_id' => $sterilDept->id,
             ],
             [
                 'name' => 'Anatomische Pinzette',
                 'serial_number' => 'INS-002',
-                'manufacturer' => 'Aesculap',
+                'manufacturer_id' => 1, // Aesculap
                 'model' => 'BD456',
-                'category' => 'forceps',
+                'category_id' => 2, // Pinzetten
                 'purchase_price' => 45.00,
                 'purchase_date' => '2024-02-10',
                 'warranty_until' => '2026-02-10',
-                'status' => 'defective',
+                'status_id' => 4, // Defekt
                 'current_container_id' => $containers[0]->id,
                 'current_location_id' => $sterilDept->id,
             ],
             [
                 'name' => 'Nadelhalter',
                 'serial_number' => 'INS-003',
-                'manufacturer' => 'Karl Storz',
+                'manufacturer_id' => 2, // Karl Storz
                 'model' => 'NH789',
-                'category' => 'needle_holder',
+                'category_id' => 3, // Nadelhalter
                 'purchase_price' => 125.00,
                 'purchase_date' => '2024-03-05',
                 'warranty_until' => '2026-03-05',
-                'status' => 'in_use',
+                'status_id' => 2, // Im Einsatz
                 'current_container_id' => $containers[1]->id,
                 'current_location_id' => $opDept->id,
             ],

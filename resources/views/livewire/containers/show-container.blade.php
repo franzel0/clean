@@ -79,8 +79,24 @@
             <!-- Instruments -->
             @if($container->instruments->count() > 0)
             <div class="bg-white rounded-lg shadow-sm border-2 border-gray-200">
-                <div class="px-6 py-4 border-b-2 border-gray-200">
+                <div class="px-6 py-4 border-b-2 border-gray-200 flex items-center justify-between">
                     <h2 class="text-lg font-semibold text-gray-900">Enthaltene Instrumente ({{ $container->instruments->count() }})</h2>
+                    <div class="flex space-x-2">
+                        <a href="{{ route('instruments.create', ['container' => $container->id]) }}" 
+                           class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Neu erstellen
+                        </a>
+                        <button wire:click="openAssignModal" 
+                                class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-bold transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Zuweisen
+                        </button>
+                    </div>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -92,28 +108,28 @@
                                     <p class="text-sm text-gray-600 font-mono bg-gray-100 px-2 py-1 rounded">{{ $instrument->serial_number }}</p>
                                 </div>
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold border
-                                    @if($instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'verfügbar') !== false) bg-green-100 text-green-800 border-green-300
-                                    @elseif($instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'benutzung') !== false || stripos($instrument->instrumentStatus->name, 'einsatz') !== false)) bg-blue-100 text-blue-800 border-blue-300
-                                    @elseif($instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'defekt') !== false || stripos($instrument->instrumentStatus->name, 'außer betrieb') !== false)) bg-red-100 text-red-800 border-red-300
-                                    @elseif($instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'wartung') !== false) bg-yellow-100 text-yellow-800 border-yellow-300
+                                    @if($instrument->instrumentStatus?->name && stripos($instrument->instrumentStatus->name, 'verfügbar') !== false) bg-green-100 text-green-800 border-green-300
+                                    @elseif($instrument->instrumentStatus?->name && (stripos($instrument->instrumentStatus->name, 'benutzung') !== false || stripos($instrument->instrumentStatus->name, 'einsatz') !== false)) bg-blue-100 text-blue-800 border-blue-300
+                                    @elseif($instrument->instrumentStatus?->name && (stripos($instrument->instrumentStatus->name, 'defekt') !== false || stripos($instrument->instrumentStatus->name, 'außer betrieb') !== false)) bg-red-100 text-red-800 border-red-300
+                                    @elseif($instrument->instrumentStatus?->name && stripos($instrument->instrumentStatus->name, 'wartung') !== false) bg-yellow-100 text-yellow-800 border-yellow-300
                                     @else bg-gray-100 text-gray-800 border-gray-300
                                     @endif">
-                                    {{ $instrument->status_display }}
+                                    {{ $instrument->instrumentStatus?->name ?? 'Unbekannt' }}
                                 </span>
                             </div>
 
                             <div class="space-y-2">
                                 <div class="text-xs">
                                     <span class="font-bold text-gray-700">Kategorie:</span>
-                                    <span class="text-gray-600">{{ $instrument->category_display }}</span>
+                                    <span class="text-gray-600">{{ $instrument->category?->name ?? 'Unbekannt' }}</span>
                                 </div>
-                                @if($instrument->manufacturerRelation)
+                                @if($instrument->manufacturerRelation?->name)
                                 <div class="text-xs">
                                     <span class="font-bold text-gray-700">Hersteller:</span>
                                     <span class="text-gray-600">{{ $instrument->manufacturerRelation->name }}</span>
                                 </div>
                                 @endif
-                                @if($instrument->defectReports->count() > 0)
+                                @if($instrument->defectReports?->count() > 0)
                                 <div class="text-xs">
                                     <span class="font-bold text-red-700">Defektmeldungen:</span>
                                     <span class="text-red-600 font-bold">{{ $instrument->defectReports->count() }}</span>
@@ -144,9 +160,22 @@
                         </svg>
                         <h3 class="text-lg font-bold text-gray-900 mb-2">Keine Instrumente</h3>
                         <p class="text-gray-600 mb-4">Dieser Container enthält derzeit keine Instrumente.</p>
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold">
-                            Instrumente hinzufügen
-                        </button>
+                        <div class="space-x-3">
+                            <a href="{{ route('instruments.create', ['container' => $container->id]) }}" 
+                               class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors duration-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Neues Instrument erstellen
+                            </a>
+                            <button wire:click="openAssignModal" 
+                               class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors duration-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                Vorhandenes Instrument zuweisen
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -258,4 +287,107 @@
             @endif
         </div>
     </div>
+
+    <!-- Assign Instrument Modal -->
+    @if($showAssignModal)
+    <div class="fixed inset-0 z-50 overflow-y-auto">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-50" wire:click="closeAssignModal"></div>
+        
+        <!-- Modal container -->
+        <div class="flex min-h-full items-center justify-center p-4">
+            <!-- Modal panel -->
+            <div class="relative w-full max-w-4xl bg-white rounded-lg shadow-xl">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">
+                            Instrument zu Container hinzufügen
+                        </h3>
+                        <button wire:click="closeAssignModal" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    @if(count($availableInstruments) > 0)
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-600">
+                                Wählen Sie ein verfügbares Instrument aus, um es zu diesem Container hinzuzufügen:
+                            </p>
+                        </div>
+
+                        <div class="max-h-96 overflow-y-auto">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                @foreach($availableInstruments as $instrument)
+                                <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-blue-400 hover:shadow-md transition-all duration-200">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div class="flex-1">
+                                            <h4 class="font-bold text-gray-900 mb-1">{{ $instrument->name }}</h4>
+                                            <p class="text-sm text-gray-600 font-mono bg-gray-100 px-2 py-1 rounded">{{ $instrument->serial_number }}</p>
+                                        </div>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold border
+                                            @if($instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'verfügbar') !== false) bg-green-100 text-green-800 border-green-300
+                                            @elseif($instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'benutzung') !== false || stripos($instrument->instrumentStatus->name, 'einsatz') !== false)) bg-blue-100 text-blue-800 border-blue-300
+                                            @elseif($instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'defekt') !== false || stripos($instrument->instrumentStatus->name, 'außer betrieb') !== false)) bg-red-100 text-red-800 border-red-300
+                                            @elseif($instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'wartung') !== false) bg-yellow-100 text-yellow-800 border-yellow-300
+                                            @else bg-gray-100 text-gray-800 border-gray-300
+                                            @endif">
+                                            {{ $instrument->status_display }}
+                                        </span>
+                                    </div>
+
+                                    <div class="space-y-1 mb-3">
+                                        <div class="text-xs">
+                                            <span class="font-bold text-gray-700">Kategorie:</span>
+                                            <span class="text-gray-600">{{ $instrument->category_display }}</span>
+                                        </div>
+                                        @if($instrument->manufacturerRelation)
+                                        <div class="text-xs">
+                                            <span class="font-bold text-gray-700">Hersteller:</span>
+                                            <span class="text-gray-600">{{ $instrument->manufacturerRelation->name }}</span>
+                                        </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="pt-3 border-t border-gray-200">
+                                        <button wire:click="assignInstrument({{ $instrument->id }})" 
+                                                class="w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-bold transition-colors duration-200">
+                                            Zu Container hinzufügen
+                                        </button>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10"/>
+                            </svg>
+                            <h4 class="text-lg font-bold text-gray-900 mb-2">Keine verfügbaren Instrumente</h4>
+                            <p class="text-gray-600 mb-4">
+                                Alle Instrumente sind bereits anderen Containern zugewiesen oder inaktiv.
+                            </p>
+                            <a href="{{ route('instruments.create', ['container' => $container->id]) }}" 
+                               class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors duration-200">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Neues Instrument erstellen
+                            </a>
+                        </div>
+                    @endif
+
+                    <div class="mt-6 flex justify-end">
+                        <button wire:click="closeAssignModal" 
+                                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium">
+                            Schließen
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>

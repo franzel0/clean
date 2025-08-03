@@ -18,6 +18,13 @@ class EditInstrument extends Component
     public $instrument;
     public $isEditing = false;
     
+    // Lookup-Daten
+    public $manufacturers;
+    public $categories;
+    public $statuses;
+    public $containers;
+    public $departments;
+    
     public $form = [
         'name' => '',
         'serial_number' => '',
@@ -35,22 +42,54 @@ class EditInstrument extends Component
 
     public function mount($instrument = null)
     {
-        if ($instrument) {
-            $this->instrumentId = $instrument;
-            $this->instrument = Instrument::findOrFail($instrument);
-            $this->isEditing = true;
-            $this->loadInstrumentData();
+        try {
+            if ($instrument) {
+                $this->instrumentId = $instrument;
+                $this->instrument = Instrument::with(['category', 'manufacturerRelation', 'instrumentStatus'])
+                    ->findOrFail($instrument);
+                
+                // Sichere Zuweisung der Form-Daten mit Nullsafe Operator
+                $this->form = [
+                    'name' => $this->instrument->name ?? '',
+                    'serial_number' => $this->instrument->serial_number ?? '',
+                    'manufacturer_id' => $this->instrument->manufacturer_id ?? '',
+                    'model' => $this->instrument->model ?? '',
+                    'category_id' => $this->instrument->category_id ?? '',
+                    'purchase_price' => $this->instrument->purchase_price ? (string) $this->instrument->purchase_price : '',
+                    'purchase_date' => $this->instrument->purchase_date?->format('Y-m-d') ?? '',
+                    'warranty_until' => $this->instrument->warranty_until?->format('Y-m-d') ?? '',
+                    'description' => $this->instrument->description ?? '',
+                    'status_id' => $this->instrument->status_id ?? '',
+                    'current_container_id' => $this->instrument->current_container_id ?? '',
+                    'current_location_id' => $this->instrument->current_location_id ?? '',
+                ];
+            }
             
-            // Debug: Check what the dates look like
-            Log::info('Loading instrument dates:', [
-                'purchase_date_raw' => $this->instrument->purchase_date,
-                'warranty_until_raw' => $this->instrument->warranty_until,
-                'purchase_date_formatted' => $this->form['purchase_date'],
-                'warranty_until_formatted' => $this->form['warranty_until'],
-            ]);
-        } else {
-            $this->isEditing = false;
-            $this->resetForm();
+            // Lade Lookup-Daten sicher
+            $this->loadLookupData();
+        } catch (\Exception $e) {
+            Log::error('Error in EditInstrument mount: ' . $e->getMessage());
+            session()->flash('error', 'Fehler beim Laden des Instruments: ' . $e->getMessage());
+            return redirect()->route('instruments.index');
+        }
+    }
+    
+    private function loadLookupData()
+    {
+        try {
+            $this->manufacturers = Manufacturer::orderBy('name')->get();
+            $this->categories = InstrumentCategory::orderBy('name')->get();
+            $this->statuses = InstrumentStatus::orderBy('name')->get();
+            $this->containers = Container::where('is_active', true)->orderBy('name')->get();
+            $this->departments = Department::orderBy('name')->get();
+        } catch (\Exception $e) {
+            Log::error('Error loading lookup data: ' . $e->getMessage());
+            // Fallback mit leeren Collections
+            $this->manufacturers = collect([]);
+            $this->categories = collect([]);
+            $this->statuses = collect([]);
+            $this->containers = collect([]);
+            $this->departments = collect([]);
         }
     }
 
