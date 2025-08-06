@@ -34,16 +34,16 @@
             <div class="p-6">
                 <!-- Status Badge -->
                 <div class="mb-6">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border-2 outline outline-2 outline-offset-2
                         @switch($report->status)
-                            @case('reported') bg-yellow-100 text-yellow-800 @break
-                            @case('acknowledged') bg-blue-100 text-blue-800 @break
-                            @case('in_review') bg-purple-100 text-purple-800 @break
-                            @case('ordered') bg-orange-100 text-orange-800 @break
-                            @case('received') bg-indigo-100 text-indigo-800 @break
-                            @case('repaired') bg-green-100 text-green-800 @break
-                            @case('closed') bg-gray-100 text-gray-800 @break
-                            @default bg-gray-100 text-gray-800
+                            @case('reported') bg-yellow-100 text-yellow-800 border-yellow-300 outline-yellow-400 @break
+                            @case('acknowledged') bg-blue-100 text-blue-800 border-blue-300 outline-blue-400 @break
+                            @case('in_review') bg-purple-100 text-purple-800 border-purple-300 outline-purple-400 @break
+                            @case('ordered') bg-orange-100 text-orange-800 border-orange-300 outline-orange-400 @break
+                            @case('received') bg-indigo-100 text-indigo-800 border-indigo-300 outline-indigo-400 @break
+                            @case('repaired') bg-green-100 text-green-800 border-green-300 outline-green-400 @break
+                            @case('closed') bg-gray-100 text-gray-800 border-gray-300 outline-gray-400 @break
+                            @default bg-gray-100 text-gray-800 border-gray-300 outline-gray-400
                         @endswitch">
                         @switch($report->status)
                             @case('reported') Gemeldet @break

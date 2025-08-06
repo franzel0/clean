@@ -38,6 +38,7 @@ class EditInstrument extends Component
         'status_id' => '',
         'current_container_id' => '',
         'current_location_id' => '',
+        'is_active' => true,
     ];
 
     public function mount($instrument = null)
@@ -47,7 +48,7 @@ class EditInstrument extends Component
                 $this->instrumentId = $instrument;
                 $this->instrument = Instrument::with(['category', 'manufacturerRelation', 'instrumentStatus'])
                     ->findOrFail($instrument);
-                
+                $this->isEditing = true;
                 // Sichere Zuweisung der Form-Daten mit Nullsafe Operator
                 $this->form = [
                     'name' => $this->instrument->name ?? '',
@@ -62,9 +63,11 @@ class EditInstrument extends Component
                     'status_id' => $this->instrument->status_id ?? '',
                     'current_container_id' => $this->instrument->current_container_id ?? '',
                     'current_location_id' => $this->instrument->current_location_id ?? '',
+                    'is_active' => $this->instrument->is_active ?? true,
                 ];
+            } else {
+                $this->isEditing = false;
             }
-            
             // Lade Lookup-Daten sicher
             $this->loadLookupData();
         } catch (\Exception $e) {
@@ -77,9 +80,9 @@ class EditInstrument extends Component
     private function loadLookupData()
     {
         try {
-            $this->manufacturers = Manufacturer::orderBy('name')->get();
-            $this->categories = InstrumentCategory::orderBy('name')->get();
-            $this->statuses = InstrumentStatus::orderBy('name')->get();
+            $this->manufacturers = Manufacturer::active()->ordered()->get();
+            $this->categories = InstrumentCategory::active()->ordered()->get();
+            $this->statuses = InstrumentStatus::active()->ordered()->get();
             $this->containers = Container::where('is_active', true)->orderBy('name')->get();
             $this->departments = Department::orderBy('name')->get();
         } catch (\Exception $e) {

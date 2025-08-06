@@ -243,4 +243,5 @@ return [
     'needs_repair' => 'Onarım Gerekli',
     'order' => 'Sipariş',
     'no_data_available' => 'Veri Yok',
+    'not_available' => 'Mevcut Alet Yok',
 ];

@@ -219,6 +219,23 @@
                     </div>
                 </div>
 
+                <!-- Is Active Checkbox -->
+                <div class="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                    <input type="checkbox" 
+                           wire:model="form.is_active" 
+                           id="is_active"
+                           class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                    <label for="is_active" class="text-sm font-medium text-gray-700">
+                        <span class="font-semibold">Instrument ist aktiv</span>
+                        <span class="block text-gray-500 text-xs mt-1">
+                            Deaktivierte Instrumente werden in Listen ausgeblendet und können nicht verwendet werden
+                        </span>
+                    </label>
+                    @error('form.is_active') 
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p> 
+                    @enderror
+                </div>
+
                 <!-- Description -->
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-2">

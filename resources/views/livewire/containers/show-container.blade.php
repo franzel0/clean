@@ -37,14 +37,19 @@
                 </div>
                 <div class="p-6">
                     <div class="flex items-center space-x-4 mb-6">
-                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold border-2
-                            @if($container->is_active) bg-green-100 text-green-800 border-green-300
-                            @else bg-red-100 text-red-800 border-red-300
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold border-2 outline outline-2 outline-offset-2
+                            @if($container->is_active) bg-green-100 text-green-800 border-green-300 outline-green-400
+                            @else bg-red-100 text-red-800 border-red-300 outline-red-400
                             @endif">
                             @if($container->is_active) AKTIV @else INAKTIV @endif
                         </span>
-                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-blue-100 text-blue-800 border-2 border-blue-300">
-                            {{ $container->type_display }}
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-orange-100 text-orange-800 border-2 border-orange-300 outline outline-2 outline-offset-2 outline-orange-400">
+                            <p class="text-sm">Status:&nbsp;</p>
+                            {{ $container->containerStatus?->name ?? 'Unbekannt' }}
+                        </span>
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-blue-100 text-blue-800 border-2 border-blue-300 outline outline-2 outline-offset-2 outline-blue-400">
+                            <p class="text-sm">Typ:&nbsp;</p>
+                            {{ $container->containerType?->name ?? 'Unbekannt' }}
                         </span>
                     </div>
                     
@@ -292,7 +297,7 @@
     @if($showAssignModal)
     <div class="fixed inset-0 z-50 overflow-y-auto">
         <!-- Background overlay -->
-        <div class="fixed inset-0 bg-black bg-opacity-50" wire:click="closeAssignModal"></div>
+        <div class="fixed inset-0" style="background-color: rgba(75, 85, 99, 0.5);" wire:click="closeAssignModal"></div>
         
         <!-- Modal container -->
         <div class="flex min-h-full items-center justify-center p-4">
@@ -311,15 +316,20 @@
                     </div>
 
                     @if(count($availableInstruments) > 0)
-                        <div class="mb-4">
+
+                        <div class="mb-4 flex flex-col gap-2">
                             <p class="text-sm text-gray-600">
                                 Wählen Sie ein verfügbares Instrument aus, um es zu diesem Container hinzuzufügen:
                             </p>
+                            <input type="text"
+                                   wire:model.live="instrumentFilter"
+                                   placeholder="Instrumente filtern... (Name, Seriennummer, Kategorie, Hersteller)"
+                                   class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm" />
                         </div>
 
                         <div class="max-h-96 overflow-y-auto">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                @foreach($availableInstruments as $instrument)
+                                @foreach($this->filteredInstruments as $instrument)
                                 <div class="border-2 border-gray-300 rounded-lg p-4 hover:border-blue-400 hover:shadow-md transition-all duration-200">
                                     <div class="flex items-start justify-between mb-3">
                                         <div class="flex-1">

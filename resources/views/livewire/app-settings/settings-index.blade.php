@@ -362,6 +362,19 @@
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="https://www.beispiel.de">
                         </div>
+
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <input 
+                                    type="checkbox" 
+                                    id="newIsActive"
+                                    wire:model="newIsActive"
+                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="newIsActive" class="ml-2 block text-sm text-gray-900">
+                                    Aktiv
+                                </label>
+                            </div>
+                        </div>
                     @endif
 
                     <div class="flex justify-end space-x-3">
@@ -515,6 +528,19 @@
                                 id="editingWebsite"
                                 wire:model="editingWebsite"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <input 
+                                    type="checkbox" 
+                                    id="editingIsActive"
+                                    wire:model="editingIsActive"
+                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="editingIsActive" class="ml-2 block text-sm text-gray-900">
+                                    Aktiv
+                                </label>
+                            </div>
                         </div>
                     @endif
 

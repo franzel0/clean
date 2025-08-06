@@ -24,7 +24,7 @@
 
     <!-- Filter -->
     <div class="dashboard-card p-6 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
                 <input type="text" 
                        wire:model.live="search" 
@@ -62,6 +62,15 @@
                 </select>
             </div>
 
+            <div class="flex items-center space-x-2">
+                <label class="flex items-center space-x-2 cursor-pointer">
+                    <input type="checkbox" 
+                           wire:model.live="activeOnly" 
+                           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2">
+                    <span class="text-sm text-gray-700 font-medium">Nur aktive</span>
+                </label>
+            </div>
+
             <div class="flex space-x-2">
                 <button wire:click="resetFilters" 
                         class="px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
@@ -82,7 +91,7 @@
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.serial_number') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.category') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.status') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.container') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.containers') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.current_location') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.actions') }}</th>
                         </tr>
@@ -118,29 +127,78 @@
                                     {{ $instrument->currentLocation?->name ?? '-' }}
                                 </td>
                                 <td class="py-3 px-4">
-                                    <div class="flex space-x-2">
-                                        <a href="{{ route('instruments.show', $instrument->id) }}" 
-                                           class="text-blue-600 hover:text-blue-800 text-sm">
-                                            Anzeigen
-                                        </a>
-                                        
-                                        <button wire:click="editInstrument({{ $instrument->id }})" 
-                                                class="text-green-600 hover:text-green-800 text-sm">
-                                            Bearbeiten
-                                        </button>
-                                        
-                                        <button wire:click="deleteInstrument({{ $instrument->id }})" 
-                                                onclick="return confirm('Sind Sie sicher, dass Sie dieses Instrument löschen möchten?')"
-                                                class="text-red-600 hover:text-red-800 text-sm">
-                                            Löschen
-                                        </button>
-                                        
-                                        @if($instrument->status !== 'defective')
-                                            <a href="{{ route('defect-reports.create', ['instrument' => $instrument->id]) }}" 
-                                               class="text-orange-600 hover:text-orange-800 text-sm">
-                                                Defekt melden
-                                            </a>
-                                        @endif
+                                    <div class="relative inline-block text-left" x-data="{ open: false }">
+                                        <div>
+                                            <button @click="open = !open" 
+                                                    class="inline-flex justify-center w-full rounded-md border-2 border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                                                    type="button" 
+                                                    aria-expanded="true" 
+                                                    aria-haspopup="true">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                                </svg>
+                                                Aktionen
+                                                <svg class="-mr-1 ml-2 h-4 w-4 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <div x-show="open" 
+                                             @click.away="open = false"
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="transform opacity-0 scale-95"
+                                             x-transition:enter-end="transform opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="transform opacity-100 scale-100"
+                                             x-transition:leave-end="transform opacity-0 scale-95"
+                                             class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                                             role="menu" 
+                                             aria-orientation="vertical">
+                                            <div class="py-1" role="none">
+                                                <a href="{{ route('instruments.show', $instrument->id) }}" 
+                                                   class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-800 transition-colors duration-150"
+                                                   role="menuitem">
+                                                    <svg class="w-4 h-4 mr-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                    </svg>
+                                                    Anzeigen
+                                                </a>
+                                                
+                                                <button wire:click="editInstrument({{ $instrument->id }})" 
+                                                        class="group flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-800 transition-colors duration-150"
+                                                        role="menuitem">
+                                                    <svg class="w-4 h-4 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                    Bearbeiten
+                                                </button>
+                                                
+                                                @if($instrument->status !== 'defective')
+                                                    <div class="border-t border-gray-100"></div>
+                                                    <a href="{{ route('defect-reports.create', ['instrument' => $instrument->id]) }}" 
+                                                       class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-800 transition-colors duration-150"
+                                                       role="menuitem">
+                                                        <svg class="w-4 h-4 mr-3 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                                        </svg>
+                                                        Defekt melden
+                                                    </a>
+                                                @endif
+                                                
+                                                <div class="border-t border-gray-100"></div>
+                                                <button wire:click="deleteInstrument({{ $instrument->id }})" 
+                                                        onclick="return confirm('Sind Sie sicher? Wenn das Instrument bereits verwendet wurde (Defektmeldungen, Bewegungen), wird es deaktiviert statt gelöscht.')"
+                                                        class="group flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-800 transition-colors duration-150"
+                                                        role="menuitem">
+                                                    <svg class="w-4 h-4 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                    </svg>
+                                                    Löschen
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

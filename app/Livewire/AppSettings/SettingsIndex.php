@@ -30,6 +30,7 @@ class SettingsIndex extends Component
     public $editingCode = '';
     public $editingLocation = '';
     public $editingDepartmentId = null;
+    public $editingIsActive = true;
     
     // Modal states
     public $showCreateModal = false;
@@ -45,6 +46,7 @@ class SettingsIndex extends Component
     public $newCode = '';
     public $newLocation = '';
     public $newDepartmentId = null;
+    public $newIsActive = true;
     
     // Manufacturer contact fields
     public $newContactPerson = '';
@@ -83,6 +85,8 @@ class SettingsIndex extends Component
         'editingContactPhone' => 'nullable|string|max:50',
         'newWebsite' => 'nullable|url|max:255',
         'editingWebsite' => 'nullable|url|max:255',
+        'newIsActive' => 'boolean',
+        'editingIsActive' => 'boolean',
     ];
 
     public function mount()
@@ -151,6 +155,9 @@ class SettingsIndex extends Component
                 $this->editingWebsite = $item->website ?? '';
             }
             
+            // Load is_active status for all models that support it
+            $this->editingIsActive = $item->is_active ?? true;
+            
             $this->showEditModal = true;
         }
     }
@@ -197,6 +204,8 @@ class SettingsIndex extends Component
         $this->editingContactEmail = '';
         $this->editingContactPhone = '';
         $this->editingWebsite = '';
+        $this->newIsActive = true;
+        $this->editingIsActive = true;
         $this->deleteItem = null;
         $this->resetValidation();
     }
@@ -266,7 +275,10 @@ class SettingsIndex extends Component
             $data['contact_email'] = $this->newContactEmail;
             $data['contact_phone'] = $this->newContactPhone;
             $data['website'] = $this->newWebsite;
-        }        $model::create($data);
+            $data['is_active'] = $this->newIsActive;
+        }
+
+        $model::create($data);
         
         $this->resetModal();
         session()->flash('message', 'Eintrag erfolgreich hinzugefügt.');
@@ -342,7 +354,10 @@ class SettingsIndex extends Component
             $data['contact_email'] = $this->editingContactEmail;
             $data['contact_phone'] = $this->editingContactPhone;
             $data['website'] = $this->editingWebsite;
-        }        $item->update($data);
+            $data['is_active'] = $this->editingIsActive;
+        }
+
+        $item->update($data);
         
         $this->resetModal();
         session()->flash('message', 'Eintrag erfolgreich aktualisiert.');

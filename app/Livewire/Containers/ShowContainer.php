@@ -16,6 +16,9 @@ class ShowContainer extends Component
     public Container $container;
     public $showAssignModal = false;
     public $availableInstruments = [];
+    // entfernt, doppelt
+
+    // entfernt, doppelt
 
     public function mount(Container $container)
     {
@@ -24,7 +27,9 @@ class ShowContainer extends Component
                 'instruments.defectReports',
                 'instruments.instrumentStatus',
                 'instruments.category',
-                'instruments.manufacturerRelation'
+                'instruments.manufacturerRelation',
+                'containerStatus',
+                'containerType'
             ]);
             $this->availableInstruments = collect([]);
         } catch (\Exception $e) {
@@ -34,18 +39,18 @@ class ShowContainer extends Component
         }
     }
 
+    public $instrumentFilter = '';
+
     public function openAssignModal()
     {
         try {
+            $this->instrumentFilter = '';
             // Get instruments that are not assigned to any container
-            $this->availableInstruments = Instrument::whereNull('current_container_id')
+            $this->availableInstruments = \App\Models\Instrument::whereNull('current_container_id')
                 ->where('is_active', true)
                 ->with(['category', 'manufacturerRelation', 'instrumentStatus'])
                 ->orderBy('name')
                 ->get();
-                
-            Log::info('Available instruments count: ' . $this->availableInstruments->count());
-            
             $this->showAssignModal = true;
             $this->dispatch('modal-opened');
         } catch (\Exception $e) {
@@ -54,17 +59,39 @@ class ShowContainer extends Component
         }
     }
 
+    public function updatedInstrumentFilter()
+    {
+        // Trigger re-rendering when filter changes
+        $this->dispatch('instruments-filtered');
+    }
+
+    public function getFilteredInstrumentsProperty()
+    {
+        if (empty($this->instrumentFilter)) {
+            return $this->availableInstruments;
+        }
+
+        $searchTerm = strtolower($this->instrumentFilter);
+        
+        return $this->availableInstruments->filter(function($instrument) use ($searchTerm) {
+            return str_contains(strtolower($instrument->name), $searchTerm) ||
+                   str_contains(strtolower($instrument->serial_number), $searchTerm) ||
+                   str_contains(strtolower($instrument->category_display), $searchTerm) ||
+                   ($instrument->manufacturerRelation && str_contains(strtolower($instrument->manufacturerRelation->name), $searchTerm));
+        });
+    }
+
     public function closeAssignModal()
     {
         $this->showAssignModal = false;
-        $this->availableInstruments = collect([]);
+        $this->instrumentFilter = '';
         $this->dispatch('modal-closed');
     }
 
     public function assignInstrument($instrumentId)
     {
         try {
-            $instrument = Instrument::find($instrumentId);
+            $instrument = \App\Models\Instrument::findOrFail($instrumentId);
             
             if ($instrument) {
                 $instrument->update(['current_container_id' => $this->container->id]);
@@ -76,6 +103,11 @@ class ShowContainer extends Component
                     'instruments.category',
                     'instruments.manufacturerRelation'
                 ]);
+                
+                // Remove assigned instrument from available list
+                $this->availableInstruments = $this->availableInstruments->reject(function($item) use ($instrumentId) {
+                    return $item->id == $instrumentId;
+                });
                 
                 $this->closeAssignModal();
                 

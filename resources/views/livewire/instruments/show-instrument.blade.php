@@ -30,14 +30,14 @@
                 </div>
                 <div class="p-6">
                     <div class="flex items-center">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border-2 outline outline-2 outline-offset-2
                             @switch($instrument->status)
-                                @case('available') bg-green-100 text-green-800 @break
-                                @case('in_use') bg-blue-100 text-blue-800 @break
-                                @case('defective') bg-red-100 text-red-800 @break
-                                @case('in_repair') bg-yellow-100 text-yellow-800 @break
-                                @case('out_of_service') bg-gray-100 text-gray-800 @break
-                                @default bg-gray-100 text-gray-800
+                                @case('available') bg-green-100 text-green-800 border-green-300 outline-green-400 @break
+                                @case('in_use') bg-blue-100 text-blue-800 border-blue-300 outline-blue-400 @break
+                                @case('defective') bg-red-100 text-red-800 border-red-300 outline-red-400 @break
+                                @case('in_repair') bg-yellow-100 text-yellow-800 border-yellow-300 outline-yellow-400 @break
+                                @case('out_of_service') bg-gray-100 text-gray-800 border-gray-300 outline-gray-400 @break
+                                @default bg-gray-100 text-gray-800 border-gray-300 outline-gray-400
                             @endswitch">
                             {{ $instrument->status_display }}
                         </span>

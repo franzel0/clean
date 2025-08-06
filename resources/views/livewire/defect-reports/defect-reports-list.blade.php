@@ -120,11 +120,13 @@
                                 </td>
                                 <td class="py-3 px-4">
                                     <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                        @if($report->status === 'reported') bg-gray-100 text-gray-800
+                                        @if($report->status === 'reported') bg-yellow-100 text-yellow-800
                                         @elseif($report->status === 'acknowledged') bg-blue-100 text-blue-800
-                                        @elseif($report->status === 'in_review') bg-yellow-100 text-yellow-800
-                                        @elseif($report->status === 'ordered') bg-purple-100 text-purple-800
-                                        @elseif($report->status === 'closed') bg-green-100 text-green-800
+                                        @elseif($report->status === 'in_review') bg-purple-100 text-purple-800
+                                        @elseif($report->status === 'ordered') bg-orange-100 text-orange-800
+                                        @elseif($report->status === 'received') bg-indigo-100 text-indigo-800
+                                        @elseif($report->status === 'repaired') bg-green-100 text-green-800
+                                        @elseif($report->status === 'closed') bg-gray-100 text-gray-800
                                         @else bg-gray-100 text-gray-800
                                         @endif">
                                         {{ $report->status_display }}

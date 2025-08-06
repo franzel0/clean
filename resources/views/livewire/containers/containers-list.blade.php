@@ -1,4 +1,4 @@
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4">
     <div class="flex justify-between items-center mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">{{ __('messages.containers') }}</h1>
@@ -26,15 +26,8 @@
                 <select wire:model.live="typeFilter" 
                         class="w-full px-3 py-2 border-2 border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="">{{ __('messages.all_types') }}</option>
-                    @foreach($types as $type)
-                        <option value="{{ $type }}">
-                            @switch($type)
-                                @case('surgical_set') Chirurgisches Set @break
-                                @case('basic_set') Basis Set @break
-                                @case('special_set') Spezial Set @break
-                                @default {{ $type }}
-                            @endswitch
-                        </option>
+                    @foreach($containerTypes as $containerType)
+                        <option value="{{ $containerType->id }}">{{ $containerType->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -75,12 +68,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap border-r border-gray-200">
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-300">
-                                        @switch($container->type)
-                                            @case('surgical_set') Chirurgisch @break
-                                            @case('basic_set') Basis @break
-                                            @case('special_set') Spezial @break
-                                            @default {{ $container->type }}
-                                        @endswitch
+                                        {{ $container->containerType?->name ?? $container->type ?? 'Unbekannt' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center border-r border-gray-200">
@@ -92,19 +80,13 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center border-r border-gray-200">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold border
-                                        @switch($container->status)
-                                            @case('complete') bg-green-100 text-green-800 border-green-300 @break
-                                            @case('incomplete') bg-yellow-100 text-yellow-800 border-yellow-300 @break
-                                            @case('out_of_service') bg-red-100 text-red-800 border-red-300 @break
-                                            @default bg-gray-100 text-gray-800 border-gray-300
-                                        @endswitch">
-                                        @switch($container->status)
-                                            @case('complete') Vollständig @break
-                                            @case('incomplete') Unvollständig @break
-                                            @case('out_of_service') Außer Betrieb @break
-                                            @default {{ $container->status }}
-                                        @endswitch
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold
+                                          @if($container->containerStatus?->color) @else border bg-gray-100 text-gray-800 border-gray-300 @endif"
+                                          @if($container->containerStatus?->color)
+                                              style="background-color: {{ $container->containerStatus->color }}; 
+                                                     color: white;"
+                                          @endif>
+                                        {{ $container->containerStatus?->name ?? $container->status ?? 'Unbekannt' }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center border-r border-gray-200">

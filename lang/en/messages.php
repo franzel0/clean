@@ -241,4 +241,5 @@ return [
     'needs_repair' => 'Needs Repair',
     'order' => 'Order',
     'no_data_available' => 'No Data Available',
+    'not_available' => 'No Available Instruments',
 ];
