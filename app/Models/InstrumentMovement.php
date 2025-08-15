@@ -12,20 +12,20 @@ class InstrumentMovement extends Model
 
     protected $fillable = [
         'instrument_id',
-        'from_department_id',
-        'to_department_id',
         'from_container_id',
         'to_container_id',
         'movement_type',
-        'status_before',
-        'status_after',
-        'moved_by',
+        'from_location',
+        'to_location',
+        'from_status',
+        'to_status',
+        'performed_by',
         'notes',
-        'moved_at',
+        'performed_at',
     ];
 
     protected $casts = [
-        'moved_at' => 'datetime',
+        'performed_at' => 'datetime',
     ];
 
     public function instrument(): BelongsTo
@@ -53,19 +53,19 @@ class InstrumentMovement extends Model
         return $this->belongsTo(Container::class, 'to_container_id');
     }
 
-    public function movedBy(): BelongsTo
+    public function performedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'moved_by');
+        return $this->belongsTo(User::class, 'performed_by');
     }
 
     public function statusBeforeObject(): BelongsTo
     {
-        return $this->belongsTo(InstrumentStatus::class, 'status_before');
+        return $this->belongsTo(InstrumentStatus::class, 'from_status');
     }
 
     public function statusAfterObject(): BelongsTo
     {
-        return $this->belongsTo(InstrumentStatus::class, 'status_after');
+        return $this->belongsTo(InstrumentStatus::class, 'to_status');
     }
 
     public function getMovementTypeDisplayAttribute(): string
@@ -82,12 +82,12 @@ class InstrumentMovement extends Model
 
     public function getStatusBeforeDisplayAttribute(): string
     {
-        return $this->convertStatusToDisplay($this->status_before);
+        return $this->convertStatusToDisplay($this->from_status);
     }
 
     public function getStatusAfterDisplayAttribute(): string
     {
-        return $this->convertStatusToDisplay($this->status_after);
+        return $this->convertStatusToDisplay($this->to_status);
     }
 
     private function convertStatusToDisplay($status): string
@@ -100,10 +100,10 @@ class InstrumentMovement extends Model
         // Wenn es eine Zahl ist, versuche es als InstrumentStatus ID zu interpretieren
         if (is_numeric($status)) {
             // Verwende die geladene Relation wenn verfügbar
-            if ($status == $this->status_before && $this->relationLoaded('statusBeforeObject')) {
+            if ($status == $this->from_status && $this->relationLoaded('statusBeforeObject')) {
                 return $this->statusBeforeObject?->name ?? "Status ID {$status}";
             }
-            if ($status == $this->status_after && $this->relationLoaded('statusAfterObject')) {
+            if ($status == $this->to_status && $this->relationLoaded('statusAfterObject')) {
                 return $this->statusAfterObject?->name ?? "Status ID {$status}";
             }
             

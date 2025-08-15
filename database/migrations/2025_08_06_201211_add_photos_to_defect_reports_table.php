@@ -6,19 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::table('defect_reports', function (Blueprint $table) {
-            // Neue Foreign Key Spalte hinzufügen
-            $table->foreignId('defect_type_id')->nullable()->after('defect_type')->constrained('defect_types');
+            $table->json('photos')->nullable()->after('repair_cost');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::table('defect_reports', function (Blueprint $table) {
-            $table->dropForeign(['defect_type_id']);
-            $table->dropColumn('defect_type_id');
+            $table->dropColumn('photos');
         });
     }
 };

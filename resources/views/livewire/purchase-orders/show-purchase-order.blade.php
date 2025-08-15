@@ -23,30 +23,12 @@
                             <div x-show="open" @click.away="open = false" x-transition
                                  class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
                                 <div class="py-1">
-                                    @php
-                                        // Alle möglichen Status-Optionen
-                                        $allStatusOptions = [
-                                            'requested' => 'Angefordert',
-                                            'approved' => 'Genehmigt', 
-                                            'ordered' => 'Bestellt',
-                                            'shipped' => 'Versandt',
-                                            'received' => 'Erhalten',
-                                            'completed' => 'Abgeschlossen',
-                                            'cancelled' => 'Storniert'
-                                        ];
-                                        
-                                        // Entferne aktuellen Status aus der Liste
-                                        $availableTransitions = array_filter($allStatusOptions, function($key) use ($order) {
-                                            return $key !== $order->status;
-                                        }, ARRAY_FILTER_USE_KEY);
-                                    @endphp
-                                    
-                                    @foreach($availableTransitions as $status => $label)
-                                        <button wire:click="openStatusModal('{{ $status }}')" 
-                                                class="block w-full text-left px-4 py-2 text-sm @if($status === 'cancelled') text-red-700 hover:bg-red-50 @else text-gray-700 hover:bg-gray-100 @endif">
-                                            {{ $label }}
+                                    @foreach($availableStatuses as $statusTransition)
+                                        <button wire:click="openStatusModal('{{ $statusTransition['id'] }}')" 
+                                                class="block w-full text-left px-4 py-2 text-sm @if($statusTransition['name'] === 'Storniert') text-red-700 hover:bg-red-50 @else text-gray-700 hover:bg-gray-100 @endif">
+                                            {{ $statusTransition['name'] }}
                                         </button>
-                                        @if($status === 'cancelled' && !$loop->last)
+                                        @if($statusTransition['name'] === 'Storniert' && !$loop->last)
                                             <div class="border-t border-gray-100"></div>
                                         @endif
                                     @endforeach
@@ -102,7 +84,7 @@
                             {{ $order->status_display }}
                         </span>
                         <span class="ml-4 text-sm text-gray-600">
-                            Erstellt am {{ $order->requested_at->format('d.m.Y H:i') }}
+                            Erstellt am {{ $order->requested_at ? $order->requested_at->format('d.m.Y H:i') : $order->created_at->format('d.m.Y H:i') }}
                         </span>
                     </div>
                 </div>
@@ -200,48 +182,50 @@
             </div>
 
             <!-- Related Defect Report -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Zugehörige Defektmeldung</h2>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Meldungsnummer</h3>
-                            <p class="text-gray-900">
-                                <a href="{{ route('defect-reports.show', $order->defectReport) }}" 
-                                   class="text-blue-600 hover:text-blue-800">
-                                    {{ $order->defectReport->report_number }}
-                                </a>
-                            </p>
+            @if($order->defectReport)
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Zugehörige Defektmeldung</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Meldungsnummer</h3>
+                                <p class="text-gray-900">
+                                    <a href="{{ route('defect-reports.show', $order->defectReport) }}" 
+                                       class="text-blue-600 hover:text-blue-800">
+                                        {{ $order->defectReport->report_number }}
+                                    </a>
+                                </p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Instrument</h3>
+                                <p class="text-gray-900">{{ $order->defectReport->instrument->name }}</p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Seriennummer</h3>
+                                <p class="text-gray-900">{{ $order->defectReport->instrument->serial_number }}</p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Gemeldet von</h3>
+                                <p class="text-gray-900">{{ $order->defectReport->reportedBy->name }}</p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Abteilung</h3>
+                                <p class="text-gray-900">{{ $order->defectReport->reportingDepartment->name }}</p>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-2">Defekttyp</h3>
+                                <p class="text-gray-900">{{ $order->defectReport->defect_type_display }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Instrument</h3>
-                            <p class="text-gray-900">{{ $order->defectReport->instrument->name }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Seriennummer</h3>
-                            <p class="text-gray-900">{{ $order->defectReport->instrument->serial_number }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Gemeldet von</h3>
-                            <p class="text-gray-900">{{ $order->defectReport->reportedBy->name }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Abteilung</h3>
-                            <p class="text-gray-900">{{ $order->defectReport->reportingDepartment->name }}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-medium text-gray-700 mb-2">Defekttyp</h3>
-                            <p class="text-gray-900">{{ $order->defectReport->defect_type_display }}</p>
+                        <div class="mt-4">
+                            <h3 class="text-sm font-medium text-gray-700 mb-2">Beschreibung</h3>
+                            <p class="text-gray-900">{{ $order->defectReport->description }}</p>
                         </div>
                     </div>
-                    <div class="mt-4">
-                        <h3 class="text-sm font-medium text-gray-700 mb-2">Beschreibung</h3>
-                        <p class="text-gray-900">{{ $order->defectReport->description }}</p>
-                    </div>
                 </div>
-            </div>
+            @endif
 
             <!-- Timeline -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -270,7 +254,7 @@
                                                 </p>
                                             </div>
                                             <div class="mt-2 text-sm text-gray-700">
-                                                <p>{{ $order->requested_at->format('d.m.Y H:i') }}</p>
+                                                <p>{{ $order->requested_at ? $order->requested_at->format('d.m.Y H:i') : 'Nicht verfügbar' }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -302,7 +286,7 @@
                                                 </p>
                                             </div>
                                             <div class="mt-2 text-sm text-gray-700">
-                                                <p>{{ $order->approved_at->format('d.m.Y H:i') }}</p>
+                                                <p>{{ $order->approved_at ? $order->approved_at->format('d.m.Y H:i') : 'Nicht verfügbar' }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -330,7 +314,7 @@
                                                 <p class="text-sm text-gray-500">Bestellung aufgegeben</p>
                                             </div>
                                             <div class="mt-2 text-sm text-gray-700">
-                                                <p>{{ $order->ordered_at->format('d.m.Y H:i') }}</p>
+                                                <p>{{ $order->ordered_at ? $order->ordered_at->format('d.m.Y H:i') : 'Nicht verfügbar' }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -398,7 +382,7 @@
                                                 </p>
                                             </div>
                                             <div class="mt-2 text-sm text-gray-700">
-                                                <p>{{ $order->received_at->format('d.m.Y H:i') }}</p>
+                                                <p>{{ $order->received_at ? $order->received_at->format('d.m.Y H:i') : 'Nicht verfügbar' }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -427,22 +411,11 @@
                     </h3>
                     <p class="text-sm text-gray-500 mb-4">
                         Sind Sie sicher, dass Sie den Status zu 
-                        <strong>
-                            @switch($newStatus)
-                                @case('requested') Angefordert @break
-                                @case('approved') Genehmigt @break
-                                @case('ordered') Bestellt @break
-                                @case('shipped') Versandt @break
-                                @case('received') Erhalten @break
-                                @case('completed') Abgeschlossen @break
-                                @case('cancelled') Storniert @break
-                                @default {{ $newStatus }}
-                            @endswitch
-                        </strong>
+                        <strong>{{ $this->getStatusDisplayName($newStatus) }}</strong>
                         ändern möchten?
                     </p>
                     
-                    @if($newStatus === 'cancelled')
+                    @if($this->getStatusDisplayName($newStatus) === 'Storniert')
                         <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
                             <p class="text-sm text-red-700">
                                 ⚠️ Achtung: Diese Bestellung wird storniert und kann nicht rückgängig gemacht werden.
@@ -457,8 +430,8 @@
                         Abbrechen
                     </button>
                     <button wire:click="confirmStatusUpdate" 
-                            class="px-4 py-2 @if($newStatus === 'cancelled') bg-red-600 hover:bg-red-700 @else bg-blue-600 hover:bg-blue-700 @endif text-white rounded-lg text-sm font-medium">
-                        @if($newStatus === 'cancelled') Stornieren @else Bestätigen @endif
+                            class="px-4 py-2 @if($this->getStatusDisplayName($newStatus) === 'Storniert') bg-red-600 hover:bg-red-700 @else bg-blue-600 hover:bg-blue-700 @endif text-white rounded-lg text-sm font-medium">
+                        @if($this->getStatusDisplayName($newStatus) === 'Storniert') Stornieren @else Bestätigen @endif
                     </button>
                 </div>
             </div>

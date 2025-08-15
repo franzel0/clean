@@ -193,42 +193,24 @@
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        @php
-                            $availableCount = $container->instruments->filter(function($instrument) {
-                                return $instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'verfügbar') !== false;
-                            })->count();
-                            
-                            $inUseCount = $container->instruments->filter(function($instrument) {
-                                return $instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'benutzung') !== false || stripos($instrument->instrumentStatus->name, 'einsatz') !== false);
-                            })->count();
-                            
-                            $defectiveCount = $container->instruments->filter(function($instrument) {
-                                return $instrument->instrumentStatus && (stripos($instrument->instrumentStatus->name, 'defekt') !== false || stripos($instrument->instrumentStatus->name, 'außer betrieb') !== false);
-                            })->count();
-                            
-                            $repairCount = $container->instruments->filter(function($instrument) {
-                                return $instrument->instrumentStatus && stripos($instrument->instrumentStatus->name, 'wartung') !== false;
-                            })->count();
-                        @endphp
-                        
                         <div class="text-center bg-green-50 p-4 rounded-lg border-2 border-green-200">
-                            <div class="text-2xl font-bold text-green-600">{{ $availableCount }}</div>
+                            <div class="text-2xl font-bold text-green-600">{{ $statistics['available'] ?? 0 }}</div>
                             <div class="text-sm font-bold text-green-800">VERFÜGBAR</div>
                         </div>
                         
                         <div class="text-center bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
-                            <div class="text-2xl font-bold text-blue-600">{{ $inUseCount }}</div>
+                            <div class="text-2xl font-bold text-blue-600">{{ $statistics['in_use'] ?? 0 }}</div>
                             <div class="text-sm font-bold text-blue-800">IM EINSATZ</div>
                         </div>
                         
                         <div class="text-center bg-red-50 p-4 rounded-lg border-2 border-red-200">
-                            <div class="text-2xl font-bold text-red-600">{{ $defectiveCount }}</div>
+                            <div class="text-2xl font-bold text-red-600">{{ $statistics['defective'] ?? 0 }}</div>
                             <div class="text-sm font-bold text-red-800">DEFEKT</div>
                         </div>
                         
                         <div class="text-center bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
-                            <div class="text-2xl font-bold text-yellow-600">{{ $repairCount }}</div>
-                            <div class="text-sm font-bold text-yellow-800">REPARATUR</div>
+                            <div class="text-2xl font-bold text-yellow-600">{{ $statistics['in_repair'] ?? 0 }}</div>
+                            <div class="text-sm font-bold text-yellow-800">IN REPARATUR</div>
                         </div>
                     </div>
                 </div>

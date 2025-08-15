@@ -13,17 +13,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
+        // Always run base configuration
         $this->call([
-            InstrumentManagementSeeder::class,
-            SupplierSeeder::class,
-            InstrumentMovementSeeder::class,
+            BaseConfigurationSeeder::class,
         ]);
+
+        // Ask if sample data should be included
+        if ($this->command->confirm('Möchten Sie Beispieldaten einfügen? (Instrumente, Container, Defektberichte, Bestellungen)', false)) {
+            $this->call([
+                SampleDataSeeder::class,
+            ]);
+        }
     }
 }

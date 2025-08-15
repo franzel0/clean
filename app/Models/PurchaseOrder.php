@@ -12,30 +12,30 @@ class PurchaseOrder extends Model
 
     protected $fillable = [
         'order_number',
-        'defect_report_id',
-        'requested_by',
+        'supplier_id',
         'manufacturer_id',
-        'estimated_cost',
-        'actual_cost',
-        'status',
+        'defect_report_id',
         'status_id',
-        'requested_at',
-        'approved_at',
+        'ordered_by',
         'approved_by',
+        'received_by',
+        'order_date',
+        'approved_at',
         'ordered_at',
         'expected_delivery',
-        'received_at',
-        'received_by',
+        'delivery_date',
+        'total_amount',
         'notes',
+        'received_at',
     ];
 
     protected $casts = [
-        'estimated_cost' => 'decimal:2',
-        'actual_cost' => 'decimal:2',
-        'requested_at' => 'datetime',
+        'total_amount' => 'decimal:2',
+        'order_date' => 'date',
         'approved_at' => 'datetime',
         'ordered_at' => 'datetime',
-        'expected_delivery' => 'datetime',
+        'expected_delivery' => 'date',
+        'delivery_date' => 'date',
         'received_at' => 'datetime',
     ];
 
@@ -44,9 +44,15 @@ class PurchaseOrder extends Model
         return $this->belongsTo(DefectReport::class);
     }
 
+    public function orderedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'ordered_by');
+    }
+
+    // Legacy alias for backward compatibility
     public function requestedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'requested_by');
+        return $this->belongsTo(User::class, 'ordered_by');
     }
 
     public function approvedBy(): BelongsTo
@@ -71,7 +77,12 @@ class PurchaseOrder extends Model
 
     public function getStatusDisplayAttribute(): string
     {
-        return match($this->status) {
+        if ($this->purchaseOrderStatus) {
+            return $this->purchaseOrderStatus->name;
+        }
+        
+        // Fallback for backward compatibility
+        return match($this->status ?? 'unknown') {
             'requested' => 'Angefordert',
             'approved' => 'Genehmigt',
             'ordered' => 'Bestellt',
@@ -79,8 +90,27 @@ class PurchaseOrder extends Model
             'received' => 'Erhalten',
             'completed' => 'Abgeschlossen',
             'cancelled' => 'Storniert',
-            default => ucfirst($this->status),
+            default => 'Unbekannt',
         };
+    }
+
+    public function getStatusAttribute(): ?string
+    {
+        // If we have a status_id, map it to a status string for backward compatibility
+        if ($this->status_id && $this->purchaseOrderStatus) {
+            return match($this->purchaseOrderStatus->name) {
+                'Entwurf' => 'requested',
+                'Freigegeben' => 'approved',
+                'Bestellt' => 'ordered',
+                'Versandt' => 'shipped',
+                'Geliefert' => 'received',
+                'Abgeschlossen' => 'completed',
+                'Storniert' => 'cancelled',
+                default => 'unknown',
+            };
+        }
+        
+        return null;
     }
 
     public function getManufacturerDisplayAttribute(): string

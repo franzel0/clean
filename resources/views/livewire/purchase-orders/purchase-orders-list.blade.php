@@ -141,7 +141,7 @@
                                     @endif
                                 </td>
                                 <td class="py-3 px-4 text-sm text-gray-900">
-                                    {{ $order->requested_at->format('d.m.Y H:i') }}
+                                    {{ $order->order_date ? \Carbon\Carbon::parse($order->order_date)->format('d.m.Y') : 'Nicht gesetzt' }}
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="flex space-x-2">

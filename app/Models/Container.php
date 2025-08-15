@@ -14,11 +14,9 @@ class Container extends Model
     protected $fillable = [
         'name',
         'barcode',
-        'type',
         'type_id',
         'description',
         'is_active',
-        'status',
         'status_id',
     ];
 
@@ -105,10 +103,14 @@ class Container extends Model
             ->whereIn('status_id', [3, 4, 5, 6]) // Wartung, Außer Betrieb, Verloren/Vermisst, Aussortiert
             ->exists();
 
-        $newStatus = $hasDefectiveInstruments ? 'incomplete' : 'complete';
+        // Get the appropriate status IDs from ContainerStatus
+        $completeStatusId = ContainerStatus::where('name', 'Steril')->first()?->id ?? 1;
+        $incompleteStatusId = ContainerStatus::where('name', 'Wartung')->first()?->id ?? 4;
+        
+        $newStatusId = $hasDefectiveInstruments ? $incompleteStatusId : $completeStatusId;
 
-        if ($this->status !== $newStatus) {
-            $this->update(['status' => $newStatus]);
+        if ($this->status_id !== $newStatusId) {
+            $this->update(['status_id' => $newStatusId]);
         }
     }
 

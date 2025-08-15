@@ -25,7 +25,7 @@ class EditDefectReport extends Component
     public $defect_type = '';
     public $defect_type_id = '';
     public $description = '';
-    public $severity = 'medium';
+    public $severity = 'mittel';
     public $status = '';
     public $photos = [];
     public $existing_photos = [];
@@ -36,8 +36,8 @@ class EditDefectReport extends Component
         'defect_type' => 'nullable|string|max:255',
         'defect_type_id' => 'required|exists:defect_types,id',
         'description' => 'required|string|min:10',
-        'severity' => 'required|in:low,medium,high,critical',
-        'status' => 'required|in:reported,acknowledged,in_review,ordered,received,repaired,closed',
+        'severity' => 'required|in:niedrig,mittel,hoch,kritisch',
+        'status' => 'required|in:offen,in_bearbeitung,abgeschlossen,abgelehnt',
         'photos.*' => 'nullable|image|max:2048',
     ];
 

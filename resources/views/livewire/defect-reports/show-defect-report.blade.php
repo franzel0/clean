@@ -34,27 +34,8 @@
             <div class="p-6">
                 <!-- Status Badge -->
                 <div class="mb-6">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border-2 outline outline-2 outline-offset-2
-                        @switch($report->status)
-                            @case('reported') bg-yellow-100 text-yellow-800 border-yellow-300 outline-yellow-400 @break
-                            @case('acknowledged') bg-blue-100 text-blue-800 border-blue-300 outline-blue-400 @break
-                            @case('in_review') bg-purple-100 text-purple-800 border-purple-300 outline-purple-400 @break
-                            @case('ordered') bg-orange-100 text-orange-800 border-orange-300 outline-orange-400 @break
-                            @case('received') bg-indigo-100 text-indigo-800 border-indigo-300 outline-indigo-400 @break
-                            @case('repaired') bg-green-100 text-green-800 border-green-300 outline-green-400 @break
-                            @case('closed') bg-gray-100 text-gray-800 border-gray-300 outline-gray-400 @break
-                            @default bg-gray-100 text-gray-800 border-gray-300 outline-gray-400
-                        @endswitch">
-                        @switch($report->status)
-                            @case('reported') Gemeldet @break
-                            @case('acknowledged') Bestätigt @break
-                            @case('in_review') In Bearbeitung @break
-                            @case('ordered') Bestellt @break
-                            @case('received') Erhalten @break
-                            @case('repaired') Repariert @break
-                            @case('closed') Abgeschlossen @break
-                            @default {{ $report->status }}
-                        @endswitch
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border-2 outline outline-2 outline-offset-2 {{ $report->status_badge_class }} border-current">
+                        {{ $report->status_display }}
                     </span>
                 </div>
 
@@ -92,20 +73,8 @@
                             <div>
                                 <dt class="text-sm font-medium text-gray-700">Schweregrad</dt>
                                 <dd class="text-sm text-gray-900">
-                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium
-                                        @switch($report->severity)
-                                            @case('low') bg-green-100 text-green-800 @break
-                                            @case('medium') bg-yellow-100 text-yellow-800 @break
-                                            @case('high') bg-orange-100 text-orange-800 @break
-                                            @case('critical') bg-red-100 text-red-800 @break
-                                        @endswitch">
-                                        @switch($report->severity)
-                                            @case('low') Niedrig @break
-                                            @case('medium') Mittel @break
-                                            @case('high') Hoch @break
-                                            @case('critical') Kritisch @break
-                                            @default {{ $report->severity }}
-                                        @endswitch
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium {{ $report->severity_badge_class }}">
+                                        {{ $report->severity_display }}
                                     </span>
                                 </dd>
                             </div>

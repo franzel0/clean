@@ -47,8 +47,12 @@ class PurchaseOrdersList extends Component
     public function markAsReceived($orderId)
     {
         $order = PurchaseOrder::findOrFail($orderId);
+        
+        // Get the "Geliefert" status
+        $receivedStatus = \App\Models\PurchaseOrderStatus::where('name', 'Geliefert')->first();
+        
         $order->update([
-            'status' => 'received',
+            'status_id' => $receivedStatus ? $receivedStatus->id : null,
             'received_at' => now(),
             'received_by' => Auth::user()->id,
         ]);
@@ -86,7 +90,8 @@ class PurchaseOrdersList extends Component
             'defectReport.reportingDepartment',
             'requestedBy',
             'receivedBy',
-            'manufacturer'
+            'manufacturer',
+            'purchaseOrderStatus'
         ])
         ->when($this->search, function ($query) {
             $query->whereHas('defectReport.instrument', function ($q) {
@@ -96,7 +101,22 @@ class PurchaseOrdersList extends Component
             ->orWhere('order_number', 'like', '%' . $this->search . '%');
         })
         ->when($this->statusFilter, function ($query) {
-            $query->where('status', $this->statusFilter);
+            // Map the old status names to the new status_id system
+            $statusMap = [
+                'requested' => 'Angefragt',
+                'approved' => 'Freigegeben', 
+                'ordered' => 'Bestellt',
+                'shipped' => 'Versandt',
+                'received' => 'Geliefert',
+                'completed' => 'Abgeschlossen',
+                'cancelled' => 'Storniert',
+            ];
+            
+            if (isset($statusMap[$this->statusFilter])) {
+                $query->whereHas('purchaseOrderStatus', function ($q) use ($statusMap) {
+                    $q->where('name', $statusMap[$this->statusFilter]);
+                });
+            }
         })
         ->when($this->departmentFilter, function ($query) {
             $query->whereHas('defectReport', function ($q) {

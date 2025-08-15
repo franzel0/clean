@@ -36,16 +36,14 @@ class MovementService
 
         $movement = InstrumentMovement::create([
             'instrument_id' => $instrument->id,
-            'from_department_id' => $fromDepartmentId,
-            'to_department_id' => $toDepartmentId,
+            'movement_type' => $movementType,
             'from_container_id' => $fromContainerId,
             'to_container_id' => $toContainerId,
-            'movement_type' => $movementType,
-            'status_before' => $statusBefore,
-            'status_after' => $statusAfter,
-            'moved_by' => $movedBy,
+            'from_status' => $statusBefore,
+            'to_status' => $statusAfter,
+            'performed_by' => $movedBy,
             'notes' => $notes,
-            'moved_at' => now(),
+            'performed_at' => now(),
         ]);
 
         // Update instrument's current status to the new status

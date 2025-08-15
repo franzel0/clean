@@ -24,7 +24,7 @@ class CreateDefectReport extends Component
     public $defect_type = '';
     public $defect_type_id = '';
     public $description = '';
-    public $severity = 'medium';
+    public $severity = 'mittel';
     public $photos = [];
 
     protected $rules = [
@@ -33,9 +33,19 @@ class CreateDefectReport extends Component
         'defect_type' => 'nullable|string|max:255',
         'defect_type_id' => 'required|exists:defect_types,id',
         'description' => 'required|string|min:10',
-        'severity' => 'required|in:low,medium,high,critical',
+        'severity' => 'required|in:niedrig,mittel,hoch,kritisch',
         'photos.*' => 'nullable|image|max:2048',
     ];
+
+    public function mount($instrument = null)
+    {
+        // Get instrument from query parameter if not passed as route parameter
+        $instrumentId = $instrument ?: request()->get('instrument');
+        
+        if ($instrumentId) {
+            $this->instrument_id = $instrumentId;
+        }
+    }
 
     public function updated($propertyName)
     {
@@ -62,7 +72,7 @@ class CreateDefectReport extends Component
             'defect_type_id' => $this->defect_type_id,
             'description' => $this->description,
             'severity' => $this->severity,
-            'status' => 'reported',
+            'status' => 'offen',
             'reported_at' => now(),
             'photos' => $photoUrls,
         ]);
@@ -80,7 +90,7 @@ class CreateDefectReport extends Component
             // Log movement for defect reporting
             \App\Services\MovementService::logMovement(
                 instrument: $instrument,
-                movementType: 'repair',
+                movementType: 'status_change',
                 statusBefore: $oldStatusId,
                 statusAfter: $defectiveStatus->id,
                 notes: 'Defekt gemeldet: ' . $this->defect_type . ' - ' . $report->report_number,

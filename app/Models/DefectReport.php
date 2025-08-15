@@ -13,29 +13,25 @@ class DefectReport extends Model
     use HasFactory;
 
     protected $fillable = [
-        'report_number',
         'instrument_id',
+        'defect_type_id',
         'reported_by',
         'reporting_department_id',
-        'operating_room_id',
-        'defect_type',
-        'defect_type_id',
         'description',
         'severity',
         'status',
         'reported_at',
-        'acknowledged_at',
-        'acknowledged_by',
+        'assigned_to',
         'resolved_at',
-        'resolved_by',
         'resolution_notes',
+        'repair_cost',
         'photos',
     ];
 
     protected $casts = [
         'reported_at' => 'datetime',
-        'acknowledged_at' => 'datetime',
         'resolved_at' => 'datetime',
+        'repair_cost' => 'decimal:2',
         'photos' => 'array',
     ];
 
@@ -82,14 +78,44 @@ class DefectReport extends Model
     public function getStatusDisplayAttribute(): string
     {
         return match($this->status) {
-            'reported' => 'Gemeldet',
-            'acknowledged' => 'Bestätigt',
-            'in_review' => 'In Bearbeitung',
-            'ordered' => 'Bestellt',
-            'received' => 'Erhalten',
-            'repaired' => 'Repariert',
-            'closed' => 'Abgeschlossen',
+            'offen' => 'Offen',
+            'in_bearbeitung' => 'In Bearbeitung',
+            'abgeschlossen' => 'Abgeschlossen',
+            'abgelehnt' => 'Abgelehnt',
             default => ucfirst($this->status),
+        };
+    }
+
+    public function getStatusBadgeClassAttribute(): string
+    {
+        return match($this->status) {
+            'offen' => 'bg-red-100 text-red-800',
+            'in_bearbeitung' => 'bg-blue-100 text-blue-800',
+            'abgeschlossen' => 'bg-green-100 text-green-800',
+            'abgelehnt' => 'bg-gray-100 text-gray-800',
+            default => 'bg-gray-100 text-gray-800',
+        };
+    }
+
+    public function getSeverityDisplayAttribute(): string
+    {
+        return match($this->severity) {
+            'niedrig' => 'Niedrig',
+            'mittel' => 'Mittel',
+            'hoch' => 'Hoch',
+            'kritisch' => 'Kritisch',
+            default => ucfirst($this->severity),
+        };
+    }
+
+    public function getSeverityBadgeClassAttribute(): string
+    {
+        return match($this->severity) {
+            'niedrig' => 'bg-green-100 text-green-800',
+            'mittel' => 'bg-yellow-100 text-yellow-800',
+            'hoch' => 'bg-orange-100 text-orange-800',
+            'kritisch' => 'bg-red-100 text-red-800',
+            default => 'bg-gray-100 text-gray-800',
         };
     }
 
@@ -111,17 +137,6 @@ class DefectReport extends Model
         };
     }
 
-    public function getSeverityDisplayAttribute(): string
-    {
-        return match($this->severity) {
-            'low' => 'Niedrig',
-            'medium' => 'Mittel',
-            'high' => 'Hoch',
-            'critical' => 'Kritisch',
-            default => ucfirst($this->severity),
-        };
-    }
-
     public function scopeOpen($query)
     {
         return $query->whereNotIn('status', ['closed']);
@@ -136,15 +151,16 @@ class DefectReport extends Model
     {
         parent::boot();
 
-        static::creating(function ($model) {
-            if (!$model->report_number) {
-                $model->report_number = 'DR-' . date('Y') . '-' . str_pad(
-                    static::whereYear('created_at', date('Y'))->count() + 1,
-                    6,
-                    '0',
-                    STR_PAD_LEFT
-                );
-            }
-        });
+        // Auto-generation of report number disabled since the field doesn't exist in the database
+        // static::creating(function ($model) {
+        //     if (!$model->report_number) {
+        //         $model->report_number = 'DR-' . date('Y') . '-' . str_pad(
+        //             static::whereYear('created_at', date('Y'))->count() + 1,
+        //             6,
+        //             '0',
+        //             STR_PAD_LEFT
+        //         );
+        //     }
+        // });
     }
 }

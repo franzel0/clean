@@ -45,9 +45,9 @@ class MovementsList extends Component
                 'toDepartment',
                 'fromContainer',
                 'toContainer',
-                'movedBy'
+                'performedBy'
             ])
-            ->orderBy('moved_at', 'desc');
+            ->orderBy('performed_at', 'desc');
 
         // Filter by search term
         if ($this->search) {
@@ -72,11 +72,11 @@ class MovementsList extends Component
 
         // Filter by date range
         if ($this->startDate) {
-            $query->whereDate('moved_at', '>=', $this->startDate);
+            $query->whereDate('performed_at', '>=', $this->startDate);
         }
 
         if ($this->endDate) {
-            $query->whereDate('moved_at', '<=', $this->endDate);
+            $query->whereDate('performed_at', '<=', $this->endDate);
         }
 
         $movements = $query->paginate(20);

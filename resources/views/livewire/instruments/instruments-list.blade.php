@@ -83,7 +83,7 @@
     <!-- Instrumente Tabelle -->
     <div class="dashboard-card">
         @if($instruments->count() > 0)
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto" style="min-height: calc(100vh - 30rem);">
                 <table class="w-full">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                         <tr>
@@ -108,15 +108,7 @@
                                 <td class="py-3 px-4 font-mono text-sm text-gray-900">{{ $instrument->serial_number }}</td>
                                 <td class="py-3 px-4 text-gray-900">{{ $instrument->category_display }}</td>
                                 <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                        @if($instrument->instrumentStatus?->color === 'green') bg-green-100 text-green-800
-                                        @elseif($instrument->instrumentStatus?->color === 'blue') bg-blue-100 text-blue-800
-                                        @elseif($instrument->instrumentStatus?->color === 'red') bg-red-100 text-red-800
-                                        @elseif($instrument->instrumentStatus?->color === 'yellow') bg-yellow-100 text-yellow-800
-                                        @elseif($instrument->instrumentStatus?->color === 'purple') bg-purple-100 text-purple-800
-                                        @elseif($instrument->instrumentStatus?->color === 'orange') bg-orange-100 text-orange-800
-                                        @else bg-gray-100 text-gray-800
-                                        @endif">
+                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $instrument->instrumentStatus?->bg_class ?? 'bg-gray-100' }} {{ $instrument->instrumentStatus?->text_class ?? 'text-gray-800' }}">
                                         {{ $instrument->status_display }}
                                     </span>
                                 </td>
@@ -127,7 +119,10 @@
                                     {{ $instrument->currentLocation?->name ?? '-' }}
                                 </td>
                                 <td class="py-3 px-4">
-                                    <div class="relative inline-block text-left" x-data="{ open: false }">
+                                    <div class="relative inline-block text-left" 
+                                         x-data="{ open: false }" 
+                                         :style="{ 'z-index': open ? '9999' : '999' }"
+                                         @click.away="open = false">
                                         <div>
                                             <button @click="open = !open" 
                                                     class="inline-flex justify-center w-full rounded-md border-2 border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
@@ -145,14 +140,15 @@
                                         </div>
 
                                         <div x-show="open" 
-                                             @click.away="open = false"
                                              x-transition:enter="transition ease-out duration-100"
                                              x-transition:enter-start="transform opacity-0 scale-95"
                                              x-transition:enter-end="transform opacity-100 scale-100"
                                              x-transition:leave="transition ease-in duration-75"
                                              x-transition:leave-start="transform opacity-100 scale-100"
                                              x-transition:leave-end="transform opacity-0 scale-95"
-                                             class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
+                                             class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                                             style="z-index: 99999;"
+                                             style="z-index: 9999;"
                                              role="menu" 
                                              aria-orientation="vertical">
                                             <div class="py-1" role="none">
@@ -175,7 +171,7 @@
                                                     Bearbeiten
                                                 </button>
                                                 
-                                                @if($instrument->status !== 'defective')
+                                                @if($instrument->instrumentStatus?->name !== 'Außer Betrieb')
                                                     <div class="border-t border-gray-100"></div>
                                                     <a href="{{ route('defect-reports.create', ['instrument' => $instrument->id]) }}" 
                                                        class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-800 transition-colors duration-150"

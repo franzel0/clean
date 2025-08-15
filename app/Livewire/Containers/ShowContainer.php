@@ -4,6 +4,7 @@ namespace App\Livewire\Containers;
 
 use App\Models\Container;
 use App\Models\Instrument;
+use App\Models\InstrumentStatus;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -15,7 +16,8 @@ class ShowContainer extends Component
 {
     public Container $container;
     public $showAssignModal = false;
-    public $availableInstruments = [];
+    public $availableInstruments;
+    public $statistics = [];
     // entfernt, doppelt
 
     // entfernt, doppelt
@@ -28,15 +30,47 @@ class ShowContainer extends Component
                 'instruments.instrumentStatus',
                 'instruments.category',
                 'instruments.manufacturerRelation',
-                'containerStatus',
                 'containerType'
             ]);
-            $this->availableInstruments = collect([]);
+
+            // Statistiken berechnen
+            $this->calculateStatistics();
+            
+            // Initialize as Collection
+            $this->availableInstruments = collect();
+
         } catch (\Exception $e) {
             Log::error('Error in ShowContainer mount: ' . $e->getMessage());
-            $this->container = $container; // Fallback ohne Relations
-            $this->availableInstruments = collect([]);
+            session()->flash('error', 'Fehler beim Laden des Containers: ' . $e->getMessage());
         }
+    }
+
+    private function calculateStatistics()
+    {
+        // Hole die Status-IDs aus der Datenbank (einmalig)
+        $statusIds = InstrumentStatus::whereIn('name', [
+            'Verfügbar',
+            'Im Einsatz',
+            'In Reparatur',
+            'Außer Betrieb'
+        ])->pluck('id', 'name')->toArray();
+
+        $instruments = $this->container->instruments;
+
+        $this->statistics = [
+            'total' => $instruments->count(),
+            'available' => $instruments->where('status_id', $statusIds['Verfügbar'] ?? null)->count(),
+            'in_use' => $instruments->where('status_id', $statusIds['Im Einsatz'] ?? null)->count(),
+            'in_repair' => $instruments->where('status_id', $statusIds['In Reparatur'] ?? null)->count(),
+            'defective' => $instruments->where('status_id', $statusIds['Außer Betrieb'] ?? null)->count(),
+        ];
+
+        // Debug-Ausgabe
+        Log::info('Container Statistiken berechnet:', [
+            'container_id' => $this->container->id,
+            'statistics' => $this->statistics,
+            'status_ids' => $statusIds
+        ]);
     }
 
     public $instrumentFilter = '';
@@ -72,12 +106,12 @@ class ShowContainer extends Component
         }
 
         $searchTerm = strtolower($this->instrumentFilter);
-        
-        return $this->availableInstruments->filter(function($instrument) use ($searchTerm) {
+
+        return $this->availableInstruments->filter(function ($instrument) use ($searchTerm) {
             return str_contains(strtolower($instrument->name), $searchTerm) ||
-                   str_contains(strtolower($instrument->serial_number), $searchTerm) ||
-                   str_contains(strtolower($instrument->category_display), $searchTerm) ||
-                   ($instrument->manufacturerRelation && str_contains(strtolower($instrument->manufacturerRelation->name), $searchTerm));
+                str_contains(strtolower($instrument->serial_number), $searchTerm) ||
+                str_contains(strtolower($instrument->category_display), $searchTerm) ||
+                ($instrument->manufacturerRelation && str_contains(strtolower($instrument->manufacturerRelation->name), $searchTerm));
         });
     }
 
@@ -92,10 +126,10 @@ class ShowContainer extends Component
     {
         try {
             $instrument = \App\Models\Instrument::findOrFail($instrumentId);
-            
+
             if ($instrument) {
                 $instrument->update(['current_container_id' => $this->container->id]);
-                
+
                 // Reload container with instruments
                 $this->container = $this->container->fresh()->load([
                     'instruments.defectReports',
@@ -103,14 +137,17 @@ class ShowContainer extends Component
                     'instruments.category',
                     'instruments.manufacturerRelation'
                 ]);
-                
+
+                // Statistiken neu berechnen nach Instrument-Zuweisung
+                $this->calculateStatistics();
+
                 // Remove assigned instrument from available list
-                $this->availableInstruments = $this->availableInstruments->reject(function($item) use ($instrumentId) {
+                $this->availableInstruments = $this->availableInstruments->reject(function ($item) use ($instrumentId) {
                     return $item->id == $instrumentId;
                 });
-                
+
                 $this->closeAssignModal();
-                
+
                 session()->flash('message', 'Instrument "' . $instrument->name . '" wurde erfolgreich zum Container hinzugefügt.');
             } else {
                 session()->flash('error', 'Instrument nicht gefunden.');

@@ -48,12 +48,12 @@ class Instrument extends Model
                 // Create movement manually to avoid recursion
                 \App\Models\InstrumentMovement::create([
                     'instrument_id' => $instrument->id,
-                    'movement_type' => 'transfer', // Default type
-                    'status_before' => $oldStatusId,
-                    'status_after' => $newStatusId,
-                    'moved_by' => \Illuminate\Support\Facades\Auth::id() ?? 1,
+                    'movement_type' => 'status_change',
+                    'from_status' => $oldStatusId,
+                    'to_status' => $newStatusId,
+                    'performed_by' => \Illuminate\Support\Facades\Auth::id() ?? 1,
                     'notes' => 'Status automatisch geändert',
-                    'moved_at' => now(),
+                    'performed_at' => now(),
                 ]);
             }
         });

@@ -32,6 +32,15 @@ class Login extends Component
 
         $this->ensureIsNotRateLimited();
 
+        // Check if user exists and is active
+        $user = \App\Models\User::where('email', $this->email)->first();
+        
+        if ($user && !$user->is_active) {
+            throw ValidationException::withMessages([
+                'email' => 'Ihr Benutzerkonto ist deaktiviert. Bitte wenden Sie sich an einen Administrator.',
+            ]);
+        }
+
         if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 

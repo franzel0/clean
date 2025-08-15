@@ -27,13 +27,10 @@
                     @foreach($statuses as $status)
                         <option value="{{ $status }}">
                             @switch($status)
-                                @case('reported') {{ __('messages.reported') }} @break
-                                @case('acknowledged') {{ __('messages.acknowledged') }} @break
-                                @case('in_review') {{ __('messages.in_progress') }} @break
-                                @case('ordered') {{ __('messages.ordered') }} @break
-                                @case('received') {{ __('messages.received') }} @break
-                                @case('repaired') {{ __('messages.repaired') }} @break
-                                @case('closed') {{ __('messages.closed') }} @break
+                                @case('offen') Offen @break
+                                @case('in_bearbeitung') In Bearbeitung @break
+                                @case('abgeschlossen') Abgeschlossen @break
+                                @case('abgelehnt') Abgelehnt @break
                                 @default {{ $status }}
                             @endswitch
                         </option>
@@ -48,10 +45,10 @@
                     @foreach($severities as $severity)
                         <option value="{{ $severity }}">
                             @switch($severity)
-                                @case('low') Niedrig @break
-                                @case('medium') Mittel @break
-                                @case('high') Hoch @break
-                                @case('critical') Kritisch @break
+                                @case('niedrig') Niedrig @break
+                                @case('mittel') Mittel @break
+                                @case('hoch') Hoch @break
+                                @case('kritisch') Kritisch @break
                                 @default {{ $severity }}
                             @endswitch
                         </option>
@@ -109,26 +106,12 @@
                                     <div class="text-sm text-gray-600">{{ $report->instrument->serial_number }}</div>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                        @if($report->severity === 'critical') bg-red-100 text-red-800
-                                        @elseif($report->severity === 'high') bg-orange-100 text-orange-800
-                                        @elseif($report->severity === 'medium') bg-yellow-100 text-yellow-800
-                                        @else bg-green-100 text-green-800
-                                        @endif">
+                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $report->severity_badge_class }}">
                                         {{ $report->severity_display }}
                                     </span>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                        @if($report->status === 'reported') bg-yellow-100 text-yellow-800
-                                        @elseif($report->status === 'acknowledged') bg-blue-100 text-blue-800
-                                        @elseif($report->status === 'in_review') bg-purple-100 text-purple-800
-                                        @elseif($report->status === 'ordered') bg-orange-100 text-orange-800
-                                        @elseif($report->status === 'received') bg-indigo-100 text-indigo-800
-                                        @elseif($report->status === 'repaired') bg-green-100 text-green-800
-                                        @elseif($report->status === 'closed') bg-gray-100 text-gray-800
-                                        @else bg-gray-100 text-gray-800
-                                        @endif">
+                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $report->status_badge_class }}">
                                         {{ $report->status_display }}
                                     </span>
                                 </td>

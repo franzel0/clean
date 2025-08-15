@@ -50,10 +50,10 @@ class ShowPurchaseOrder extends Component
         $this->showStatusDropdown = !$this->showStatusDropdown;
     }
 
-    public function openStatusModal($status)
+    public function openStatusModal($statusId)
     {
-        Log::info('openStatusModal called with status: ' . $status);
-        $this->newStatus = $status;
+        Log::info('openStatusModal called with status ID: ' . $statusId);
+        $this->newStatus = $statusId; // Speichere die Status-ID statt Code
         $this->showStatusModal = true;
         $this->showStatusDropdown = false;
     }
@@ -75,39 +75,44 @@ class ShowPurchaseOrder extends Component
         // Authorization: Nur berechtigt Benutzer können Status ändern
         $this->authorize('updateStatus', $this->order);
         
-        Log::info('updateStatus called with newStatus: ' . $this->newStatus);
+        Log::info('updateStatus called with newStatus ID: ' . $this->newStatus);
         
         if (empty($this->newStatus)) {
             session()->flash('error', 'Kein Status ausgewählt.');
             return;
         }
 
+        // Finde den Status anhand der ID
+        $purchaseOrderStatus = \App\Models\PurchaseOrderStatus::find($this->newStatus);
+        if (!$purchaseOrderStatus) {
+            session()->flash('error', 'Status nicht gefunden.');
+            return;
+        }
+
         $updateData = [
-            'status' => $this->newStatus
+            'status_id' => $purchaseOrderStatus->id
         ];
 
-        switch ($this->newStatus) {
-            case 'approved':
+        // Setze zusätzliche Felder basierend auf Status-Namen
+        switch ($purchaseOrderStatus->name) {
+            case 'Freigegeben':
                 $updateData['approved_at'] = now();
                 $updateData['approved_by'] = Auth::user()->id;
                 break;
-            case 'ordered':
+            case 'Bestellt':
                 $updateData['ordered_at'] = now();
                 break;
-            case 'shipped':
-                // Shipped status - no additional fields needed
-                break;
-            case 'received':
+            case 'Geliefert':
                 $updateData['received_at'] = now();
                 $updateData['received_by'] = Auth::user()->id;
                 // Update defect report status
                 if ($this->order->defectReport) {
-                    $this->order->defectReport->update(['status' => 'received']);
+                    $this->order->defectReport->update(['status' => 'abgeschlossen']);
                 }
                 break;
-            case 'completed':
+            case 'Abgeschlossen':
                 if ($this->order->defectReport) {
-                    $this->order->defectReport->update(['status' => 'closed']);
+                    $this->order->defectReport->update(['status' => 'abgeschlossen']);
                 }
                 break;
         }
@@ -116,7 +121,7 @@ class ShowPurchaseOrder extends Component
         $this->order->refresh();
         $this->closeModal();
         
-        session()->flash('message', 'Status erfolgreich von "' . $this->order->getOriginal('status') . '" zu "' . $this->newStatus . '" geändert.');
+        session()->flash('message', 'Status erfolgreich zu "' . $purchaseOrderStatus->name . '" geändert.');
     }
 
     public function updateDetails()
@@ -154,48 +159,34 @@ class ShowPurchaseOrder extends Component
 
     public function getAvailableStatusTransitions()
     {
-        $transitions = [];
+        // Lade alle aktiven Status aus der Datenbank
+        $allStatuses = \App\Models\PurchaseOrderStatus::active()->ordered()->get();
         
-        switch ($this->order->status) {
-            case 'requested':
-                $transitions = [
-                    'approved' => 'Genehmigen',
-                    'ordered' => 'Direkt als bestellt markieren'
-                ];
-                break;
-                
-            case 'approved':
-                $transitions = [
-                    'ordered' => 'Als bestellt markieren'
-                ];
-                break;
-                
-            case 'ordered':
-                $transitions = [
-                    'shipped' => 'Als versandt markieren',
-                    'received' => 'Direkt als erhalten markieren'
-                ];
-                break;
-                
-            case 'shipped':
-                $transitions = [
-                    'received' => 'Als erhalten markieren'
-                ];
-                break;
-                
-            case 'received':
-                $transitions = [
-                    'completed' => 'Abschließen'
-                ];
-                break;
+        // Aktueller Status der Bestellung
+        $currentStatusId = $this->order->status_id;
+        
+        $availableTransitions = collect();
+        
+        foreach ($allStatuses as $status) {
+            // Skip den aktuellen Status
+            if ($status->id === $currentStatusId) {
+                continue;
+            }
+            
+            // Keine Übergänge von Endstatus (Abgeschlossen/Storniert)
+            if ($this->order->purchaseOrderStatus && 
+                in_array($this->order->purchaseOrderStatus->name, ['Abgeschlossen', 'Storniert'])) {
+                continue;
+            }
+            
+            $availableTransitions->push([
+                'id' => $status->id,
+                'name' => $status->name,
+                'color' => $status->color
+            ]);
         }
         
-        // Stornieren ist immer möglich (außer bei already cancelled/completed)
-        if (!in_array($this->order->status, ['cancelled', 'completed'])) {
-            $transitions['cancelled'] = 'Stornieren';
-        }
-        
-        return $transitions;
+        return $availableTransitions;
     }
 
     public function cancelOrder()
@@ -232,7 +223,16 @@ class ShowPurchaseOrder extends Component
     public function render()
     {
         $manufacturers = Manufacturer::active()->ordered()->get();
+        
+        // Lade verfügbare Status-Übergänge basierend auf dem aktuellen Status
+        $availableStatuses = $this->getAvailableStatusTransitions();
 
-        return view('livewire.purchase-orders.show-purchase-order', compact('manufacturers'));
+        return view('livewire.purchase-orders.show-purchase-order', compact('manufacturers', 'availableStatuses'));
+    }
+    
+    public function getStatusDisplayName($statusId)
+    {
+        $status = \App\Models\PurchaseOrderStatus::find($statusId);
+        return $status ? $status->name : 'Unbekannt';
     }
 }

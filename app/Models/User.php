@@ -92,7 +92,7 @@ class User extends Authenticatable
 
     public function movements(): HasMany
     {
-        return $this->hasMany(InstrumentMovement::class, 'moved_by');
+        return $this->hasMany(InstrumentMovement::class, 'performed_by');
     }
 
     public function getRoleDisplayAttribute(): string

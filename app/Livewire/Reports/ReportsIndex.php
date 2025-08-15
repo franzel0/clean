@@ -47,7 +47,7 @@ class ReportsIndex extends Component
             
             // Movement Statistics  
             $totalMovements = InstrumentMovement::count();
-            $recentMovements = InstrumentMovement::where('moved_at', '>=', $startDate)->count();
+            $recentMovements = InstrumentMovement::where('performed_at', '>=', $startDate)->count();
             
             // Recent Activity (limited to prevent memory issues)
             $recentDefects = DefectReport::with(['instrument', 'reportedBy'])
@@ -58,12 +58,12 @@ class ReportsIndex extends Component
                 ->limit(5)
                 ->get();
                 
-            $recentMovementsList = InstrumentMovement::with(['instrument', 'movedBy'])
+            $recentMovementsList = InstrumentMovement::with(['instrument', 'performedBy'])
                 ->when($this->selectedDepartment, function($query) {
                     $query->where('from_department_id', $this->selectedDepartment)
                          ->orWhere('to_department_id', $this->selectedDepartment);
                 })
-                ->orderBy('moved_at', 'desc')
+                ->orderBy('performed_at', 'desc')
                 ->limit(5)
                 ->get();
 

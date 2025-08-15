@@ -12,6 +12,7 @@ use App\Livewire\DefectReports\CreateDefectReport;
 use App\Livewire\DefectReports\DefectReportsList;
 
 Route::view('/', 'welcome');
+Route::view('/test', 'test');
 
 // Language switcher
 Route::get('/language/{language}', [LanguageController::class, 'switch'])->name('language.switch');
@@ -54,6 +55,9 @@ Route::middleware(['auth'])->group(function () {
     
     // App Settings (nur für Admins)
     Route::get('/app-settings', \App\Livewire\AppSettings\SettingsIndex::class)->name('app-settings.index');
+    
+    // Admin Tools (nur für Admins)
+    Route::get('/admin/sample-data', \App\Livewire\Admin\SampleDataManager::class)->name('admin.sample-data');
     
     // Berichte
     Route::get('/reports', \App\Livewire\Reports\SimpleReports::class)->name('reports.index');

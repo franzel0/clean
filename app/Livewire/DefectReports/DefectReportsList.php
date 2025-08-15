@@ -41,7 +41,7 @@ class DefectReportsList extends Component
     {
         $report = DefectReport::findOrFail($reportId);
         $report->update([
-            'status' => 'acknowledged',
+            'status' => 'in_bearbeitung',
             'acknowledged_at' => now(),
             'acknowledged_by' => Auth::user()->id,
         ]);
@@ -53,14 +53,24 @@ class DefectReportsList extends Component
     {
         $report = DefectReport::findOrFail($reportId);
         
+        // Generate order number
+        $orderNumber = 'PO-' . date('Y') . '-' . str_pad(
+            PurchaseOrder::whereYear('created_at', date('Y'))->count() + 1,
+            6,
+            '0',
+            STR_PAD_LEFT
+        );
+        
         PurchaseOrder::create([
+            'order_number' => $orderNumber,
             'defect_report_id' => $reportId,
-            'requested_by' => Auth::user()->id,
-            'status' => 'requested',
-            'requested_at' => now(),
+            'ordered_by' => Auth::user()->id,
+            'status_id' => \App\Models\PurchaseOrderStatus::where('name', 'Angefragt')->first()->id ?? 1,
+            'order_date' => now()->format('Y-m-d'),
+            'notes' => 'Automatisch erstellt durch Defektbericht #' . $report->id,
         ]);
 
-        $report->update(['status' => 'ordered']);
+        $report->update(['status' => 'in_bearbeitung']);
 
         session()->flash('message', 'Bestellung wurde erstellt.');
     }
@@ -104,8 +114,8 @@ class DefectReportsList extends Component
 
         $reports = $query->latest()->paginate(15);
 
-        $statuses = ['reported', 'acknowledged', 'in_review', 'ordered', 'received', 'repaired', 'closed'];
-        $severities = ['low', 'medium', 'high', 'critical'];
+        $statuses = ['offen', 'in_bearbeitung', 'abgeschlossen', 'abgelehnt'];
+        $severities = ['niedrig', 'mittel', 'hoch', 'kritisch'];
         $departments = \App\Models\Department::active()->get();
 
         return view('livewire.defect-reports.defect-reports-list', compact(
