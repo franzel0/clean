@@ -32,10 +32,29 @@ class SimpleReports extends Component
             $totalContainers = Container::count();
             $activeContainers = Container::where('is_active', true)->count();
             
-            // Container status based on new status field
-            $completeContainers = Container::where('is_active', true)->where('status', 'complete')->count();
-            $incompleteContainers = Container::where('is_active', true)->where('status', 'incomplete')->count();
-            $outOfServiceContainers = Container::where('is_active', true)->where('status', 'out_of_service')->count();
+            // Container status based on calculated status using InstrumentStatusService
+            $statusService = app(\App\Services\InstrumentStatusService::class);
+            $containers = Container::where('is_active', true)->with(['instruments.instrumentStatus'])->get();
+            
+            $completeContainers = 0;
+            $incompleteContainers = 0;
+            $outOfServiceContainers = 0;
+            
+            foreach ($containers as $container) {
+                $calculatedStatus = $statusService->calculateContainerStatus($container);
+                
+                switch ($calculatedStatus) {
+                    case 'Vollständig & betriebsbereit':
+                        $completeContainers++;
+                        break;
+                    case 'Unvollständig aber betriebsbereit':
+                        $incompleteContainers++;
+                        break;
+                    case 'Nicht betriebsbereit':
+                        $outOfServiceContainers++;
+                        break;
+                }
+            }
             
             // Status distribution
             $statusStats = [
