@@ -125,34 +125,25 @@ class MovementService
     /**
      * Convert status name to numeric ID
      */
-    private static function convertStatusNameToId($statusName): int
+    private static function convertStatusNameToId($statusName): ?int
     {
+        // Falls es bereits eine ID ist, zurückgeben
         if (is_numeric($statusName)) {
             return (int)$statusName;
         }
 
-        // Mapping für englische Status-Namen zu Standard-IDs
-        $statusMap = [
-            'available' => 1,        // Verfügbar
-            'in_use' => 2,          // In Verwendung  
-            'maintenance' => 3,      // Wartung
-            'out_of_service' => 4,   // Außer Betrieb
-            'lost' => 5,            // Vermisst
-            'disposed' => 6,        // Aussortiert
-            'defective' => 4,       // Fallback zu "Außer Betrieb"
-            'broken' => 4,          // Fallback zu "Außer Betrieb"
-            'clean' => 1,           // Fallback zu "Verfügbar"
-            'dirty' => 1,           // Fallback zu "Verfügbar"
-            'sterile' => 1,         // Fallback zu "Verfügbar"
-            'in_sterilization' => 1, // Fallback zu "Verfügbar"
-            'repair' => 4,          // Fallback zu "Außer Betrieb"
-            'repaired' => 1,        // Fallback zu "Verfügbar"
-            'returned' => 1,        // Fallback zu "Verfügbar"
-            'dispatched' => 2,      // Fallback zu "In Verwendung"
-            'transferred' => 1,     // Fallback zu "Verfügbar"
-            'reserved' => 2,        // Fallback zu "In Verwendung"
-        ];
+        // Status dynamisch aus der Datenbank laden
+        $status = \App\Models\InstrumentStatus::where('name', $statusName)->first();
+        
+        if ($status) {
+            return $status->id;
+        }
 
-        return $statusMap[strtolower($statusName)] ?? 1; // Default: Verfügbar
+        // Falls Status nicht gefunden: Warnung loggen und Fallback verwenden
+        \Log::warning("MovementService: Unbekannter Status-Name '$statusName' verwendet. Fallback zu 'Verfügbar'.");
+        
+        // Als Fallback: "Verfügbar" Status
+        $fallbackStatus = \App\Models\InstrumentStatus::where('name', 'Verfügbar')->first();
+        return $fallbackStatus?->id ?? 1; // Notfall-Fallback zu ID 1
     }
 }

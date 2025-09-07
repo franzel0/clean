@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Department;
 use App\Models\OperatingRoom;
 use App\Models\InstrumentCategory;
-use App\Models\InstrumentStatus;
 use App\Models\ContainerType;
 use App\Models\ContainerStatus;
 use App\Models\DefectType;
@@ -23,7 +22,6 @@ class BaseConfigurationSeeder extends Seeder
     public function run(): void
     {
         $this->createInstrumentCategories();
-        $this->createInstrumentStatuses();
         $this->createContainerTypes();
         $this->createContainerStatuses();
         $this->createDefectTypes();
@@ -48,25 +46,6 @@ class BaseConfigurationSeeder extends Seeder
 
         foreach ($categories as $category) {
             InstrumentCategory::create($category);
-        }
-    }
-
-    private function createInstrumentStatuses(): void
-    {
-        $statuses = [
-            ['name' => 'Verfügbar', 'color' => '#10B981', 'sort_order' => 10, 'is_active' => true],
-            ['name' => 'Im Einsatz', 'color' => '#F59E0B', 'sort_order' => 20, 'is_active' => true],
-            ['name' => 'In Aufbereitung', 'color' => '#3B82F6', 'sort_order' => 30, 'is_active' => true],
-            ['name' => 'Defekt', 'color' => '#EF4444', 'sort_order' => 40, 'is_active' => true],
-            ['name' => 'In Reparatur', 'color' => '#F97316', 'sort_order' => 50, 'is_active' => true],
-            ['name' => 'Außer Betrieb', 'color' => '#6B7280', 'sort_order' => 60, 'is_active' => true],
-        ];
-
-        foreach ($statuses as $status) {
-            InstrumentStatus::firstOrCreate(
-                ['name' => $status['name']], 
-                $status
-            );
         }
     }
 

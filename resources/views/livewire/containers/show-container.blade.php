@@ -234,16 +234,11 @@
                                             {{ $report->report_number }}
                                         </a>
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold border
-                                            @switch($report->status)
-                                                @case('reported') bg-yellow-100 text-yellow-800 border-yellow-300 @break
-                                                @case('acknowledged') bg-blue-100 text-blue-800 border-blue-300 @break
-                                                @case('in_review') bg-purple-100 text-purple-800 border-purple-300 @break
-                                                @case('ordered') bg-indigo-100 text-indigo-800 border-indigo-300 @break
-                                                @case('received') bg-green-100 text-green-800 border-green-300 @break
-                                                @case('repaired') bg-green-100 text-green-800 border-green-300 @break
-                                                @case('closed') bg-gray-100 text-gray-800 border-gray-300 @break
-                                                @default bg-gray-100 text-gray-800 border-gray-300
-                                            @endswitch">
+                                            @if($report->is_resolved) 
+                                                bg-green-100 text-green-800 border-green-300
+                                            @else 
+                                                bg-yellow-100 text-yellow-800 border-yellow-300
+                                            @endif">
                                             {{ $report->status_display }}
                                         </span>
                                     </div>

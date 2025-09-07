@@ -49,28 +49,6 @@
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <h3 class="text-sm font-medium text-gray-700">Instrumentenstatus</h3>
-                                @if($order->defectReport && $order->defectReport->instrument)
-                                    <div x-data="{ open: false }" class="relative">
-                                        <button @click="open = !open" 
-                                                class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                            </svg>
-                                            Status ändern
-                                        </button>
-                                        <div x-show="open" @click.away="open = false" x-transition
-                                             class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
-                                            <div class="py-1">
-                                                @foreach($availableStatuses as $statusTransition)
-                                                    <button wire:click="openStatusModal('{{ $statusTransition['id'] }}')" 
-                                                            class="block w-full text-left px-4 py-2 text-sm @if($statusTransition['name'] === 'Storniert') text-red-700 hover:bg-red-50 @else text-gray-700 hover:bg-gray-100 @endif">
-                                                        {{ $statusTransition['name'] }}
-                                                    </button>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endif
                             </div>
                             @if($order->defectReport && $order->defectReport->instrument && $order->defectReport->instrument->instrumentStatus)
                                 <div class="flex items-center">
@@ -138,6 +116,20 @@
                                     secondary-display-field="contact_person"
                                     :error="$errors->first('manufacturer_id')"
                                 />
+                            </div>
+                            <div>
+                                <label for="instrumentStatusId" class="text-sm font-medium text-gray-700 mb-2 block">Instrumentenstatus</label>
+                                <select wire:model="instrumentStatusId" 
+                                        id="instrumentStatusId"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">Status auswählen...</option>
+                                    @foreach($this->availableInstrumentStatuses as $status)
+                                        <option value="{{ $status->id }}">{{ $status->name }}</option>
+                                    @endforeach
+                                </select>
+                                @error('instrumentStatusId') 
+                                    <span class="text-red-500 text-sm">{{ $message }}</span> 
+                                @enderror
                             </div>
                             <div>
                                 <label for="actualCost" class="text-sm font-medium text-gray-700 mb-2 block">Tatsächliche Kosten</label>
@@ -397,47 +389,4 @@
             </div>
         </div>
     </div>
-    
-    <!-- Status Update Modal -->
-    @if($showStatusModal)
-    <div class="fixed inset-0 z-50 overflow-y-auto" wire:ignore.self>
-        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center">
-            <!-- Background overlay -->
-            <div class="fixed inset-0" style="background-color: rgba(75, 85, 99, 0.5);" wire:click="closeModal"></div>
-            
-            <!-- Modal content -->
-            <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl max-w-lg w-full">
-                <div class="bg-white px-6 pt-6 pb-4">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">
-                        Status ändern
-                    </h3>
-                    <p class="text-sm text-gray-500 mb-4">
-                        Sind Sie sicher, dass Sie den Status zu 
-                        <strong>{{ $this->getStatusDisplayName($newStatus) }}</strong>
-                        ändern möchten?
-                    </p>
-                    
-                    @if($this->getStatusDisplayName($newStatus) === 'Storniert')
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                            <p class="text-sm text-red-700">
-                                ⚠️ Achtung: Diese Bestellung wird storniert und kann nicht rückgängig gemacht werden.
-                            </p>
-                        </div>
-                    @endif
-                </div>
-                
-                <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
-                    <button wire:click="closeModal" 
-                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg text-sm font-medium">
-                        Abbrechen
-                    </button>
-                    <button wire:click="confirmStatusUpdate" 
-                            class="px-4 py-2 @if($this->getStatusDisplayName($newStatus) === 'Storniert') bg-red-600 hover:bg-red-700 @else bg-blue-600 hover:bg-blue-700 @endif text-white rounded-lg text-sm font-medium">
-                        @if($this->getStatusDisplayName($newStatus) === 'Storniert') Stornieren @else Bestätigen @endif
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
 </div>

@@ -47,29 +47,39 @@ class ShowContainer extends Component
 
     private function calculateStatistics()
     {
-        // Hole die Status-IDs aus der Datenbank (einmalig)
-        $statusIds = InstrumentStatus::whereIn('name', [
-            'Verfügbar',
-            'Im Einsatz',
-            'In Reparatur',
-            'Außer Betrieb'
-        ])->pluck('id', 'name')->toArray();
-
+        // Verwende den InstrumentStatusService für konsistente Statistiken
+        $statusService = app(\App\Services\InstrumentStatusService::class);
         $instruments = $this->container->instruments;
+
+        // Hole alle Status-Namen und gruppiere Instrumente
+        $statusCounts = $instruments->groupBy(function($instrument) {
+            return $instrument->instrumentStatus?->name ?? 'Unbekannt';
+        })->map->count();
+
+        // Kategorisiere die Status
+        $available = $statusCounts->get('Verfügbar', 0);
+        $inUse = $statusCounts->get('In Betrieb', 0) + $statusCounts->get('Im Einsatz', 0);
+        $inRepair = $statusCounts->get('In Reparatur', 0);
+        $defective = $statusCounts->get('Defekt gemeldet', 0) + 
+                    $statusCounts->get('Defekt bestätigt', 0) + 
+                    $statusCounts->get('Außer Betrieb', 0) +
+                    $statusCounts->get('Ersatz bestellt', 0);
+        $other = $instruments->count() - $available - $inUse - $inRepair - $defective;
 
         $this->statistics = [
             'total' => $instruments->count(),
-            'available' => $instruments->where('status_id', $statusIds['Verfügbar'] ?? null)->count(),
-            'in_use' => $instruments->where('status_id', $statusIds['Im Einsatz'] ?? null)->count(),
-            'in_repair' => $instruments->where('status_id', $statusIds['In Reparatur'] ?? null)->count(),
-            'defective' => $instruments->where('status_id', $statusIds['Außer Betrieb'] ?? null)->count(),
+            'available' => $available,
+            'in_use' => $inUse,
+            'in_repair' => $inRepair,
+            'defective' => $defective,
+            'other' => max(0, $other), // Verhindere negative Zahlen
+            'status_breakdown' => $statusCounts->toArray()
         ];
 
         // Debug-Ausgabe
         Log::info('Container Statistiken berechnet:', [
             'container_id' => $this->container->id,
-            'statistics' => $this->statistics,
-            'status_ids' => $statusIds
+            'statistics' => $this->statistics
         ]);
     }
 

@@ -16,14 +16,10 @@ class DatabaseSeeder extends Seeder
         // Always run base configuration
         $this->call([
             BaseConfigurationSeeder::class,
-            SampleDataSeeder::class,
+            InstrumentStatusSeeder::class,  // Erstellt InstrumentStatuses
+            InstrumentStatusContextSeeder::class,  // Setzt Context-Availability
+            SampleDataSeeder::class,  // Erstellt Beispieldaten
         ]);
 
-        // Ask if sample data should be included
-       /*  if ($this->command->confirm('Möchten Sie Beispieldaten einfügen? (Instrumente, Container, Defektberichte, Bestellungen)', false)) {
-            $this->call([
-                SampleDataSeeder::class,
-            ]);
-        } */
     }
 }

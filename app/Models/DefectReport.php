@@ -36,6 +36,10 @@ class DefectReport extends Model
         'photos' => 'array',
     ];
 
+    protected $appends = [
+        'report_number',
+    ];
+
     public function instrument(): BelongsTo
     {
         return $this->belongsTo(Instrument::class);
@@ -78,7 +82,25 @@ class DefectReport extends Model
 
     public function getStatusDisplayAttribute(): string
     {
-        return $this->is_resolved ? 'Gelöst' : 'Offen';
+        // Verwende is_resolved als maßgeblich für den Status
+        if ($this->is_resolved) {
+            return 'Gelöst';
+        }
+        
+        // Prüfe ob eine Bestellung existiert
+        $purchaseOrder = \App\Models\PurchaseOrder::where('defect_report_id', $this->id)->first();
+        if ($purchaseOrder) {
+            if ($purchaseOrder->received_at) {
+                return 'Ersatz geliefert';
+            } elseif ($purchaseOrder->ordered_at) {
+                return 'Ersatz bestellt';
+            } else {
+                return 'Bestellung geplant';
+            }
+        }
+        
+        // Standard: Offen
+        return 'Offen';
     }
 
     public function getStatusBadgeClassAttribute(): string
@@ -126,6 +148,11 @@ class DefectReport extends Model
             'other' => 'Sonstiges',
             default => ucfirst($this->defect_type ?? 'Unbekannt'),
         };
+    }
+
+    public function getReportNumberAttribute(): string
+    {
+        return 'DR-' . date('Y', strtotime($this->created_at)) . '-' . str_pad($this->id, 6, '0', STR_PAD_LEFT);
     }
 
     public function scopeOpen($query)

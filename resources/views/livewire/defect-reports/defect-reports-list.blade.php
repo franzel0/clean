@@ -79,6 +79,7 @@
                         <tr>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.report_number') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.instruments') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">Defekttyp</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.severity') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.status') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.reported_by') }}</th>
@@ -90,12 +91,14 @@
                         @foreach($reports as $report)
                             <tr class="hover:bg-gray-50">
                                 <td class="py-3 px-4">
-                                    <div class="font-medium text-gray-900">{{ $report->report_number }}</div>
-                                    <div class="text-sm text-gray-600">{{ $report->defect_type_display }}</div>
+                                    <div class="font-medium text-blue-600">DR-{{ date('Y', strtotime($report->created_at)) }}-{{ str_pad($report->id, 6, '0', STR_PAD_LEFT) }}</div>
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="font-medium text-gray-900">{{ $report->instrument->name }}</div>
                                     <div class="text-sm text-gray-600">{{ $report->instrument->serial_number }}</div>
+                                </td>
+                                <td class="py-3 px-4">
+                                    <div class="text-sm text-gray-900">{{ $report->defect_type_display }}</div>
                                 </td>
                                 <td class="py-3 px-4">
                                     <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $report->severity_badge_class }}">

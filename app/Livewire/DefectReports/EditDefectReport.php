@@ -102,9 +102,16 @@ class EditDefectReport extends Component
             'photos' => $photoUrls,
         ]);
 
-        // Update instrument status directly
-        if ($this->instrument_status_id) {
-            $this->report->instrument->update(['status_id' => $this->instrument_status_id]);
+        // Update instrument status via MovementService if changed
+        if ($this->instrument_status_id && $this->instrument_status_id != $this->report->instrument->status_id) {
+            \App\Services\MovementService::logMovement(
+                instrument: $this->report->instrument,
+                movementType: 'status_change',
+                statusBefore: $this->report->instrument->status_id,
+                statusAfter: $this->instrument_status_id,
+                notes: 'Status aktualisiert via Defektmeldung: ' . $this->report->report_number,
+                movedBy: Auth::user()->id
+            );
         }
         
         session()->flash('message', 'Defektmeldung wurde erfolgreich aktualisiert.');

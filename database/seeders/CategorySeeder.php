@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\InstrumentCategory;
 use App\Models\InstrumentStatus;
 use App\Models\ContainerType;
 use App\Models\ContainerStatus;
 use App\Models\DefectType;
-use App\Models\PurchaseOrderStatus;
 use App\Models\Manufacturer;
 use Illuminate\Database\Seeder;
 
@@ -15,36 +13,32 @@ class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        // Instrument Kategorien
-        $instrumentCategories = [
-            ['name' => 'Scheren', 'description' => 'Chirurgische Scheren aller Art', 'sort_order' => 1],
-            ['name' => 'Pinzetten', 'description' => 'Anatomische und chirurgische Pinzetten', 'sort_order' => 2],
-            ['name' => 'Klemmen', 'description' => 'Arterien- und Gewebsklemmen', 'sort_order' => 3],
-            ['name' => 'Retraktor', 'description' => 'Wundhaken und Spreizer', 'sort_order' => 4],
-            ['name' => 'Sonden', 'description' => 'Untersuchungssonden', 'sort_order' => 5],
-            ['name' => 'Sauggeräte', 'description' => 'Absauggeräte und Kanülen', 'sort_order' => 6],
-            ['name' => 'Elektrokauter', 'description' => 'Elektrochirurgische Instrumente', 'sort_order' => 7],
-            ['name' => 'Nadelhalter', 'description' => 'Nadelhalter verschiedener Größen', 'sort_order' => 8],
-            ['name' => 'Skalpelle', 'description' => 'Chirurgische Messer und Klingen', 'sort_order' => 9],
-            ['name' => 'Sonstiges', 'description' => 'Andere chirurgische Instrumente', 'sort_order' => 10],
-        ];
-
-        foreach ($instrumentCategories as $category) {
-            InstrumentCategory::create($category);
-        }
-
-        // Instrument Status
+        // Nur Instrument Status erstellen - Categories werden vom BaseConfigurationSeeder erstellt
+        
+        // Instrument Status (diese müssen mit InstrumentStatusContextSeeder übereinstimmen)
         $instrumentStatuses = [
-            ['name' => 'Verfügbar', 'description' => 'Instrument ist einsatzbereit', 'color' => 'green', 'sort_order' => 1],
-            ['name' => 'In Benutzung', 'description' => 'Instrument wird gerade verwendet', 'color' => 'blue', 'sort_order' => 2],
-            ['name' => 'Wartung', 'description' => 'Instrument wird gewartet', 'color' => 'yellow', 'sort_order' => 3],
-            ['name' => 'Außer Betrieb', 'description' => 'Instrument ist defekt', 'color' => 'red', 'sort_order' => 4],
-            ['name' => 'Verloren/Vermisst', 'description' => 'Instrument ist verloren', 'color' => 'gray', 'sort_order' => 5],
-            ['name' => 'Aussortiert', 'description' => 'Instrument ist nicht mehr verwendbar', 'color' => 'black', 'sort_order' => 6],
+            ['name' => 'Verfügbar', 'description' => 'Instrument ist verfügbar', 'color' => 'green', 'sort_order' => 1, 'is_active' => true],
+            ['name' => 'Im Einsatz', 'description' => 'Instrument wird verwendet', 'color' => 'blue', 'sort_order' => 2, 'is_active' => true],
+            ['name' => 'In Betrieb', 'description' => 'Instrument ist in Betrieb', 'color' => 'blue', 'sort_order' => 3, 'is_active' => true],
+            ['name' => 'In Aufbereitung', 'description' => 'Instrument wird aufbereitet', 'color' => 'yellow', 'sort_order' => 4, 'is_active' => true],
+            ['name' => 'In Wartung', 'description' => 'Instrument wird gewartet', 'color' => 'orange', 'sort_order' => 5, 'is_active' => true],
+            ['name' => 'Defekt', 'description' => 'Instrument ist defekt', 'color' => 'red', 'sort_order' => 6, 'is_active' => true],
+            ['name' => 'Defekt gemeldet', 'description' => 'Defekt wurde gemeldet', 'color' => 'red', 'sort_order' => 7, 'is_active' => true],
+            ['name' => 'Defekt bestätigt', 'description' => 'Defekt wurde bestätigt', 'color' => 'red', 'sort_order' => 8, 'is_active' => true],
+            ['name' => 'In Reparatur', 'description' => 'Instrument ist in Reparatur', 'color' => 'orange', 'sort_order' => 9, 'is_active' => true],
+            ['name' => 'Repariert', 'description' => 'Instrument wurde repariert', 'color' => 'green', 'sort_order' => 10, 'is_active' => true],
+            ['name' => 'Ersatz bestellt', 'description' => 'Ersatz wurde bestellt', 'color' => 'purple', 'sort_order' => 11, 'is_active' => true],
+            ['name' => 'Ersatz geliefert', 'description' => 'Ersatz wurde geliefert', 'color' => 'green', 'sort_order' => 12, 'is_active' => true],
+            ['name' => 'Außer Betrieb', 'description' => 'Instrument ist außer Betrieb', 'color' => 'gray', 'sort_order' => 13, 'is_active' => true],
+            ['name' => 'Verloren/Vermisst', 'description' => 'Instrument ist verloren', 'color' => 'gray', 'sort_order' => 14, 'is_active' => true],
+            ['name' => 'Aussortiert', 'description' => 'Instrument ist aussortiert', 'color' => 'gray', 'sort_order' => 15, 'is_active' => true],
         ];
 
         foreach ($instrumentStatuses as $status) {
-            InstrumentStatus::create($status);
+            InstrumentStatus::firstOrCreate(
+                ['name' => $status['name']], 
+                $status
+            );
         }
 
         // Container Arten
@@ -90,22 +84,6 @@ class CategorySeeder extends Seeder
 
         foreach ($defectTypes as $type) {
             DefectType::create($type);
-        }
-
-        // Bestellstatus
-        $purchaseOrderStatuses = [
-            ['name' => 'Angefordert', 'description' => 'Bestellung wurde angefordert', 'color' => 'gray', 'sort_order' => 1],
-            ['name' => 'Prüfung Pending', 'description' => 'Bestellung wartet auf Genehmigung', 'color' => 'yellow', 'sort_order' => 2],
-            ['name' => 'Genehmigt', 'description' => 'Bestellung wurde genehmigt', 'color' => 'green', 'sort_order' => 3],
-            ['name' => 'Bestellt', 'description' => 'Bestellung wurde aufgegeben', 'color' => 'blue', 'sort_order' => 4],
-            ['name' => 'Versandt', 'description' => 'Bestellung wurde versandt', 'color' => 'purple', 'sort_order' => 5],
-            ['name' => 'Erhalten', 'description' => 'Bestellung wurde erhalten', 'color' => 'green', 'sort_order' => 6],
-            ['name' => 'Storniert', 'description' => 'Bestellung wurde storniert', 'color' => 'red', 'sort_order' => 7],
-            ['name' => 'Abgelehnt', 'description' => 'Bestellung wurde abgelehnt', 'color' => 'red', 'sort_order' => 8],
-        ];
-
-        foreach ($purchaseOrderStatuses as $status) {
-            PurchaseOrderStatus::create($status);
         }
 
         // Hersteller

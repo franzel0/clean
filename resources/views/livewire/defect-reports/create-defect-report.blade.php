@@ -89,6 +89,20 @@
                     </select>
                     @error('severity') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
+
+                <!-- Instrumentenstatus -->
+                <div>
+                    <label for="instrumentStatusId" class="block text-sm font-medium text-gray-700 mb-2">Instrumentenstatus</label>
+                    <select wire:model.live="instrumentStatusId" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Standard (Defekt gemeldet)</option>
+                        @foreach($this->availableInstrumentStatuses as $status)
+                            <option value="{{ $status->id }}">{{ $status->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('instrumentStatusId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    <p class="text-sm text-gray-500 mt-1">Wenn nicht ausgewählt, wird das Instrument automatisch als "Defekt gemeldet" markiert</p>
+                </div>
             </div>
 
             <!-- Beschreibung -->

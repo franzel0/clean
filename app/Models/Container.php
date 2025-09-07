@@ -115,7 +115,8 @@ class Container extends Model
         // Status-IDs für nicht verfügbare Instrumente (basierend auf den neuen Status)
         $unavailableStatusIds = \App\Models\InstrumentStatus::whereIn('name', [
             'Defekt gemeldet', 'Defekt bestätigt', 'In Reparatur', 
-            'Aussortiert', 'Verloren/Vermisst', 'In Wartung'
+            'Aussortiert', 'Verloren/Vermisst', 'In Wartung',
+            'Ersatz bestellt', 'Außer Betrieb'
         ])->pluck('id')->toArray();
         
         return $this->instruments()

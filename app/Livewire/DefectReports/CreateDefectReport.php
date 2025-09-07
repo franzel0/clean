@@ -26,6 +26,7 @@ class CreateDefectReport extends Component
     public $description = '';
     public $severity = 'mittel';
     public $photos = [];
+    public $instrumentStatusId = '';
 
     protected $rules = [
         'instrument_id' => 'required|exists:instruments,id',
@@ -35,6 +36,7 @@ class CreateDefectReport extends Component
         'description' => 'required|string|min:10',
         'severity' => 'required|in:niedrig,mittel,hoch,kritisch',
         'photos.*' => 'nullable|image|max:2048',
+        'instrumentStatusId' => 'nullable|exists:instrument_statuses,id',
     ];
 
     public function mount($instrument = null)
@@ -45,6 +47,11 @@ class CreateDefectReport extends Component
         if ($instrumentId) {
             $this->instrument_id = $instrumentId;
         }
+    }
+
+    public function getAvailableInstrumentStatusesProperty()
+    {
+        return \App\Models\InstrumentStatus::availableInDefectReports()->get();
     }
 
     public function updated($propertyName)
@@ -76,25 +83,33 @@ class CreateDefectReport extends Component
             'photos' => $photoUrls,
         ]);
 
-        // Update instrument status
+        // Update instrument status via MovementService to avoid double entries
         $instrument = Instrument::find($this->instrument_id);
         $oldStatusId = $instrument->status_id;
         
-        // Find the 'Außer Betrieb' status for defective instruments
-        $defectiveStatus = \App\Models\InstrumentStatus::where('name', 'Außer Betrieb')->first();
+        // Use the selected status or default to 'Defekt gemeldet'
+        $targetStatusId = $this->instrumentStatusId;
+        if (!$targetStatusId) {
+            $defectReportedStatus = \App\Models\InstrumentStatus::where('name', 'Defekt gemeldet')->first();
+            $targetStatusId = $defectReportedStatus?->id;
+        }
         
-        if ($defectiveStatus) {
-            $instrument->update(['status_id' => $defectiveStatus->id]);
-            
-            // Log movement for defect reporting
+        if ($targetStatusId && $targetStatusId != $oldStatusId) {
+            // Use MovementService which handles both movement logging AND status update
             \App\Services\MovementService::logMovement(
                 instrument: $instrument,
                 movementType: 'status_change',
                 statusBefore: $oldStatusId,
-                statusAfter: $defectiveStatus->id,
+                statusAfter: $targetStatusId,
                 notes: 'Defekt gemeldet: ' . $this->defect_type . ' - ' . $report->report_number,
                 movedBy: Auth::user()->id
             );
+            
+            // Explicit status update as fallback (MovementService should handle this, but just to be sure)
+            $instrument->refresh();
+            if ($instrument->status_id != $targetStatusId) {
+                $instrument->update(['status_id' => $targetStatusId]);
+            }
         }
 
         session()->flash('message', 'Defektmeldung erfolgreich erstellt: ' . $report->report_number);
