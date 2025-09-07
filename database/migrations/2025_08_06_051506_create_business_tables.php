@@ -69,7 +69,6 @@ return new class extends Migration
             $table->foreignId('supplier_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('manufacturer_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('defect_report_id')->nullable()->constrained()->onDelete('set null');
-            $table->foreignId('status_id')->nullable()->constrained('purchase_order_statuses')->onDelete('set null');
             $table->foreignId('ordered_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('received_by')->nullable()->constrained('users')->onDelete('set null');

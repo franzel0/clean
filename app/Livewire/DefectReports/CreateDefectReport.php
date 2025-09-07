@@ -72,7 +72,6 @@ class CreateDefectReport extends Component
             'defect_type_id' => $this->defect_type_id,
             'description' => $this->description,
             'severity' => $this->severity,
-            'status' => 'offen',
             'reported_at' => now(),
             'photos' => $photoUrls,
         ]);

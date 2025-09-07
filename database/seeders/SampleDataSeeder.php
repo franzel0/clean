@@ -14,7 +14,6 @@ use App\Models\ContainerType;
 use App\Models\ContainerStatus;
 use App\Models\Manufacturer;
 use App\Models\DefectType;
-use App\Models\PurchaseOrderStatus;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -504,9 +503,9 @@ class SampleDataSeeder extends Seeder
     private function createSamplePurchaseOrders(): void
     {
         $manufacturers = Manufacturer::all();
-        $statuses = PurchaseOrderStatus::all();
         $users = User::all();
         $purchaseUser = $users->where('role', 'purchasing_staff')->first();
+        $defectReports = DefectReport::all();
 
         // Get specific manufacturers by exact name
         $aesculap = $manufacturers->where('name', 'Aesculap AG')->first();
@@ -516,21 +515,23 @@ class SampleDataSeeder extends Seeder
         $purchaseOrders = [
             [
                 'order_number' => 'PO-2024-001',
+                'defect_report_id' => $defectReports->first()->id,
                 'supplier_id' => null,
                 'manufacturer_id' => $aesculap->id,
-                'status_id' => $statuses->where('name', 'Geliefert')->first()->id,
                 'ordered_by' => $purchaseUser->id,
                 'order_date' => Carbon::now()->subDays(30),
                 'expected_delivery' => Carbon::now()->subDays(15),
                 'delivery_date' => Carbon::now()->subDays(10),
                 'total_amount' => 2500.00,
                 'notes' => 'Nachbestellung Standard-Instrumente',
+                'received_at' => Carbon::now()->subDays(10),
+                'received_by' => $purchaseUser->id,
             ],
             [
                 'order_number' => 'PO-2024-002',
+                'defect_report_id' => $defectReports->skip(1)->first()->id,
                 'supplier_id' => null,
                 'manufacturer_id' => $karlStorz->id,
-                'status_id' => $statuses->where('name', 'Bestellt')->first()->id,
                 'ordered_by' => $purchaseUser->id,
                 'order_date' => Carbon::now()->subDays(10),
                 'expected_delivery' => Carbon::now()->addDays(5),
@@ -539,9 +540,9 @@ class SampleDataSeeder extends Seeder
             ],
             [
                 'order_number' => 'PO-2024-003',
+                'defect_report_id' => $defectReports->skip(2)->first()->id,
                 'supplier_id' => null,
                 'manufacturer_id' => $johnson->id,
-                'status_id' => $statuses->where('name', 'Freigegeben')->first()->id,
                 'ordered_by' => $purchaseUser->id,
                 'order_date' => Carbon::now()->subDays(3),
                 'expected_delivery' => Carbon::now()->addDays(14),

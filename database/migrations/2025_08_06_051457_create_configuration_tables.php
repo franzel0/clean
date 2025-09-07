@@ -86,17 +86,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Purchase Order Statuses
-        Schema::create('purchase_order_statuses', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('color', 7)->default('#6B7280');
-            $table->text('description')->nullable();
-            $table->integer('sort_order')->default(0);
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
-
         // Manufacturers
         Schema::create('manufacturers', function (Blueprint $table) {
             $table->id();
@@ -133,7 +122,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('manufacturers');
-        Schema::dropIfExists('purchase_order_statuses');
         Schema::dropIfExists('defect_types');
         Schema::dropIfExists('container_statuses');
         Schema::dropIfExists('container_types');

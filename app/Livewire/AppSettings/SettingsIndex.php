@@ -9,7 +9,6 @@ use App\Models\InstrumentStatus;
 use App\Models\ContainerType;
 use App\Models\ContainerStatus;
 use App\Models\DefectType;
-use App\Models\PurchaseOrderStatus;
 use App\Models\Manufacturer;
 use Livewire\Component;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -57,6 +56,16 @@ class SettingsIndex extends Component
     public $editingContactPhone = '';
     public $editingContactEmail = '';
     public $editingWebsite = '';
+    
+    // Context availability fields for instrument statuses
+    public $newAvailableInPurchaseOrders = false;
+    public $newAvailableInDefectReports = false;
+    public $newAvailableInInstruments = true;
+    public $newAvailableInContainers = false;
+    public $editingAvailableInPurchaseOrders = false;
+    public $editingAvailableInDefectReports = false;
+    public $editingAvailableInInstruments = true;
+    public $editingAvailableInContainers = false;
     
     public $deleteItem = null;
     
@@ -155,6 +164,14 @@ class SettingsIndex extends Component
                 $this->editingWebsite = $item->website ?? '';
             }
             
+            // Load context availability fields for instrument statuses
+            if ($this->activeTab === 'instrument-statuses') {
+                $this->editingAvailableInPurchaseOrders = $item->available_in_purchase_orders ?? false;
+                $this->editingAvailableInDefectReports = $item->available_in_defect_reports ?? false;
+                $this->editingAvailableInInstruments = $item->available_in_instruments ?? true;
+                $this->editingAvailableInContainers = $item->available_in_containers ?? false;
+            }
+            
             // Load is_active status for all models that support it
             $this->editingIsActive = $item->is_active ?? true;
             
@@ -206,6 +223,14 @@ class SettingsIndex extends Component
         $this->editingWebsite = '';
         $this->newIsActive = true;
         $this->editingIsActive = true;
+        $this->newAvailableInPurchaseOrders = false;
+        $this->newAvailableInDefectReports = false;
+        $this->newAvailableInInstruments = true;
+        $this->newAvailableInContainers = false;
+        $this->editingAvailableInPurchaseOrders = false;
+        $this->editingAvailableInDefectReports = false;
+        $this->editingAvailableInInstruments = true;
+        $this->editingAvailableInContainers = false;
         $this->deleteItem = null;
         $this->resetValidation();
     }
@@ -253,8 +278,16 @@ class SettingsIndex extends Component
         }
 
         // Add model-specific fields
-        if (in_array($this->activeTab, ['instrument-statuses', 'container-statuses', 'purchase-order-statuses'])) {
+        if (in_array($this->activeTab, ['instrument-statuses', 'container-statuses'])) {
             $data['color'] = $this->newColor;
+        }
+
+        // Add context availability fields for instrument statuses
+        if ($this->activeTab === 'instrument-statuses') {
+            $data['available_in_purchase_orders'] = $this->newAvailableInPurchaseOrders;
+            $data['available_in_defect_reports'] = $this->newAvailableInDefectReports;
+            $data['available_in_instruments'] = $this->newAvailableInInstruments;
+            $data['available_in_containers'] = $this->newAvailableInContainers;
         }
 
         if ($this->activeTab === 'defect-types') {
@@ -332,8 +365,16 @@ class SettingsIndex extends Component
         }
 
         // Add model-specific fields
-        if (in_array($this->activeTab, ['instrument-statuses', 'container-statuses', 'purchase-order-statuses'])) {
+        if (in_array($this->activeTab, ['instrument-statuses', 'container-statuses'])) {
             $data['color'] = $this->editingColor;
+        }
+
+        // Add context availability fields for instrument statuses
+        if ($this->activeTab === 'instrument-statuses') {
+            $data['available_in_purchase_orders'] = $this->editingAvailableInPurchaseOrders;
+            $data['available_in_defect_reports'] = $this->editingAvailableInDefectReports;
+            $data['available_in_instruments'] = $this->editingAvailableInInstruments;
+            $data['available_in_containers'] = $this->editingAvailableInContainers;
         }
 
         if ($this->activeTab === 'defect-types') {
@@ -406,7 +447,6 @@ class SettingsIndex extends Component
             'container-types' => ContainerType::class,
             'container-statuses' => ContainerStatus::class,
             'defect-types' => DefectType::class,
-            'purchase-order-statuses' => PurchaseOrderStatus::class,
             'manufacturers' => Manufacturer::class,
             'operating-rooms' => OperatingRoom::class,
             'departments' => Department::class,
@@ -422,8 +462,7 @@ class SettingsIndex extends Component
             'container-types' => $item->containers()->count(),
             'container-statuses' => $item->containers()->count(),
             'defect-types' => $item->defectReports()->count(),
-            'purchase-order-statuses' => $item->purchaseOrders()->count(),
-            'manufacturers' => $item->instruments()->count() + $item->purchaseOrders()->count(),
+            'manufacturers' => $item->instruments()->count(),
             'operating-rooms' => $item->defectReports()->count(),
             'departments' => $item->operatingRooms()->count(),
             default => 0
@@ -452,7 +491,6 @@ class SettingsIndex extends Component
             'container-types' => 'Container-Arten',
             'container-statuses' => 'Container-Status',
             'defect-types' => 'Defekt-Arten',
-            'purchase-order-statuses' => 'Bestellstatus',
             'manufacturers' => 'Hersteller',
             'operating-rooms' => 'OP-Säle',
             'departments' => 'Abteilungen',

@@ -73,10 +73,9 @@ class MovementService
 
         // Determine movement type based on status change
         $movementType = match($newStatusName) {
-            'Wartung' => 'repair',
-            'Verfügbar' => ($oldStatusName === 'In Benutzung') ? 'return' : 'sterilization',
-            'In Benutzung' => 'dispatch',
-            default => 'transfer'
+            'In Wartung' => 'maintenance',
+            'Wartung' => 'maintenance',
+            default => 'status_change'
         };
 
         return self::logMovement(

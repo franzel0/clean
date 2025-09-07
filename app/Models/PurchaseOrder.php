@@ -15,7 +15,6 @@ class PurchaseOrder extends Model
         'supplier_id',
         'manufacturer_id',
         'defect_report_id',
-        'status_id',
         'ordered_by',
         'approved_by',
         'received_by',
@@ -65,52 +64,9 @@ class PurchaseOrder extends Model
         return $this->belongsTo(User::class, 'received_by');
     }
 
-    public function purchaseOrderStatus(): BelongsTo
-    {
-        return $this->belongsTo(PurchaseOrderStatus::class, 'status_id');
-    }
-
     public function manufacturer(): BelongsTo
     {
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
-    }
-
-    public function getStatusDisplayAttribute(): string
-    {
-        if ($this->purchaseOrderStatus) {
-            return $this->purchaseOrderStatus->name;
-        }
-        
-        // Fallback for backward compatibility
-        return match($this->status ?? 'unknown') {
-            'requested' => 'Angefordert',
-            'approved' => 'Genehmigt',
-            'ordered' => 'Bestellt',
-            'shipped' => 'Versandt',
-            'received' => 'Erhalten',
-            'completed' => 'Abgeschlossen',
-            'cancelled' => 'Storniert',
-            default => 'Unbekannt',
-        };
-    }
-
-    public function getStatusAttribute(): ?string
-    {
-        // If we have a status_id, map it to a status string for backward compatibility
-        if ($this->status_id && $this->purchaseOrderStatus) {
-            return match($this->purchaseOrderStatus->name) {
-                'Entwurf' => 'requested',
-                'Freigegeben' => 'approved',
-                'Bestellt' => 'ordered',
-                'Versandt' => 'shipped',
-                'Geliefert' => 'received',
-                'Abgeschlossen' => 'completed',
-                'Storniert' => 'cancelled',
-                default => 'unknown',
-            };
-        }
-        
-        return null;
     }
 
     public function getManufacturerDisplayAttribute(): string

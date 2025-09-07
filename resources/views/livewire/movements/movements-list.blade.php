@@ -189,13 +189,13 @@
                                     <!-- Timestamp & User -->
                                     <div class="flex-shrink-0 text-right">
                                         <p class="text-sm font-medium text-gray-900">
-                                            {{ $movement->moved_at->format('d.m.Y') }}
+                                            {{ $movement->moved_at ? $movement->moved_at->format('d.m.Y') : 'N/A' }}
                                         </p>
                                         <p class="text-sm text-gray-600">
-                                            {{ $movement->moved_at->format('H:i') }}
+                                            {{ $movement->moved_at ? $movement->moved_at->format('H:i') : 'N/A' }}
                                         </p>
                                         <p class="text-xs text-gray-500 mt-1">
-                                            {{ $movement->movedBy->name }}
+                                            {{ $movement->movedBy->name ?? 'N/A' }}
                                         </p>
                                     </div>
                                 </div>

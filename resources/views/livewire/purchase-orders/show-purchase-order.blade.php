@@ -11,31 +11,6 @@
                 </div>
                 <div class="flex space-x-3">
                     <!-- Status Actions -->
-                    @if($order->status !== 'cancelled' && $order->status !== 'completed')
-                        <div x-data="{ open: false }" class="relative" wire:key="status-dropdown-{{ $order->status }}">
-                            <button @click="open = !open" 
-                                    class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                </svg>
-                                Status ändern!!
-                            </button>
-                            <div x-show="open" @click.away="open = false" x-transition
-                                 class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
-                                <div class="py-1">
-                                    @foreach($availableStatuses as $statusTransition)
-                                        <button wire:click="openStatusModal('{{ $statusTransition['id'] }}')" 
-                                                class="block w-full text-left px-4 py-2 text-sm @if($statusTransition['name'] === 'Storniert') text-red-700 hover:bg-red-50 @else text-gray-700 hover:bg-gray-100 @endif">
-                                            {{ $statusTransition['name'] }}
-                                        </button>
-                                        @if($statusTransition['name'] === 'Storniert' && !$loop->last)
-                                            <div class="border-t border-gray-100"></div>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    @endif
                     
                     <button wire:click="downloadPdf" 
                             class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
@@ -69,23 +44,50 @@
                     <h2 class="text-lg font-semibold text-gray-900">Status</h2>
                 </div>
                 <div class="p-6">
-                    <div class="flex items-center">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
-                            @switch($order->status)
-                                @case('requested') bg-yellow-100 text-yellow-800 @break
-                                @case('approved') bg-blue-100 text-blue-800 @break
-                                @case('ordered') bg-purple-100 text-purple-800 @break
-                                @case('shipped') bg-indigo-100 text-indigo-800 @break
-                                @case('received') bg-green-100 text-green-800 @break
-                                @case('completed') bg-green-100 text-green-800 @break
-                                @case('cancelled') bg-red-100 text-red-800 @break
-                                @default bg-gray-100 text-gray-800
-                            @endswitch">
-                            {{ $order->status_display }}
-                        </span>
-                        <span class="ml-4 text-sm text-gray-600">
-                            Erstellt am {{ $order->requested_at ? $order->requested_at->format('d.m.Y H:i') : $order->created_at->format('d.m.Y H:i') }}
-                        </span>
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-6">
+                        <!-- Instrumentenstatus -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-medium text-gray-700">Instrumentenstatus</h3>
+                                @if($order->defectReport && $order->defectReport->instrument)
+                                    <div x-data="{ open: false }" class="relative">
+                                        <button @click="open = !open" 
+                                                class="inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                            Status ändern
+                                        </button>
+                                        <div x-show="open" @click.away="open = false" x-transition
+                                             class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                                            <div class="py-1">
+                                                @foreach($availableStatuses as $statusTransition)
+                                                    <button wire:click="openStatusModal('{{ $statusTransition['id'] }}')" 
+                                                            class="block w-full text-left px-4 py-2 text-sm @if($statusTransition['name'] === 'Storniert') text-red-700 hover:bg-red-50 @else text-gray-700 hover:bg-gray-100 @endif">
+                                                        {{ $statusTransition['name'] }}
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                            @if($order->defectReport && $order->defectReport->instrument && $order->defectReport->instrument->instrumentStatus)
+                                <div class="flex items-center">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $order->defectReport->instrument->instrumentStatus->bg_class }} {{ $order->defectReport->instrument->instrumentStatus->text_class }}">
+                                        {{ $order->defectReport->instrument->instrumentStatus->name }}
+                                    </span>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-600">
+                                    Instrument: {{ $order->defectReport->instrument->name }} ({{ $order->defectReport->instrument->serial_number }})
+                                </div>
+                                <div class="mt-1 text-sm text-gray-600">
+                                    Erstellt am {{ $order->requested_at ? $order->requested_at->format('d.m.Y H:i') : $order->created_at->format('d.m.Y H:i') }}
+                                </div>
+                            @else
+                                <span class="text-gray-500 text-sm">Kein Instrument verknüpft</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

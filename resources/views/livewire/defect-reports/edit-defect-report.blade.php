@@ -95,18 +95,60 @@
                         </div>
                     </div>
 
-                    <!-- Status (nur für Bearbeitung) -->
+                    <!-- Lösung -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="flex items-center">
+                                <input type="checkbox" 
+                                       wire:model.live="is_resolved" 
+                                       id="is_resolved"
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="is_resolved" class="ml-2 block text-sm font-medium text-gray-700">
+                                    Als gelöst markieren
+                                </label>
+                            </div>
+                            @error('is_resolved') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                        
+                        <div class="{{ $is_resolved ? '' : 'opacity-50' }}">
+                            <label for="resolution_notes" class="block text-sm font-medium text-gray-700 mb-2">
+                                Lösungsnotizen {{ $is_resolved ? '*' : '(optional)' }}
+                            </label>
+                            <textarea wire:model="resolution_notes" 
+                                      rows="3" 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                                      placeholder="Beschreiben Sie wie der Defekt behoben wurde..."
+                                      {{ $is_resolved ? '' : 'disabled' }}></textarea>
+                            @error('resolution_notes') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <!-- Instrument Status -->
                     <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status *</label>
-                        <select wire:model.live="status" 
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
-                                required>
-                            <option value="offen">Offen</option>
-                            <option value="in_bearbeitung">In Bearbeitung</option>
-                            <option value="abgeschlossen">Abgeschlossen</option>
-                            <option value="abgelehnt">Abgelehnt</option>
-                        </select>
-                        @error('status') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <label for="instrument_status" class="block text-sm font-medium text-gray-700 mb-2">Instrument Status *</label>
+                        <div class="relative">
+                            <select wire:model.live="instrument_status_id" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                                    required>
+                                <option value="">Status auswählen</option>
+                                @foreach($instrumentStatuses as $status)
+                                    <option value="{{ $status->id }}">{{ $status->name }}</option>
+                                @endforeach
+                            </select>
+                            @if($instrument_status_id)
+                                @php
+                                    $selectedStatus = $instrumentStatuses->firstWhere('id', $instrument_status_id);
+                                @endphp
+                                @if($selectedStatus)
+                                    <div class="mt-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $selectedStatus->bg_class }} {{ $selectedStatus->text_class }}">
+                                            {{ $selectedStatus->name }}
+                                        </span>
+                                    </div>
+                                @endif
+                            @endif
+                        </div>
+                        @error('instrument_status_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Beschreibung -->

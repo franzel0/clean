@@ -41,7 +41,6 @@ class DefectReportsList extends Component
     {
         $report = DefectReport::findOrFail($reportId);
         $report->update([
-            'status' => 'in_bearbeitung',
             'acknowledged_at' => now(),
             'acknowledged_by' => Auth::user()->id,
         ]);
@@ -70,8 +69,6 @@ class DefectReportsList extends Component
             'notes' => 'Automatisch erstellt durch Defektbericht #' . $report->id,
         ]);
 
-        $report->update(['status' => 'in_bearbeitung']);
-
         session()->flash('message', 'Bestellung wurde erstellt.');
     }
 
@@ -87,7 +84,7 @@ class DefectReportsList extends Component
     public function render()
     {
         $query = DefectReport::with([
-            'instrument', 
+            'instrument.instrumentStatus', 
             'reportedBy', 
             'reportingDepartment',
             'operatingRoom',
@@ -103,7 +100,11 @@ class DefectReportsList extends Component
             ->orWhere('description', 'like', '%' . $this->search . '%');
         })
         ->when($this->statusFilter, function ($query) {
-            $query->where('status', $this->statusFilter);
+            if ($this->statusFilter === 'resolved') {
+                $query->where('is_resolved', true);
+            } elseif ($this->statusFilter === 'open') {
+                $query->where('is_resolved', false);
+            }
         })
         ->when($this->severityFilter, function ($query) {
             $query->where('severity', $this->severityFilter);
@@ -114,7 +115,7 @@ class DefectReportsList extends Component
 
         $reports = $query->latest()->paginate(15);
 
-        $statuses = ['offen', 'in_bearbeitung', 'abgeschlossen', 'abgelehnt'];
+        $statuses = ['open' => 'Offen', 'resolved' => 'Gelöst'];
         $severities = ['niedrig', 'mittel', 'hoch', 'kritisch'];
         $departments = \App\Models\Department::active()->get();
 

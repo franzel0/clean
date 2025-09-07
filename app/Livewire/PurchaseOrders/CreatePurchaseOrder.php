@@ -32,18 +32,31 @@ class CreatePurchaseOrder extends Component
     #[Validate('nullable|string|max:1000')]
     public $notes = '';
 
-    #[Validate('nullable|exists:purchase_order_statuses,id')]
+    #[Validate('nullable|exists:instrument_statuses,id')]
     public $status_id = '';
 
     public $defectReports = [];
+    public $instrumentStatuses = [];
 
-    public function mount()
+    public function mount(): void
     {
-        // Lade nur Defektmeldungen, die noch keine Bestellung haben und für Bestellungen geeignet sind
-        $this->defectReports = DefectReport::with(['instrument', 'reportedBy'])
-            ->whereDoesntHave('purchaseOrder')
-            ->whereIn('status', ['acknowledged', 'in_review']) // Nur bestätigte oder in Bearbeitung befindliche Defektmeldungen
+        // Lade Defektmeldungen, deren Instrumente den Status "Defekt bestätigt" haben
+        $confirmedStatusId = \App\Models\InstrumentStatus::where('name', 'Defekt bestätigt')->first()?->id;
+        
+        $this->defectReports = DefectReport::with(['instrument', 'defectType', 'reportingDepartment', 'reportedBy'])
+            ->whereHas('instrument', function ($query) use ($confirmedStatusId) {
+                $query->where('status_id', $confirmedStatusId);
+            })
+            ->whereDoesntHave('purchaseOrder') // Singular! Keine bereits verknüpfte Bestellung
+            ->orderBy('reported_at', 'desc')
             ->get();
+            
+        // Lade relevante Instrument-Status für das Dropdown
+        $this->instrumentStatuses = \App\Models\InstrumentStatus::whereIn('name', [
+            'Ersatz bestellt',
+            'Ersatz geliefert', 
+            'In Reparatur'
+        ])->orderBy('sort_order')->get();
     }
 
     public function save()
@@ -54,7 +67,7 @@ class CreatePurchaseOrder extends Component
             'estimated_cost' => 'nullable|numeric|min:0|max:999999.99',
             'estimated_delivery_date' => 'nullable|date',
             'notes' => 'nullable|string|max:1000',
-            'status_id' => 'nullable|exists:purchase_order_statuses,id',
+            'status_id' => 'nullable|exists:instrument_statuses,id',
         ], [
             'defect_report_id.required' => 'Bitte wählen Sie eine Defektmeldung aus.',
             'defect_report_id.exists' => 'Die ausgewählte Defektmeldung ist nicht gültig.',
@@ -70,14 +83,20 @@ class CreatePurchaseOrder extends Component
         $purchaseOrder = PurchaseOrder::create([
             'defect_report_id' => $this->defect_report_id,
             'manufacturer_id' => $this->manufacturer_id,
-            'estimated_cost' => $this->estimated_cost ?: null,
+            'total_amount' => $this->estimated_cost ?: null,
             'expected_delivery' => $this->estimated_delivery_date ?: null,
             'notes' => $this->notes,
-            'status' => 'requested',
-            'status_id' => $this->status_id,
-            'requested_by' => Auth::id(),
-            'requested_at' => now(),
+            'ordered_by' => Auth::id(),
+            'order_date' => now(),
         ]);
+
+        // Aktualisiere das Instrument Status auf "Ersatz bestellt" (wenn Status ausgewählt wurde)
+        if (!empty($this->status_id)) {
+            $defectReport = DefectReport::find($this->defect_report_id);
+            if ($defectReport && $defectReport->instrument) {
+                $defectReport->instrument->update(['status_id' => $this->status_id]);
+            }
+        }
 
         session()->flash('success', 'Bestellung wurde erfolgreich erstellt.');
         
@@ -97,8 +116,7 @@ class CreatePurchaseOrder extends Component
     public function render()
     {
         $manufacturers = Manufacturer::active()->ordered()->get();
-        $purchaseOrderStatuses = PurchaseOrderStatus::active()->ordered()->get();
         
-        return view('livewire.purchase-orders.create-purchase-order', compact('manufacturers', 'purchaseOrderStatuses'));
+        return view('livewire.purchase-orders.create-purchase-order', compact('manufacturers'));
     }
 }

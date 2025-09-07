@@ -26,9 +26,15 @@ class EditDefectReport extends Component
     public $defect_type_id = '';
     public $description = '';
     public $severity = 'mittel';
-    public $status = '';
+    public $is_resolved = false;
+    public $resolution_notes = '';
     public $photos = [];
     public $existing_photos = [];
+
+    // Instrument Status Properties
+    public $instrument_status_id = '';
+    public $instruments = [];
+    public $instrumentStatuses = [];
 
     protected $rules = [
         'instrument_id' => 'required|exists:instruments,id',
@@ -37,8 +43,10 @@ class EditDefectReport extends Component
         'defect_type_id' => 'required|exists:defect_types,id',
         'description' => 'required|string|min:10',
         'severity' => 'required|in:niedrig,mittel,hoch,kritisch',
-        'status' => 'required|in:offen,in_bearbeitung,abgeschlossen,abgelehnt',
+        'is_resolved' => 'boolean',
+        'resolution_notes' => 'nullable|string',
         'photos.*' => 'nullable|image|max:2048',
+        'instrument_status_id' => 'required|exists:instrument_statuses,id',
     ];
 
     public function mount(DefectReport $report)
@@ -50,8 +58,16 @@ class EditDefectReport extends Component
         $this->defect_type_id = $report->defect_type_id;
         $this->description = $report->description;
         $this->severity = $report->severity;
-        $this->status = $report->status;
+        $this->is_resolved = $report->is_resolved ?? false;
+        $this->resolution_notes = $report->resolution_notes ?? '';
         $this->existing_photos = $report->photos ?? [];
+        
+        // Load instrument status
+        $this->instrument_status_id = $report->instrument->status_id ?? '';
+        
+        // Load data for dropdowns
+        $this->instruments = \App\Models\Instrument::with('instrumentStatus')->get();
+        $this->instrumentStatuses = \App\Models\InstrumentStatus::all();
     }
 
     public function removeExistingPhoto($index)
@@ -79,23 +95,18 @@ class EditDefectReport extends Component
             'defect_type_id' => $this->defect_type_id,
             'description' => $this->description,
             'severity' => $this->severity,
-            'status' => $this->status,
+            'is_resolved' => $this->is_resolved,
+            'resolution_notes' => $this->resolution_notes,
+            'resolved_at' => $this->is_resolved ? now() : null,
+            'resolved_by' => $this->is_resolved ? Auth::id() : null,
             'photos' => $photoUrls,
         ]);
 
-        // Update instrument status based on defect report status
-        if ($this->status === 'closed' || $this->status === 'repaired') {
-            $activeStatus = \App\Models\InstrumentStatus::where('name', 'Verfügbar')->first();
-            if ($activeStatus) {
-                $this->report->instrument->update(['status_id' => $activeStatus->id]);
-            }
-        } else {
-            $defectiveStatus = \App\Models\InstrumentStatus::where('name', 'Außer Betrieb')->first();
-            if ($defectiveStatus) {
-                $this->report->instrument->update(['status_id' => $defectiveStatus->id]);
-            }
+        // Update instrument status directly
+        if ($this->instrument_status_id) {
+            $this->report->instrument->update(['status_id' => $this->instrument_status_id]);
         }
-
+        
         session()->flash('message', 'Defektmeldung wurde erfolgreich aktualisiert.');
         
         return redirect()->route('defect-reports.show', $this->report);
@@ -106,6 +117,11 @@ class EditDefectReport extends Component
         $instruments = Instrument::all(); // Alle Instrumente für Bearbeitung
         $operating_rooms = OperatingRoom::active()->get();
         $defectTypes = DefectType::active()->ordered()->get();
+        
+        // Stelle sicher, dass instrumentStatuses verfügbar sind
+        if (empty($this->instrumentStatuses)) {
+            $this->instrumentStatuses = \App\Models\InstrumentStatus::all();
+        }
         
         return view('livewire.defect-reports.edit-defect-report', compact('instruments', 'operating_rooms', 'defectTypes'));
     }

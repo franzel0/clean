@@ -23,7 +23,7 @@ class ShowInstrument extends Component
             'movements.toDepartment', 
             'movements.fromContainer',
             'movements.toContainer',
-            'movements.movedBy'
+            'movements.performedBy'
         ]);
     }
 

@@ -30,31 +30,12 @@
 
     <!-- Filter -->
     <div class="dashboard-card p-6 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <input type="text" 
                        wire:model.live="search" 
                        placeholder="Suchen..." 
                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            
-            <div>
-                <select wire:model.live="statusFilter" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Alle Status</option>
-                    @foreach($statuses as $status)
-                        <option value="{{ $status }}">
-                            @switch($status)
-                                @case('requested') Angefordert @break
-                                @case('approved') Genehmigt @break
-                                @case('ordered') Bestellt @break
-                                @case('received') Erhalten @break
-                                @case('completed') Abgeschlossen @break
-                                @default {{ $status }}
-                            @endswitch
-                        </option>
-                    @endforeach
-                </select>
             </div>
 
             <div>
@@ -88,8 +69,7 @@
                         <tr>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.order_number') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.instrument') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.report') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.status') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">Instrumentenstatus</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.requested_by') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.date') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.actions') }}</th>
@@ -113,26 +93,13 @@
                                     @endif
                                 </td>
                                 <td class="py-3 px-4">
-                                    @if($order->defectReport)
-                                        <div class="text-sm text-gray-900">{{ $order->defectReport->report_number }}</div>
-                                        <div class="text-xs text-gray-600">{{ $order->defectReport->defect_type_display }}</div>
+                                    @if($order->defectReport && $order->defectReport->instrument && $order->defectReport->instrument->instrumentStatus)
+                                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $order->defectReport->instrument->instrumentStatus->bg_class }} {{ $order->defectReport->instrument->instrumentStatus->text_class }}">
+                                            {{ $order->defectReport->instrument->instrumentStatus->name }}
+                                        </span>
                                     @else
-                                        <span class="text-gray-500">Keine Meldung</span>
+                                        <span class="text-gray-500 text-sm">-</span>
                                     @endif
-                                </td>
-                                <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
-                                        @if($order->status === 'requested') bg-yellow-100 text-yellow-800
-                                        @elseif($order->status === 'approved') bg-blue-100 text-blue-800
-                                        @elseif($order->status === 'ordered') bg-purple-100 text-purple-800
-                                        @elseif($order->status === 'shipped') bg-indigo-100 text-indigo-800
-                                        @elseif($order->status === 'received') bg-green-100 text-green-800
-                                        @elseif($order->status === 'completed') bg-green-100 text-green-800
-                                        @elseif($order->status === 'cancelled') bg-red-100 text-red-800
-                                        @else bg-gray-100 text-gray-800
-                                        @endif">
-                                        {{ $order->status_display }}
-                                    </span>
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="text-sm text-gray-900">{{ $order->requestedBy->name }}</div>
@@ -154,7 +121,7 @@
                                             PDF
                                         </button>
                                         
-                                        @if($order->status === 'ordered' && auth()->user()->role === 'procurement')
+                                        @if(is_null($order->received_at) && auth()->user()->role === 'procurement')
                                             <button wire:click="markAsReceived({{ $order->id }})" 
                                                     class="text-green-600 hover:text-green-800 text-sm">
                                                 Als erhalten markieren

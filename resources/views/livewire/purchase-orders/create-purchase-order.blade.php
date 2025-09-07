@@ -35,7 +35,7 @@
                     </svg>
                     <div class="invisible group-hover:visible absolute left-0 top-6 bg-gray-800 text-white text-xs rounded py-2 px-3 w-72 z-10 shadow-lg">
                         <strong>Angezeigte Defektmeldungen:</strong><br>
-                        • Status: "Bestätigt" oder "In Bearbeitung"<br>
+                        • Instrumentenstatus: "Defekt bestätigt"<br>
                         • Noch keiner Bestellung zugeordnet<br>
                         • Bereit für Ersatzbeschaffung
                     </div>
@@ -49,7 +49,7 @@
                     @foreach($defectReports as $report)
                         <option value="{{ $report->id }}">
                             {{ $report->instrument->name }} - {{ $report->instrument->serial_number }} 
-                            ({{ $report->created_at->format('d.m.Y') }}) - {{ $report->status_display }}
+                            ({{ $report->created_at->format('d.m.Y') }}) - {{ $report->instrument->instrumentStatus->name }}
                         </option>
                     @endforeach
                 @else
@@ -61,7 +61,7 @@
                     <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
                     </svg>
-                    Keine Defektmeldungen mit Status "Bestätigt" oder "In Bearbeitung" verfügbar.
+                    Keine Defektmeldungen mit Instrumentenstatus "Defekt bestätigt" verfügbar.
                 </p>
             @endif
             @error('defect_report_id')
@@ -160,19 +160,22 @@
             @enderror
         </div>
 
-        <!-- Status -->
+        <!-- Instrumentenstatus nach Bestellung -->
         <div class="mb-6">
             <label for="status_id" class="block text-sm font-medium text-gray-700 mb-2">
-                Status
+                Neuer Instrumentenstatus (optional)
             </label>
             <select wire:model="status_id" 
                     id="status_id" 
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <option value="">Status auswählen...</option>
-                @foreach($purchaseOrderStatuses as $status)
+                <option value="">Status beibehalten...</option>
+                @foreach($instrumentStatuses as $status)
                     <option value="{{ $status->id }}">{{ $status->name }}</option>
                 @endforeach
             </select>
+            <p class="mt-1 text-sm text-gray-500">
+                Wählen Sie einen neuen Status für das Instrument nach der Bestellung (z.B. "Ersatz bestellt").
+            </p>
             @error('status_id')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror

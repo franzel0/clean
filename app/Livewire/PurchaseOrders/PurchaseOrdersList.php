@@ -18,15 +18,9 @@ class PurchaseOrdersList extends Component
     use WithPagination;
 
     public $search = '';
-    public $statusFilter = '';
     public $departmentFilter = '';
 
     public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingStatusFilter()
     {
         $this->resetPage();
     }
@@ -39,7 +33,6 @@ class PurchaseOrdersList extends Component
     public function resetFilters()
     {
         $this->search = '';
-        $this->statusFilter = '';
         $this->departmentFilter = '';
         $this->resetPage();
     }
@@ -48,18 +41,20 @@ class PurchaseOrdersList extends Component
     {
         $order = PurchaseOrder::findOrFail($orderId);
         
-        // Get the "Geliefert" status
-        $receivedStatus = \App\Models\PurchaseOrderStatus::where('name', 'Geliefert')->first();
-        
+        // Update the received information
         $order->update([
-            'status_id' => $receivedStatus ? $receivedStatus->id : null,
             'received_at' => now(),
             'received_by' => Auth::user()->id,
         ]);
 
-        // Update defect report status
-        if ($order->defectReport) {
-            $order->defectReport->update(['status' => 'received']);
+        // Update defect report and instrument status to "Geliefert"
+        if ($order->defectReport && $order->defectReport->instrument) {
+            $receivedStatus = \App\Models\InstrumentStatus::where('name', 'Geliefert')->first();
+            if ($receivedStatus) {
+                $order->defectReport->instrument->update([
+                    'status_id' => $receivedStatus->id
+                ]);
+            }
         }
 
         session()->flash('message', 'Bestellung als erhalten markiert.');
@@ -86,12 +81,11 @@ class PurchaseOrdersList extends Component
     public function render()
     {
         $query = PurchaseOrder::with([
-            'defectReport.instrument',
+            'defectReport.instrument.instrumentStatus',
             'defectReport.reportingDepartment',
             'requestedBy',
             'receivedBy',
-            'manufacturer',
-            'purchaseOrderStatus'
+            'manufacturer'
         ])
         ->when($this->search, function ($query) {
             $query->whereHas('defectReport.instrument', function ($q) {
@@ -99,24 +93,6 @@ class PurchaseOrdersList extends Component
                   ->orWhere('serial_number', 'like', '%' . $this->search . '%');
             })
             ->orWhere('order_number', 'like', '%' . $this->search . '%');
-        })
-        ->when($this->statusFilter, function ($query) {
-            // Map the old status names to the new status_id system
-            $statusMap = [
-                'requested' => 'Angefragt',
-                'approved' => 'Freigegeben', 
-                'ordered' => 'Bestellt',
-                'shipped' => 'Versandt',
-                'received' => 'Geliefert',
-                'completed' => 'Abgeschlossen',
-                'cancelled' => 'Storniert',
-            ];
-            
-            if (isset($statusMap[$this->statusFilter])) {
-                $query->whereHas('purchaseOrderStatus', function ($q) use ($statusMap) {
-                    $q->where('name', $statusMap[$this->statusFilter]);
-                });
-            }
         })
         ->when($this->departmentFilter, function ($query) {
             $query->whereHas('defectReport', function ($q) {
@@ -126,12 +102,10 @@ class PurchaseOrdersList extends Component
 
         $orders = $query->latest()->paginate(15);
 
-        $statuses = ['requested', 'approved', 'ordered', 'shipped', 'received', 'completed', 'cancelled'];
         $departments = Department::active()->get();
 
         return view('livewire.purchase-orders.purchase-orders-list', compact(
             'orders',
-            'statuses',
             'departments'
         ));
     }

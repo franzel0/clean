@@ -30,7 +30,7 @@ class ShowPurchaseOrder extends Component
         $this->authorize('view', $order);
         
         $this->order = $order->load([
-            'defectReport.instrument',
+            'defectReport.instrument.instrumentStatus',
             'defectReport.reportedBy',
             'defectReport.reportingDepartment',
             'requestedBy',
@@ -82,46 +82,66 @@ class ShowPurchaseOrder extends Component
             return;
         }
 
-        // Finde den Status anhand der ID
-        $purchaseOrderStatus = \App\Models\PurchaseOrderStatus::find($this->newStatus);
-        if (!$purchaseOrderStatus) {
-            session()->flash('error', 'Status nicht gefunden.');
+        // Finde den Instrumentenstatus anhand der ID
+        $instrumentStatus = \App\Models\InstrumentStatus::find($this->newStatus);
+        if (!$instrumentStatus) {
+            session()->flash('error', 'Instrumentenstatus nicht gefunden.');
             return;
         }
 
-        $updateData = [
-            'status_id' => $purchaseOrderStatus->id
-        ];
+        // Aktualisiere den Instrumentenstatus über das DefectReport
+        if ($this->order->defectReport && $this->order->defectReport->instrument) {
+            Log::info('Updating instrument status to: ' . $instrumentStatus->name . ' (ID: ' . $instrumentStatus->id . ')');
+            
+            $this->order->defectReport->instrument->update([
+                'status_id' => $instrumentStatus->id
+            ]);
 
-        // Setze zusätzliche Felder basierend auf Status-Namen
-        switch ($purchaseOrderStatus->name) {
-            case 'Freigegeben':
-                $updateData['approved_at'] = now();
-                $updateData['approved_by'] = Auth::user()->id;
-                break;
-            case 'Bestellt':
-                $updateData['ordered_at'] = now();
-                break;
-            case 'Geliefert':
-                $updateData['received_at'] = now();
-                $updateData['received_by'] = Auth::user()->id;
-                // Update defect report status
-                if ($this->order->defectReport) {
-                    $this->order->defectReport->update(['status' => 'abgeschlossen']);
-                }
-                break;
-            case 'Abgeschlossen':
-                if ($this->order->defectReport) {
-                    $this->order->defectReport->update(['status' => 'abgeschlossen']);
-                }
-                break;
+            Log::info('Instrument status updated. New status ID: ' . $this->order->defectReport->instrument->fresh()->status_id);
+
+            // Setze zusätzliche Felder basierend auf Status-Namen
+            $updateData = [];
+            switch ($instrumentStatus->name) {
+                case 'Ersatz bestellt':
+                    Log::info('Processing "Ersatz bestellt" status');
+                    // Order date sollte bereits gesetzt sein, da die PurchaseOrder bereits existiert
+                    // Keine zusätzlichen Updates nötig
+                    break;
+                case 'Ersatz geliefert':
+                    Log::info('Processing "Ersatz geliefert" status');
+                    $updateData['received_at'] = now();
+                    $updateData['received_by'] = Auth::user()->id;
+                    // Update defect report resolution
+                    $this->order->defectReport->update([
+                        'is_resolved' => true,
+                        'resolved_at' => now(),
+                        'resolved_by' => Auth::id(),
+                        'resolution_notes' => 'Automatisch als gelöst markiert - Ersatzgerät geliefert'
+                    ]);
+                    break;
+                default:
+                    Log::info('Processing status: ' . $instrumentStatus->name);
+                    break;
+            }
+
+            // Aktualisiere Purchase Order falls zusätzliche Daten gesetzt wurden
+            if (!empty($updateData)) {
+                // Temporär Observer deaktivieren, um Status-Überschreibung zu vermeiden
+                \App\Models\PurchaseOrder::withoutEvents(function () use ($updateData) {
+                    $this->order->update($updateData);
+                });
+            }
+
+            $this->order->refresh();
+            $this->order->load(['defectReport.instrument.instrumentStatus']);
+
+            session()->flash('success', 'Instrumentenstatus erfolgreich auf "' . $instrumentStatus->name . '" geändert.');
+        } else {
+            session()->flash('error', 'Kein Instrument gefunden, um den Status zu ändern.');
         }
 
-        $this->order->update($updateData);
-        $this->order->refresh();
-        $this->closeModal();
-        
-        session()->flash('message', 'Status erfolgreich zu "' . $purchaseOrderStatus->name . '" geändert.');
+        $this->showStatusModal = false;
+        $this->newStatus = '';
     }
 
     public function updateDetails()
@@ -159,30 +179,29 @@ class ShowPurchaseOrder extends Component
 
     public function getAvailableStatusTransitions()
     {
-        // Lade alle aktiven Status aus der Datenbank
-        $allStatuses = \App\Models\PurchaseOrderStatus::active()->ordered()->get();
+        // Lade nur Status, die für Purchase Orders verfügbar sind
+        $instrumentStatuses = \App\Models\InstrumentStatus::availableInPurchaseOrders()
+            ->active()
+            ->orderBy('sort_order')
+            ->get();
         
-        // Aktueller Status der Bestellung
-        $currentStatusId = $this->order->status_id;
+        // Aktueller Instrumentenstatus
+        $currentStatusId = $this->order->defectReport?->instrument?->status_id;
         
         $availableTransitions = collect();
         
-        foreach ($allStatuses as $status) {
+        foreach ($instrumentStatuses as $status) {
             // Skip den aktuellen Status
             if ($status->id === $currentStatusId) {
-                continue;
-            }
-            
-            // Keine Übergänge von Endstatus (Abgeschlossen/Storniert)
-            if ($this->order->purchaseOrderStatus && 
-                in_array($this->order->purchaseOrderStatus->name, ['Abgeschlossen', 'Storniert'])) {
                 continue;
             }
             
             $availableTransitions->push([
                 'id' => $status->id,
                 'name' => $status->name,
-                'color' => $status->color
+                'color' => $status->color,
+                'bg_class' => $status->bg_class,
+                'text_class' => $status->text_class
             ]);
         }
         
@@ -220,19 +239,23 @@ class ShowPurchaseOrder extends Component
         }, 'bestellung-' . $order->order_number . '.pdf');
     }
 
+    public function getStatusDisplayName($statusId)
+    {
+        if (empty($statusId)) {
+            return 'Unbekannt';
+        }
+
+        $status = \App\Models\InstrumentStatus::find($statusId);
+        return $status ? $status->name : 'Unbekannt';
+    }
+
     public function render()
     {
         $manufacturers = Manufacturer::active()->ordered()->get();
         
-        // Lade verfügbare Status-Übergänge basierend auf dem aktuellen Status
+        // Lade verfügbare Status-Übergänge basierend auf dem aktuellen Instrumentenstatus
         $availableStatuses = $this->getAvailableStatusTransitions();
 
         return view('livewire.purchase-orders.show-purchase-order', compact('manufacturers', 'availableStatuses'));
-    }
-    
-    public function getStatusDisplayName($statusId)
-    {
-        $status = \App\Models\PurchaseOrderStatus::find($statusId);
-        return $status ? $status->name : 'Unbekannt';
     }
 }

@@ -99,25 +99,27 @@ class Container extends Model
 
     public function updateStatusBasedOnInstruments(): void
     {
-        $hasDefectiveInstruments = $this->instruments()
-            ->whereIn('status_id', [3, 4, 5, 6]) // Wartung, Außer Betrieb, Verloren/Vermisst, Aussortiert
-            ->exists();
-
-        // Get the appropriate status IDs from ContainerStatus
-        $completeStatusId = ContainerStatus::where('name', 'Steril')->first()?->id ?? 1;
-        $incompleteStatusId = ContainerStatus::where('name', 'Wartung')->first()?->id ?? 4;
+        // Benutze den neuen InstrumentStatusService
+        $statusService = app(\App\Services\InstrumentStatusService::class);
+        $newStatusName = $statusService->calculateContainerStatus($this);
         
-        $newStatusId = $hasDefectiveInstruments ? $incompleteStatusId : $completeStatusId;
-
-        if ($this->status_id !== $newStatusId) {
-            $this->update(['status_id' => $newStatusId]);
+        $newStatus = \App\Models\ContainerStatus::where('name', $newStatusName)->first();
+        
+        if ($newStatus && $this->status_id !== $newStatus->id) {
+            $this->update(['status_id' => $newStatus->id]);
         }
     }
 
     public function getUnavailableInstrumentsCountAttribute(): int
     {
+        // Status-IDs für nicht verfügbare Instrumente (basierend auf den neuen Status)
+        $unavailableStatusIds = \App\Models\InstrumentStatus::whereIn('name', [
+            'Defekt gemeldet', 'Defekt bestätigt', 'In Reparatur', 
+            'Aussortiert', 'Verloren/Vermisst', 'In Wartung'
+        ])->pluck('id')->toArray();
+        
         return $this->instruments()
-            ->whereIn('status_id', [3, 4, 5, 6]) // Wartung, Außer Betrieb, Verloren/Vermisst, Aussortiert
+            ->whereIn('status_id', $unavailableStatusIds)
             ->count();
     }
 

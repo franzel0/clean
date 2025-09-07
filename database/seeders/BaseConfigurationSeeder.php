@@ -9,7 +9,6 @@ use App\Models\InstrumentStatus;
 use App\Models\ContainerType;
 use App\Models\ContainerStatus;
 use App\Models\DefectType;
-use App\Models\PurchaseOrderStatus;
 use App\Models\Manufacturer;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -28,7 +27,6 @@ class BaseConfigurationSeeder extends Seeder
         $this->createContainerTypes();
         $this->createContainerStatuses();
         $this->createDefectTypes();
-        $this->createPurchaseOrderStatuses();
         $this->createManufacturers();
         $this->createDepartments();
         $this->createOperatingRooms();
@@ -65,7 +63,10 @@ class BaseConfigurationSeeder extends Seeder
         ];
 
         foreach ($statuses as $status) {
-            InstrumentStatus::create($status);
+            InstrumentStatus::firstOrCreate(
+                ['name' => $status['name']], 
+                $status
+            );
         }
     }
 
@@ -109,22 +110,6 @@ class BaseConfigurationSeeder extends Seeder
 
         foreach ($types as $type) {
             DefectType::create($type);
-        }
-    }
-
-    private function createPurchaseOrderStatuses(): void
-    {
-        $statuses = [
-            ['name' => 'Entwurf', 'color' => '#6B7280', 'sort_order' => 10, 'is_active' => true],
-            ['name' => 'Freigegeben', 'color' => '#3B82F6', 'sort_order' => 20, 'is_active' => true],
-            ['name' => 'Bestellt', 'color' => '#F59E0B', 'sort_order' => 30, 'is_active' => true],
-            ['name' => 'Geliefert', 'color' => '#10B981', 'sort_order' => 40, 'is_active' => true],
-            ['name' => 'Abgeschlossen', 'color' => '#059669', 'sort_order' => 50, 'is_active' => true],
-            ['name' => 'Storniert', 'color' => '#EF4444', 'sort_order' => 60, 'is_active' => true],
-        ];
-
-        foreach ($statuses as $status) {
-            PurchaseOrderStatus::create($status);
         }
     }
 

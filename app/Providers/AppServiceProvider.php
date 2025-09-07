@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\DefectReport;
+use App\Models\PurchaseOrder;
+use App\Observers\DefectReportObserver;
+use App\Observers\PurchaseOrderObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register Observers für automatische Status-Updates
+        DefectReport::observe(DefectReportObserver::class);
+        PurchaseOrder::observe(PurchaseOrderObserver::class);
     }
 }

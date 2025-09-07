@@ -141,7 +141,7 @@
                 <div class="p-6">
                     <div class="flow-root">
                         <ul role="list" class="-mb-8">
-                            @foreach($instrument->movements->sortByDesc('moved_at')->take(10) as $movement)
+                            @foreach($instrument->movements->sortByDesc('performed_at')->take(10) as $movement)
                             <li>
                                 <div class="relative pb-8">
                                     @if(!$loop->last)
@@ -179,8 +179,8 @@
                                                     {{ $movement->movement_type_display }}
                                                 </p>
                                                 <p class="text-sm text-gray-500">
-                                                    {{ $movement->moved_at->format('d.m.Y H:i') }} • 
-                                                    {{ $movement->movedBy->name }}
+                                                    {{ $movement->performed_at->format('d.m.Y H:i') }} • 
+                                                    {{ $movement->performedBy->name }}
                                                 </p>
                                             </div>
                                             <div class="mt-2 text-sm text-gray-700">

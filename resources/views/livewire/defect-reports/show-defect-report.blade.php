@@ -34,8 +34,8 @@
             <div class="p-6">
                 <!-- Status Badge -->
                 <div class="mb-6">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border-2 outline outline-2 outline-offset-2 {{ $report->status_badge_class }} border-current">
-                        {{ $report->status_display }}
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border-2 outline outline-2 outline-offset-2 {{ $report->instrument->instrumentStatus->bg_class }} {{ $report->instrument->instrumentStatus->text_class }} border-current">
+                        {{ $report->instrument->instrumentStatus->name }}
                     </span>
                 </div>
 

@@ -19,13 +19,14 @@ class DefectReport extends Model
         'reporting_department_id',
         'description',
         'severity',
-        'status',
         'reported_at',
         'assigned_to',
         'resolved_at',
+        'resolved_by',
         'resolution_notes',
         'repair_cost',
         'photos',
+        'is_resolved',
     ];
 
     protected $casts = [
@@ -77,24 +78,14 @@ class DefectReport extends Model
 
     public function getStatusDisplayAttribute(): string
     {
-        return match($this->status) {
-            'offen' => 'Offen',
-            'in_bearbeitung' => 'In Bearbeitung',
-            'abgeschlossen' => 'Abgeschlossen',
-            'abgelehnt' => 'Abgelehnt',
-            default => ucfirst($this->status),
-        };
+        return $this->is_resolved ? 'Gelöst' : 'Offen';
     }
 
     public function getStatusBadgeClassAttribute(): string
     {
-        return match($this->status) {
-            'offen' => 'bg-red-100 text-red-800',
-            'in_bearbeitung' => 'bg-blue-100 text-blue-800',
-            'abgeschlossen' => 'bg-green-100 text-green-800',
-            'abgelehnt' => 'bg-gray-100 text-gray-800',
-            default => 'bg-gray-100 text-gray-800',
-        };
+        return $this->is_resolved 
+            ? 'bg-green-100 text-green-800' 
+            : 'bg-red-100 text-red-800';
     }
 
     public function getSeverityDisplayAttribute(): string

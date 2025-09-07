@@ -15,7 +15,7 @@ class ShowDefectReport extends Component
 
     public function mount(DefectReport $report)
     {
-        $this->report = $report->load(['defectType', 'instrument', 'reportedBy', 'reportingDepartment']);
+        $this->report = $report->load(['defectType', 'instrument.instrumentStatus', 'reportedBy', 'reportingDepartment']);
     }
 
     public function render()

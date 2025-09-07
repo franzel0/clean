@@ -24,16 +24,8 @@
                 <select wire:model.live="statusFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     <option value="">{{ __('messages.all_status') }}</option>
-                    @foreach($statuses as $status)
-                        <option value="{{ $status }}">
-                            @switch($status)
-                                @case('offen') Offen @break
-                                @case('in_bearbeitung') In Bearbeitung @break
-                                @case('abgeschlossen') Abgeschlossen @break
-                                @case('abgelehnt') Abgelehnt @break
-                                @default {{ $status }}
-                            @endswitch
-                        </option>
+                    @foreach($statuses as $value => $label)
+                        <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
@@ -111,8 +103,8 @@
                                     </span>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $report->status_badge_class }}">
-                                        {{ $report->status_display }}
+                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $report->instrument->instrumentStatus->bg_class }} {{ $report->instrument->instrumentStatus->text_class }}">
+                                        {{ $report->instrument->instrumentStatus->name }}
                                     </span>
                                 </td>
                                 <td class="py-3 px-4">

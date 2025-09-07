@@ -68,10 +68,6 @@ return new class extends Migration
             $table->unique(['name']);
         });
 
-        Schema::table('purchase_order_statuses', function (Blueprint $table) {
-            $table->unique(['name']);
-        });
-
         Schema::table('manufacturers', function (Blueprint $table) {
             $table->unique(['name']);
         });
@@ -92,10 +88,6 @@ return new class extends Migration
         });
 
         Schema::table('manufacturers', function (Blueprint $table) {
-            $table->dropUnique(['name']);
-        });
-
-        Schema::table('purchase_order_statuses', function (Blueprint $table) {
             $table->dropUnique(['name']);
         });
 

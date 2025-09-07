@@ -71,11 +71,11 @@ class InstrumentMovement extends Model
     public function getMovementTypeDisplayAttribute(): string
     {
         return match($this->movement_type) {
-            'dispatch' => 'Ausgabe',
-            'return' => 'Rückgabe',
-            'transfer' => 'Transfer',
-            'sterilization' => 'Sterilisation',
-            'repair' => 'Reparatur',
+            'location_change' => 'Standortwechsel',
+            'container_assignment' => 'Container-Zuweisung',
+            'container_removal' => 'Container-Entfernung',
+            'status_change' => 'Status-Änderung',
+            'maintenance' => 'Wartung',
             default => ucfirst($this->movement_type),
         };
     }

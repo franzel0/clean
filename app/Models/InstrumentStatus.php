@@ -2,24 +2,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InstrumentStatus extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
         'description',
         'color',
         'is_active',
         'sort_order',
+        'available_in_purchase_orders',
+        'available_in_defect_reports',
+        'available_in_instruments',
+        'available_in_containers',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'available_in_purchase_orders' => 'boolean',
+        'available_in_defect_reports' => 'boolean',
+        'available_in_instruments' => 'boolean',
+        'available_in_containers' => 'boolean',
     ];
 
     public function instruments(): HasMany
@@ -30,6 +35,26 @@ class InstrumentStatus extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeAvailableInPurchaseOrders($query)
+    {
+        return $query->where('available_in_purchase_orders', true);
+    }
+
+    public function scopeAvailableInDefectReports($query)
+    {
+        return $query->where('available_in_defect_reports', true);
+    }
+
+    public function scopeAvailableInInstruments($query)
+    {
+        return $query->where('available_in_instruments', true);
+    }
+
+    public function scopeAvailableInContainers($query)
+    {
+        return $query->where('available_in_containers', true);
     }
 
     public function scopeOrdered($query)
