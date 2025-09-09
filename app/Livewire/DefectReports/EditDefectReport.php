@@ -26,7 +26,7 @@ class EditDefectReport extends Component
     public $defect_type_id = '';
     public $description = '';
     public $severity = 'mittel';
-    public $is_resolved = false;
+    public $is_completed = false;
     public $resolution_notes = '';
     public $photos = [];
     public $existing_photos = [];
@@ -43,7 +43,7 @@ class EditDefectReport extends Component
         'defect_type_id' => 'required|exists:defect_types,id',
         'description' => 'required|string|min:10',
         'severity' => 'required|in:niedrig,mittel,hoch,kritisch',
-        'is_resolved' => 'boolean',
+        'is_completed' => 'boolean',
         'resolution_notes' => 'nullable|string',
         'photos.*' => 'nullable|image|max:2048',
         'instrument_status_id' => 'required|exists:instrument_statuses,id',
@@ -58,7 +58,7 @@ class EditDefectReport extends Component
         $this->defect_type_id = $report->defect_type_id;
         $this->description = $report->description;
         $this->severity = $report->severity;
-        $this->is_resolved = $report->is_resolved ?? false;
+        $this->is_completed = $report->is_completed ?? false;
         $this->resolution_notes = $report->resolution_notes ?? '';
         $this->existing_photos = $report->photos ?? [];
         
@@ -95,19 +95,25 @@ class EditDefectReport extends Component
             'defect_type_id' => $this->defect_type_id,
             'description' => $this->description,
             'severity' => $this->severity,
-            'is_resolved' => $this->is_resolved,
+            'is_completed' => $this->is_completed,
             'resolution_notes' => $this->resolution_notes,
-            'resolved_at' => $this->is_resolved ? now() : null,
-            'resolved_by' => $this->is_resolved ? Auth::id() : null,
+            'resolved_at' => $this->is_completed ? now() : null,
+            'resolved_by' => $this->is_completed ? Auth::id() : null,
             'photos' => $photoUrls,
         ]);
 
-        // Update instrument status via MovementService if changed
+        // Update instrument status directly if changed
         if ($this->instrument_status_id && $this->instrument_status_id != $this->report->instrument->status_id) {
-            \App\Services\MovementService::logMovement(
+            $oldStatusId = $this->report->instrument->status_id;
+            
+            // Update instrument status directly
+            $this->report->instrument->update(['status_id' => $this->instrument_status_id]);
+            
+            // Log movement without updating instrument again
+            \App\Services\MovementService::logMovementOnly(
                 instrument: $this->report->instrument,
                 movementType: 'status_change',
-                statusBefore: $this->report->instrument->status_id,
+                statusBefore: $oldStatusId,
                 statusAfter: $this->instrument_status_id,
                 notes: 'Status aktualisiert via Defektmeldung: ' . $this->report->report_number,
                 movedBy: Auth::user()->id

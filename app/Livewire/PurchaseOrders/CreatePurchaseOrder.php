@@ -90,14 +90,20 @@ class CreatePurchaseOrder extends Component
             'order_date' => now(),
         ]);
 
-        // Update instrument status via MovementService if selected
+        // Update instrument status directly if selected
         if (!empty($this->status_id)) {
             $defectReport = DefectReport::find($this->defect_report_id);
             if ($defectReport && $defectReport->instrument && $defectReport->instrument->status_id != $this->status_id) {
-                \App\Services\MovementService::logMovement(
+                $oldStatusId = $defectReport->instrument->status_id;
+                
+                // Update instrument status directly
+                $defectReport->instrument->update(['status_id' => $this->status_id]);
+                
+                // Log movement without updating instrument again
+                \App\Services\MovementService::logMovementOnly(
                     instrument: $defectReport->instrument,
                     movementType: 'status_change',
-                    statusBefore: $defectReport->instrument->status_id,
+                    statusBefore: $oldStatusId,
                     statusAfter: $this->status_id,
                     notes: 'Status aktualisiert via neue Bestellung: ' . $purchaseOrder->order_number,
                     movedBy: Auth::user()->id

@@ -19,7 +19,6 @@
                 Passwort
             </a>
             
-            <!-- Erscheinungsbild temporär deaktiviert
             <a href="{{ route('settings.appearance') }}" 
                wire:navigate
                class="flex items-center px-3 py-2 text-sm font-medium rounded-md {{ request()->routeIs('settings.appearance') ? 'bg-blue-100 text-blue-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
@@ -28,7 +27,6 @@
                 </svg>
                 Erscheinungsbild
             </a>
-            -->
         </nav>
     </div>
 

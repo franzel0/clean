@@ -5,6 +5,7 @@ namespace App\Livewire\Containers;
 use App\Models\Container;
 use App\Models\Instrument;
 use App\Models\InstrumentStatus;
+use App\Models\ContainerStatisticsSetting;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -18,9 +19,7 @@ class ShowContainer extends Component
     public $showAssignModal = false;
     public $availableInstruments;
     public $statistics = [];
-    // entfernt, doppelt
-
-    // entfernt, doppelt
+    public $statisticsCards = [];
 
     public function mount(Container $container)
     {
@@ -47,32 +46,42 @@ class ShowContainer extends Component
 
     private function calculateStatistics()
     {
-        // Verwende den InstrumentStatusService für konsistente Statistiken
-        $statusService = app(\App\Services\InstrumentStatusService::class);
         $instruments = $this->container->instruments;
 
         // Hole alle Status-Namen und gruppiere Instrumente
         $statusCounts = $instruments->groupBy(function($instrument) {
-            return $instrument->instrumentStatus?->name ?? 'Unbekannt';
+            return $instrument->instrumentStatus?->id ?? 0;
         })->map->count();
 
-        // Kategorisiere die Status
-        $available = $statusCounts->get('Verfügbar', 0);
-        $inUse = $statusCounts->get('In Betrieb', 0) + $statusCounts->get('Im Einsatz', 0);
-        $inRepair = $statusCounts->get('In Reparatur', 0);
-        $defective = $statusCounts->get('Defekt gemeldet', 0) + 
-                    $statusCounts->get('Defekt bestätigt', 0) + 
-                    $statusCounts->get('Außer Betrieb', 0) +
-                    $statusCounts->get('Ersatz bestellt', 0);
-        $other = $instruments->count() - $available - $inUse - $inRepair - $defective;
+        // Lade aktive Container-Statistik-Einstellungen
+        $activeSettings = ContainerStatisticsSetting::where('is_active', true)
+            ->with('instrumentStatus')
+            ->orderBy('sort_order')
+            ->get();
 
+        // Erstelle Karten basierend auf den Einstellungen
+        $this->statisticsCards = $activeSettings->map(function($setting) use ($statusCounts) {
+            $count = $statusCounts->get($setting->instrument_status_id, 0);
+            
+            return [
+                'display_name' => $setting->display_name,
+                'count' => $count,
+                'color' => $setting->color,
+                'status_name' => $setting->instrumentStatus?->name ?? 'Unbekannt'
+            ];
+        })->toArray();
+
+        // Backward compatibility - behalte alte Statistik-Struktur für andere Teile der App
         $this->statistics = [
             'total' => $instruments->count(),
-            'available' => $available,
-            'in_use' => $inUse,
-            'in_repair' => $inRepair,
-            'defective' => $defective,
-            'other' => max(0, $other), // Verhindere negative Zahlen
+            'available' => $statusCounts->get($this->getStatusIdByName('Verfügbar'), 0),
+            'in_use' => $statusCounts->get($this->getStatusIdByName('In Betrieb'), 0) + 
+                       $statusCounts->get($this->getStatusIdByName('Im Einsatz'), 0),
+            'in_repair' => $statusCounts->get($this->getStatusIdByName('In Reparatur'), 0),
+            'defective' => $statusCounts->get($this->getStatusIdByName('Defekt gemeldet'), 0) + 
+                          $statusCounts->get($this->getStatusIdByName('Defekt bestätigt'), 0) + 
+                          $statusCounts->get($this->getStatusIdByName('Außer Betrieb'), 0) +
+                          $statusCounts->get($this->getStatusIdByName('Ersatz bestellt'), 0),
             'status_breakdown' => $statusCounts->toArray()
         ];
 
@@ -81,6 +90,18 @@ class ShowContainer extends Component
             'container_id' => $this->container->id,
             'statistics' => $this->statistics
         ]);
+    }
+
+    private function getStatusIdByName($name)
+    {
+        static $statusIds = [];
+        
+        if (!isset($statusIds[$name])) {
+            $status = InstrumentStatus::where('name', $name)->first();
+            $statusIds[$name] = $status?->id ?? 0;
+        }
+        
+        return $statusIds[$name];
     }
 
     public $instrumentFilter = '';

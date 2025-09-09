@@ -22,6 +22,7 @@ class ShowPurchaseOrder extends Component
     public $manufacturer_id = '';
     public $expectedDelivery = '';
     public $instrumentStatusId = '';
+    public $is_completed = false;
 
     public function mount(PurchaseOrder $order)
     {
@@ -43,6 +44,7 @@ class ShowPurchaseOrder extends Component
         $this->notes = $this->order->notes;
         $this->expectedDelivery = $this->order->expected_delivery;
         $this->instrumentStatusId = $this->order->defectReport?->instrument?->status_id ?? '';
+        $this->is_completed = $this->order->is_completed ?? false;
     }
 
     public function toggleStatusDropdown()
@@ -61,6 +63,7 @@ class ShowPurchaseOrder extends Component
             'expectedDelivery' => 'nullable|date|after_or_equal:today',
             'notes' => 'nullable|string|max:2000', // Limit für Notes
             'instrumentStatusId' => 'nullable|exists:instrument_statuses,id',
+            'is_completed' => 'boolean',
         ], [
             'manufacturer_id.exists' => 'Bitte wählen Sie einen gültigen Hersteller aus.',
             'actualCost.numeric' => 'Die tatsächlichen Kosten müssen eine Zahl sein.',
@@ -77,6 +80,7 @@ class ShowPurchaseOrder extends Component
             'actual_cost' => $this->actualCost,
             'expected_delivery' => $this->expectedDelivery,
             'notes' => $this->notes,
+            'is_completed' => $this->is_completed,
         ]);
 
         // Instrumentenstatus aktualisieren falls vorhanden

@@ -10,6 +10,7 @@ use App\Models\ContainerType;
 use App\Models\ContainerStatus;
 use App\Models\DefectType;
 use App\Models\Manufacturer;
+use App\Models\ContainerStatisticsSetting;
 use Livewire\Component;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
@@ -18,6 +19,17 @@ class SettingsIndex extends Component
     use AuthorizesRequests;
 
     public $activeTab = 'instrument-categories';
+    
+    // Container Statistics Settings
+    public $containerStatsSettings = [];
+    public $availableStatuses = [];
+    public $colorOptions = [
+        'green' => 'Grün',
+        'yellow' => 'Gelb', 
+        'red' => 'Rot',
+        'blue' => 'Blau',
+        'gray' => 'Grau'
+    ];
     
     // Active item editing
     public $editingItem = null;
@@ -101,6 +113,8 @@ class SettingsIndex extends Component
     public function mount()
     {
         $this->authorize('viewAny', \App\Models\User::class);
+        $this->loadContainerStatsSettings();
+        $this->availableStatuses = InstrumentStatus::orderBy('name')->get();
     }
 
     public function render()
@@ -490,6 +504,7 @@ class SettingsIndex extends Component
             'instrument-statuses' => 'Instrument-Status',
             'container-types' => 'Container-Arten',
             'container-statuses' => 'Container-Status',
+            'container-statistics' => 'Container-Statistiken',
             'defect-types' => 'Defekt-Arten',
             'manufacturers' => 'Hersteller',
             'operating-rooms' => 'OP-Säle',
@@ -501,5 +516,72 @@ class SettingsIndex extends Component
     public function getDepartments()
     {
         return Department::active()->orderBy('name')->get();
+    }
+
+    // Container Statistics Settings Methods
+    private function loadContainerStatsSettings()
+    {
+        $this->containerStatsSettings = ContainerStatisticsSetting::with('instrumentStatus')
+            ->orderBy('sort_order')
+            ->get()
+            ->toArray();
+        
+        // Ensure we always have 4 cards
+        while (count($this->containerStatsSettings) < 4) {
+            $cardNumber = count($this->containerStatsSettings) + 1;
+            $this->containerStatsSettings[] = [
+                'id' => null,
+                'card_name' => 'card_' . $cardNumber,
+                'instrument_status_id' => '',
+                'display_name' => '',
+                'color' => 'gray',
+                'is_active' => true,
+                'sort_order' => $cardNumber
+            ];
+        }
+    }
+
+    public function saveContainerStatsSettings()
+    {
+        try {
+            foreach ($this->containerStatsSettings as $index => $setting) {
+                if (!empty($setting['instrument_status_id'])) {
+                    ContainerStatisticsSetting::updateOrCreate(
+                        ['card_name' => $setting['card_name']],
+                        [
+                            'instrument_status_id' => $setting['instrument_status_id'],
+                            'display_name' => $setting['display_name'],
+                            'color' => $setting['color'],
+                            'is_active' => $setting['is_active'] ?? true,
+                            'sort_order' => $index + 1
+                        ]
+                    );
+                }
+            }
+            
+            session()->flash('message', 'Container-Statistik-Einstellungen erfolgreich gespeichert.');
+            $this->loadContainerStatsSettings();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Fehler beim Speichern: ' . $e->getMessage());
+        }
+    }
+
+    public function resetContainerStatsSettings()
+    {
+        try {
+            // Lösche alle bestehenden Einstellungen
+            ContainerStatisticsSetting::truncate();
+            
+            // Lade Standard-Einstellungen
+            $defaults = ContainerStatisticsSetting::getDefaultSettings();
+            foreach ($defaults as $default) {
+                ContainerStatisticsSetting::create($default);
+            }
+            
+            $this->loadContainerStatsSettings();
+            session()->flash('message', 'Container-Statistik-Einstellungen auf Standard zurückgesetzt.');
+        } catch (\Exception $e) {
+            session()->flash('error', 'Fehler beim Zurücksetzen: ' . $e->getMessage());
+        }
     }
 }

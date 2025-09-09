@@ -30,7 +30,7 @@ beforeEach(function () {
 it('updates instrument status when defect report is created', function () {
     $defectReport = DefectReport::factory()->create([
         'instrument_id' => $this->instrument->id,
-        'is_resolved' => false,
+        'is_completed' => false,
     ]);
 
     $this->service->updateStatusOnDefectReport($defectReport);
@@ -42,13 +42,13 @@ it('updates instrument status when defect report is resolved', function () {
     // First create a defect and set status
     $defectReport = DefectReport::factory()->create([
         'instrument_id' => $this->instrument->id,
-        'is_resolved' => false,
+        'is_completed' => false,
     ]);
     
     $this->instrument->update(['status_id' => $this->defectReportedStatus->id]);
     
     // Now resolve the defect
-    $defectReport->update(['is_resolved' => true]);
+    $defectReport->update(['is_completed' => true]);
     $this->service->updateStatusOnDefectReport($defectReport);
 
     expect($this->instrument->fresh()->status_id)->toBe($this->availableStatus->id);
@@ -58,7 +58,7 @@ it('handles multiple defect reports correctly', function () {
     // Create first defect report
     $defectReport1 = DefectReport::factory()->create([
         'instrument_id' => $this->instrument->id,
-        'is_resolved' => false,
+        'is_completed' => false,
     ]);
     
     $this->service->updateStatusOnDefectReport($defectReport1);
@@ -67,16 +67,16 @@ it('handles multiple defect reports correctly', function () {
     // Create second defect report
     $defectReport2 = DefectReport::factory()->create([
         'instrument_id' => $this->instrument->id,
-        'is_resolved' => false,
+        'is_completed' => false,
     ]);
     
     // Resolve first report - status should still be "Defekt gemeldet" because second is open
-    $defectReport1->update(['is_resolved' => true]);
+    $defectReport1->update(['is_completed' => true]);
     $this->service->updateStatusOnDefectReport($defectReport1);
     expect($this->instrument->fresh()->status_id)->toBe($this->defectReportedStatus->id);
     
     // Resolve second report - now status should be "Verfügbar"
-    $defectReport2->update(['is_resolved' => true]);
+    $defectReport2->update(['is_completed' => true]);
     $this->service->updateStatusOnDefectReport($defectReport2);
     expect($this->instrument->fresh()->status_id)->toBe($this->availableStatus->id);
 });

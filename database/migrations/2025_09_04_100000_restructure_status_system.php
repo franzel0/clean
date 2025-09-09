@@ -72,11 +72,8 @@ return new class extends Migration
 
         // 5. Füge Workflow-Felder zu defect_reports hinzu (falls noch nicht vorhanden)
         Schema::table('defect_reports', function (Blueprint $table) {
-            if (!Schema::hasColumn('defect_reports', 'is_resolved')) {
-                $table->boolean('is_resolved')->default(false)->after('severity');
-            }
             if (!Schema::hasColumn('defect_reports', 'resolved_at')) {
-                $table->timestamp('resolved_at')->nullable()->after('is_resolved');
+                $table->timestamp('resolved_at')->nullable()->after('severity');
             }
             if (!Schema::hasColumn('defect_reports', 'resolved_by')) {
                 $table->foreignId('resolved_by')->nullable()->constrained('users')->onDelete('set null')->after('resolved_at');
@@ -120,7 +117,7 @@ return new class extends Migration
             if (Schema::hasColumn('defect_reports', 'resolved_by')) {
                 $table->dropForeign(['resolved_by']);
             }
-            $table->dropColumn(['is_resolved', 'resolved_at', 'resolved_by', 'resolution_notes']);
+            $table->dropColumn(['resolved_at', 'resolved_by', 'resolution_notes']);
         });
 
         // Füge status_id wieder zu defect_reports hinzu  

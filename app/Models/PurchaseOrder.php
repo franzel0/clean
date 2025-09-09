@@ -26,6 +26,7 @@ class PurchaseOrder extends Model
         'total_amount',
         'notes',
         'received_at',
+        'is_completed',
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class PurchaseOrder extends Model
         'expected_delivery' => 'date',
         'delivery_date' => 'date',
         'received_at' => 'datetime',
+        'is_completed' => 'boolean',
     ];
 
     public function defectReport(): BelongsTo

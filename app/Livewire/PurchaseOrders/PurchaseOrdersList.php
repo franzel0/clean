@@ -19,6 +19,7 @@ class PurchaseOrdersList extends Component
 
     public $search = '';
     public $departmentFilter = '';
+    public $completionFilter = '';
 
     public function updatingSearch()
     {
@@ -30,10 +31,16 @@ class PurchaseOrdersList extends Component
         $this->resetPage();
     }
 
+    public function updatingCompletionFilter()
+    {
+        $this->resetPage();
+    }
+
     public function resetFilters()
     {
         $this->search = '';
         $this->departmentFilter = '';
+        $this->completionFilter = '';
         $this->resetPage();
     }
 
@@ -98,6 +105,13 @@ class PurchaseOrdersList extends Component
             $query->whereHas('defectReport', function ($q) {
                 $q->where('reporting_department_id', $this->departmentFilter);
             });
+        })
+        ->when($this->completionFilter, function ($query) {
+            if ($this->completionFilter === 'active') {
+                $query->where('is_completed', false);
+            } elseif ($this->completionFilter === 'completed') {
+                $query->where('is_completed', true);
+            }
         });
 
         $orders = $query->latest()->paginate(15);

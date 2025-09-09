@@ -26,7 +26,7 @@ class DefectReport extends Model
         'resolution_notes',
         'repair_cost',
         'photos',
-        'is_resolved',
+        'is_completed',
     ];
 
     protected $casts = [
@@ -34,6 +34,7 @@ class DefectReport extends Model
         'resolved_at' => 'datetime',
         'repair_cost' => 'decimal:2',
         'photos' => 'array',
+        'is_completed' => 'boolean',
     ];
 
     protected $appends = [
@@ -82,9 +83,9 @@ class DefectReport extends Model
 
     public function getStatusDisplayAttribute(): string
     {
-        // Verwende is_resolved als maßgeblich für den Status
-        if ($this->is_resolved) {
-            return 'Gelöst';
+        // Verwende is_completed als maßgeblich für den Status
+        if ($this->is_completed) {
+            return 'Abgeschlossen';
         }
         
         // Prüfe ob eine Bestellung existiert
@@ -105,7 +106,7 @@ class DefectReport extends Model
 
     public function getStatusBadgeClassAttribute(): string
     {
-        return $this->is_resolved 
+        return $this->is_completed 
             ? 'bg-green-100 text-green-800' 
             : 'bg-red-100 text-red-800';
     }

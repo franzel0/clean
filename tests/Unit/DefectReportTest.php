@@ -27,7 +27,7 @@ it('can create a defect report', function () {
         'defect_type_id' => $this->defectType->id,
         'description' => 'Test defect description',
         'severity' => 'hoch',
-        'is_resolved' => false,
+        'is_completed' => false,
     ]);
 
     expect($report->instrument_id)->toBe($this->instrument->id)
@@ -35,7 +35,7 @@ it('can create a defect report', function () {
         ->and($report->reporting_department_id)->toBe($this->department->id)
         ->and($report->description)->toBe('Test defect description')
         ->and($report->severity)->toBe('hoch')
-        ->and($report->is_resolved)->toBeFalse();
+        ->and($report->is_completed)->toBeFalse();
 });
 
 it('has correct relationships', function () {
@@ -52,33 +52,33 @@ it('has correct relationships', function () {
         ->and($report->defectType)->toBeInstanceOf(DefectType::class);
 });
 
-it('generates correct status display based on resolution', function () {
-    $openReport = DefectReport::factory()->create(['is_resolved' => false]);
-    $resolvedReport = DefectReport::factory()->create(['is_resolved' => true]);
+it('generates correct status display based on completion', function () {
+    $openReport = DefectReport::factory()->create(['is_completed' => false]);
+    $completedReport = DefectReport::factory()->create(['is_completed' => true]);
 
     expect($openReport->status_display)->toBe('Offen')
-        ->and($resolvedReport->status_display)->toBe('Gelöst');
+        ->and($completedReport->status_display)->toBe('Abgeschlossen');
 });
 
 it('generates correct status badge classes', function () {
-    $openReport = DefectReport::factory()->create(['is_resolved' => false]);
-    $resolvedReport = DefectReport::factory()->create(['is_resolved' => true]);
+    $openReport = DefectReport::factory()->create(['is_completed' => false]);
+    $completedReport = DefectReport::factory()->create(['is_completed' => true]);
 
     expect($openReport->status_badge_class)->toBe('bg-red-100 text-red-800')
-        ->and($resolvedReport->status_badge_class)->toBe('bg-green-100 text-green-800');
+        ->and($completedReport->status_badge_class)->toBe('bg-green-100 text-green-800');
 });
 
-it('can be resolved with notes', function () {
-    $report = DefectReport::factory()->create(['is_resolved' => false]);
+it('can be completed with notes', function () {
+    $report = DefectReport::factory()->create(['is_completed' => false]);
     
     $report->update([
-        'is_resolved' => true,
+        'is_completed' => true,
         'resolved_at' => now(),
         'resolved_by' => $this->user->id,
         'resolution_notes' => 'Fixed by replacing damaged part'
     ]);
 
-    expect($report->fresh()->is_resolved)->toBeTrue()
+    expect($report->fresh()->is_completed)->toBeTrue()
         ->and($report->fresh()->resolved_at)->not->toBeNull()
         ->and($report->fresh()->resolved_by)->toBe($this->user->id)
         ->and($report->fresh()->resolution_notes)->toBe('Fixed by replacing damaged part');

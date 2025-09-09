@@ -162,6 +162,22 @@
                             @error('notes') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                         
+                        <!-- Abgeschlossen Status -->
+                        <div class="mt-6">
+                            <div class="flex items-center">
+                                <input type="checkbox" 
+                                       wire:model="is_completed" 
+                                       id="is_completed"
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="is_completed" class="ml-2 text-sm font-medium text-gray-700">
+                                    Bestellung ist abgeschlossen
+                                </label>
+                            </div>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Markieren Sie diese Option, wenn die Bestellung vollständig bearbeitet wurde.
+                            </p>
+                        </div>
+                        
                         <div class="mt-6">
                             <button type="submit" 
                                     class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors duration-200">

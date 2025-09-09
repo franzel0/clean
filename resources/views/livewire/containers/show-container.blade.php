@@ -192,27 +192,39 @@
                     <h2 class="text-lg font-semibold text-gray-900">Statistiken</h2>
                 </div>
                 <div class="p-6">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="text-center bg-green-50 p-4 rounded-lg border-2 border-green-200">
-                            <div class="text-2xl font-bold text-green-600">{{ $statistics['available'] ?? 0 }}</div>
-                            <div class="text-sm font-bold text-green-800">VERFÜGBAR</div>
+                    @if(!empty($statisticsCards))
+                        <div class="grid grid-cols-2 md:grid-cols-{{ min(4, count($statisticsCards)) }} gap-4">
+                            @foreach($statisticsCards as $card)
+                            <div class="text-center bg-{{ $card['color'] }}-50 p-4 rounded-lg border-2 border-{{ $card['color'] }}-200">
+                                <div class="text-2xl font-bold text-{{ $card['color'] }}-600">{{ $card['count'] }}</div>
+                                <div class="text-sm font-bold text-{{ $card['color'] }}-800">{{ strtoupper($card['display_name']) }}</div>
+                            </div>
+                            @endforeach
                         </div>
-                        
-                        <div class="text-center bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
-                            <div class="text-2xl font-bold text-blue-600">{{ $statistics['in_use'] ?? 0 }}</div>
-                            <div class="text-sm font-bold text-blue-800">IM EINSATZ</div>
+                    @else
+                        <!-- Fallback zu statischen Karten falls keine Einstellungen vorhanden -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="text-center bg-green-50 p-4 rounded-lg border-2 border-green-200">
+                                <div class="text-2xl font-bold text-green-600">{{ $statistics['available'] ?? 0 }}</div>
+                                <div class="text-sm font-bold text-green-800">VERFÜGBAR</div>
+                            </div>
+                            
+                            <div class="text-center bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                                <div class="text-2xl font-bold text-blue-600">{{ $statistics['in_use'] ?? 0 }}</div>
+                                <div class="text-sm font-bold text-blue-800">IM EINSATZ</div>
+                            </div>
+                            
+                            <div class="text-center bg-red-50 p-4 rounded-lg border-2 border-red-200">
+                                <div class="text-2xl font-bold text-red-600">{{ $statistics['defective'] ?? 0 }}</div>
+                                <div class="text-sm font-bold text-red-800">DEFEKT</div>
+                            </div>
+                            
+                            <div class="text-center bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+                                <div class="text-2xl font-bold text-yellow-600">{{ $statistics['in_repair'] ?? 0 }}</div>
+                                <div class="text-sm font-bold text-yellow-800">IN REPARATUR</div>
+                            </div>
                         </div>
-                        
-                        <div class="text-center bg-red-50 p-4 rounded-lg border-2 border-red-200">
-                            <div class="text-2xl font-bold text-red-600">{{ $statistics['defective'] ?? 0 }}</div>
-                            <div class="text-sm font-bold text-red-800">DEFEKT</div>
-                        </div>
-                        
-                        <div class="text-center bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
-                            <div class="text-2xl font-bold text-yellow-600">{{ $statistics['in_repair'] ?? 0 }}</div>
-                            <div class="text-sm font-bold text-yellow-800">IN REPARATUR</div>
-                        </div>
-                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -234,7 +246,7 @@
                                             {{ $report->report_number }}
                                         </a>
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold border
-                                            @if($report->is_resolved) 
+                                            @if($report->is_completed) 
                                                 bg-green-100 text-green-800 border-green-300
                                             @else 
                                                 bg-yellow-100 text-yellow-800 border-yellow-300

@@ -100,25 +100,25 @@
                         <div>
                             <div class="flex items-center">
                                 <input type="checkbox" 
-                                       wire:model.live="is_resolved" 
-                                       id="is_resolved"
+                                       wire:model.live="is_completed" 
+                                       id="is_completed_status"
                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                <label for="is_resolved" class="ml-2 block text-sm font-medium text-gray-700">
-                                    Als gelöst markieren
+                                <label for="is_completed_status" class="ml-2 block text-sm font-medium text-gray-700">
+                                    Als abgeschlossen markieren
                                 </label>
                             </div>
-                            @error('is_resolved') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            @error('is_completed') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                         
-                        <div class="{{ $is_resolved ? '' : 'opacity-50' }}">
+                        <div class="{{ $is_completed ? '' : 'opacity-50' }}">
                             <label for="resolution_notes" class="block text-sm font-medium text-gray-700 mb-2">
-                                Lösungsnotizen {{ $is_resolved ? '*' : '(optional)' }}
+                                Lösungsnotizen {{ $is_completed ? '*' : '(optional)' }}
                             </label>
                             <textarea wire:model="resolution_notes" 
                                       rows="3" 
                                       class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
                                       placeholder="Beschreiben Sie wie der Defekt behoben wurde..."
-                                      {{ $is_resolved ? '' : 'disabled' }}></textarea>
+                                      {{ $is_completed ? '' : 'disabled' }}></textarea>
                             @error('resolution_notes') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                         </div>
                     </div>

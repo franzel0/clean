@@ -16,6 +16,7 @@ class DefectReportsList extends Component
     public $statusFilter = '';
     public $severityFilter = '';
     public $departmentFilter = '';
+    public $completionFilter = '';
 
     public function updatingSearch()
     {
@@ -33,6 +34,11 @@ class DefectReportsList extends Component
     }
 
     public function updatingDepartmentFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingCompletionFilter()
     {
         $this->resetPage();
     }
@@ -64,7 +70,6 @@ class DefectReportsList extends Component
             'order_number' => $orderNumber,
             'defect_report_id' => $reportId,
             'ordered_by' => Auth::user()->id,
-            'status_id' => \App\Models\PurchaseOrderStatus::where('name', 'Angefragt')->first()->id ?? 1,
             'order_date' => now()->format('Y-m-d'),
             'notes' => 'Automatisch erstellt durch Defektbericht #' . $report->id,
         ]);
@@ -78,6 +83,7 @@ class DefectReportsList extends Component
         $this->statusFilter = '';
         $this->severityFilter = '';
         $this->departmentFilter = '';
+        $this->completionFilter = '';
         $this->resetPage();
     }
 
@@ -101,9 +107,9 @@ class DefectReportsList extends Component
         })
         ->when($this->statusFilter, function ($query) {
             if ($this->statusFilter === 'resolved') {
-                $query->where('is_resolved', true);
+                $query->where('is_completed', true);
             } elseif ($this->statusFilter === 'open') {
-                $query->where('is_resolved', false);
+                $query->where('is_completed', false);
             }
         })
         ->when($this->severityFilter, function ($query) {
@@ -111,6 +117,13 @@ class DefectReportsList extends Component
         })
         ->when($this->departmentFilter, function ($query) {
             $query->where('reporting_department_id', $this->departmentFilter);
+        })
+        ->when($this->completionFilter, function ($query) {
+            if ($this->completionFilter === 'active') {
+                $query->where('is_completed', false);
+            } elseif ($this->completionFilter === 'completed') {
+                $query->where('is_completed', true);
+            }
         });
 
         $reports = $query->latest()->paginate(15);

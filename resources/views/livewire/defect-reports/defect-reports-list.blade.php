@@ -12,7 +12,7 @@
 
     <!-- Filter -->
     <div class="dashboard-card p-6 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
                 <input type="text" 
                        wire:model.live="search" 
@@ -57,6 +57,15 @@
                     @endforeach
                 </select>
             </div>
+
+            <div>
+                <select wire:model.live="completionFilter" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Alle Meldungen</option>
+                    <option value="active">Nur aktive</option>
+                    <option value="completed">Nur abgeschlossene</option>
+                </select>
+            </div>
         </div>
         
         <div class="mt-4 flex justify-between items-center">
@@ -82,6 +91,7 @@
                             <th class="text-left py-3 px-4 font-medium text-gray-900">Defekttyp</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.severity') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.status') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900">Abgeschlossen</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.reported_by') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.date') }}</th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.actions') }}</th>
@@ -109,6 +119,17 @@
                                     <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $report->instrument->instrumentStatus->bg_class }} {{ $report->instrument->instrumentStatus->text_class }}">
                                         {{ $report->instrument->instrumentStatus->name }}
                                     </span>
+                                </td>
+                                <td class="py-3 px-4">
+                                    @if($report->is_completed)
+                                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                                            Abgeschlossen
+                                        </span>
+                                    @else
+                                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                                            Aktiv
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="text-sm text-gray-900">{{ $report->reportedBy->name }}</div>

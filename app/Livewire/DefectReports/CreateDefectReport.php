@@ -95,8 +95,11 @@ class CreateDefectReport extends Component
         }
         
         if ($targetStatusId && $targetStatusId != $oldStatusId) {
-            // Use MovementService which handles both movement logging AND status update
-            \App\Services\MovementService::logMovement(
+            // Update instrument status directly
+            $instrument->update(['status_id' => $targetStatusId]);
+            
+            // Log movement without updating instrument again
+            \App\Services\MovementService::logMovementOnly(
                 instrument: $instrument,
                 movementType: 'status_change',
                 statusBefore: $oldStatusId,
@@ -104,12 +107,6 @@ class CreateDefectReport extends Component
                 notes: 'Defekt gemeldet: ' . $this->defect_type . ' - ' . $report->report_number,
                 movedBy: Auth::user()->id
             );
-            
-            // Explicit status update as fallback (MovementService should handle this, but just to be sure)
-            $instrument->refresh();
-            if ($instrument->status_id != $targetStatusId) {
-                $instrument->update(['status_id' => $targetStatusId]);
-            }
         }
 
         session()->flash('message', 'Defektmeldung erfolgreich erstellt: ' . $report->report_number);

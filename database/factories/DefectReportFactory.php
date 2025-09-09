@@ -22,7 +22,7 @@ class DefectReportFactory extends Factory
             'defect_type_id' => DefectType::factory(),
             'description' => $this->faker->paragraph(),
             'severity' => $this->faker->randomElement(['niedrig', 'mittel', 'hoch', 'kritisch']),
-            'is_resolved' => false,
+            'is_completed' => false,
             'reported_at' => $this->faker->dateTimeBetween('-1 month', 'now'),
             'photos' => [],
             'created_at' => now(),

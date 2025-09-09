@@ -209,18 +209,21 @@ class EditInstrument extends Component
         }
 
         if ($this->isEditing) {
-            // Speichere den alten Status für Movement-Logging
+            // Speichere den alten Status für Movement-Logging VOR dem Update
             $oldStatusId = $this->instrument->status_id;
             $newStatusId = $data['status_id'];
             
+            // Update das Instrument zuerst
             $this->instrument->update($data);
             
-            // Erstelle Movement wenn Status geändert wurde
+            // Erstelle Movement nur wenn Status geändert wurde (ohne das Instrument nochmal zu updaten)
             if ($oldStatusId != $newStatusId) {
-                \App\Services\MovementService::logStatusChange(
-                    $this->instrument,
-                    $newStatusId,
-                    'Status geändert über Instrumentenbearbeitung'
+                \App\Services\MovementService::logMovementOnly(
+                    instrument: $this->instrument,
+                    movementType: 'status_change',
+                    statusBefore: $oldStatusId,
+                    statusAfter: $newStatusId,
+                    notes: 'Status geändert über Instrumentenbearbeitung'
                 );
             }
             

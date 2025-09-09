@@ -54,6 +54,49 @@ class MovementService
         return $movement;
     }
 
+    /**
+     * Log movement without updating the instrument (for manual updates)
+     */
+    public static function logMovementOnly(
+        Instrument $instrument,
+        string $movementType,
+        ?int $fromDepartmentId = null,
+        ?int $toDepartmentId = null,
+        ?int $fromContainerId = null,
+        ?int $toContainerId = null,
+        ?int $statusBefore = null,
+        ?int $statusAfter = null,
+        ?string $notes = null,
+        ?int $movedBy = null
+    ): InstrumentMovement {
+        // Use current status_id if not provided
+        $statusBefore = $statusBefore ?? $instrument->getOriginal('status_id') ?? $instrument->status_id;
+        $statusAfter = $statusAfter ?? $instrument->status_id;
+        
+        // Ensure status values are numeric IDs
+        if (!is_numeric($statusBefore)) {
+            $statusBefore = self::convertStatusNameToId($statusBefore);
+        }
+        if (!is_numeric($statusAfter)) {
+            $statusAfter = self::convertStatusNameToId($statusAfter);
+        }
+        
+        // Use current user if not provided
+        $movedBy = $movedBy ?? (\Illuminate\Support\Facades\Auth::id() ?? 1);
+
+        return InstrumentMovement::create([
+            'instrument_id' => $instrument->id,
+            'movement_type' => $movementType,
+            'from_container_id' => $fromContainerId,
+            'to_container_id' => $toContainerId,
+            'from_status' => $statusBefore,
+            'to_status' => $statusAfter,
+            'performed_by' => $movedBy,
+            'notes' => $notes,
+            'performed_at' => now(),
+        ]);
+    }
+
     public static function logStatusChange(
         Instrument $instrument,
         int $newStatusId,

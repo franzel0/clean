@@ -40,6 +40,11 @@
                 Container-Status
             </button>
             <button 
+                wire:click="setActiveTab('container-statistics')"
+                class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm ml-8 {{ $activeTab === 'container-statistics' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                Container-Statistiken
+            </button>
+            <button 
                 wire:click="setActiveTab('defect-types')"
                 class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm ml-8 {{ $activeTab === 'defect-types' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                 Defekt-Arten
@@ -67,15 +72,108 @@
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold text-gray-900">{{ $this->getActiveTitle() }}</h2>
+                @if($activeTab !== 'container-statistics')
                 <button 
                     wire:click="openCreateModal"
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
                     Neu hinzufügen
                 </button>
+                @endif
             </div>
         </div>
 
         <div class="px-6 py-4">
+            @if($activeTab === 'container-statistics')
+                <!-- Container Statistics Settings -->
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-medium text-gray-900">Container-Statistik Karten konfigurieren</h3>
+                        <div class="space-x-2">
+                            <button wire:click="resetContainerStatsSettings" 
+                                    class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Zurücksetzen
+                            </button>
+                            <button wire:click="saveContainerStatsSettings" 
+                                    class="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700">
+                                Speichern
+                            </button>
+                        </div>
+                    </div>
+
+                    @foreach($containerStatsSettings as $index => $setting)
+                    <div class="border border-gray-200 rounded-lg p-6">
+                        <h4 class="text-md font-medium text-gray-900 mb-4">Karte {{ $index + 1 }}</h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <!-- Status auswählen -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Instrumentenstatus</label>
+                                <select wire:model="containerStatsSettings.{{ $index }}.instrument_status_id" 
+                                        class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="">-- Status auswählen --</option>
+                                    @foreach($availableStatuses as $status)
+                                        <option value="{{ $status->id }}">{{ $status->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Anzeigename -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Anzeigename</label>
+                                <input type="text" 
+                                       wire:model="containerStatsSettings.{{ $index }}.display_name"
+                                       class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="Name der Karte">
+                            </div>
+
+                            <!-- Farbe -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Farbe</label>
+                                <select wire:model="containerStatsSettings.{{ $index }}.color" 
+                                        class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                    @foreach($colorOptions as $value => $label)
+                                        <option value="{{ $value }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Aktiv -->
+                            <div class="flex items-center pt-6">
+                                <input type="checkbox" 
+                                       wire:model="containerStatsSettings.{{ $index }}.is_active"
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label class="ml-2 block text-sm text-gray-900">Aktiv</label>
+                            </div>
+                        </div>
+
+                        <!-- Vorschau -->
+                        @if(!empty($setting['instrument_status_id']) && ($setting['is_active'] ?? true))
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Vorschau:</label>
+                            <div class="bg-{{ $setting['color'] }}-50 border-2 border-{{ $setting['color'] }}-200 rounded-lg p-4 max-w-xs">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-{{ $setting['color'] }}-600 mb-1">0</div>
+                                    <div class="text-sm font-medium text-{{ $setting['color'] }}-800">{{ $setting['display_name'] }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    @endforeach
+
+                    @if (session()->has('message'))
+                        <div class="p-4 bg-green-50 border border-green-200 rounded-md">
+                            <p class="text-sm text-green-800">{{ session('message') }}</p>
+                        </div>
+                    @endif
+
+                    @if (session()->has('error'))
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-md">
+                            <p class="text-sm text-red-800">{{ session('error') }}</p>
+                        </div>
+                    @endif
+                </div>
+            @else
             <!-- Database Model Tables -->
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -197,6 +295,7 @@
                 <div class="text-center py-8">
                     <p class="text-gray-500">Keine Einträge gefunden. Fügen Sie Ihren ersten Eintrag hinzu.</p>
                 </div>
+            @endif
             @endif
         </div>
     </div>
