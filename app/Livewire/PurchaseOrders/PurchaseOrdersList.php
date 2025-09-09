@@ -19,7 +19,7 @@ class PurchaseOrdersList extends Component
 
     public $search = '';
     public $departmentFilter = '';
-    public $completionFilter = '';
+    public $completionFilter = 'active';
 
     public function updatingSearch()
     {
@@ -40,7 +40,7 @@ class PurchaseOrdersList extends Component
     {
         $this->search = '';
         $this->departmentFilter = '';
-        $this->completionFilter = '';
+        $this->completionFilter = 'active';
         $this->resetPage();
     }
 

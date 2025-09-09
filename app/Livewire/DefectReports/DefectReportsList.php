@@ -16,7 +16,7 @@ class DefectReportsList extends Component
     public $statusFilter = '';
     public $severityFilter = '';
     public $departmentFilter = '';
-    public $completionFilter = '';
+    public $completionFilter = 'active';
 
     public function updatingSearch()
     {
@@ -83,7 +83,7 @@ class DefectReportsList extends Component
         $this->statusFilter = '';
         $this->severityFilter = '';
         $this->departmentFilter = '';
-        $this->completionFilter = '';
+        $this->completionFilter = 'active';
         $this->resetPage();
     }
 
