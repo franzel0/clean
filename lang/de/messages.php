@@ -221,7 +221,8 @@ return [
     'manage_containers' => 'Container verwalten',
     'report_defect' => 'Defekt melden',
     'manage_orders' => 'Bestellungen verwalten',
-    'reports_by_department' => 'Meldungen nach Abteilung',
+    'reports_by_department' => 'Meldungen
+     nach Abteilung',
     
     // Table Headers
     'report_number' => 'Meldungsnummer',
