@@ -61,6 +61,9 @@ Route::middleware(['auth'])->group(function () {
     
     // Berichte
     Route::get('/reports', \App\Livewire\Reports\SimpleReports::class)->name('reports.index');
+    
+    // Hilfe
+    Route::get('/help/workflow', \App\Livewire\Help\WorkflowGuide::class)->name('help.workflow');
 
     Route::redirect('settings', 'settings/profile');
 

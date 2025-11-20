@@ -174,7 +174,7 @@ return [
     // Dashboard Statistics
     'total_instruments' => 'Instrumente gesamt',
     'defective_instruments' => 'Defekte Instrumente',
-    'open_reports' => 'Offene Meldungen',
+    'open_reports' => 'Offene Defektmeldungen',
     'pending_orders' => 'Offene Bestellungen',
     'total_instruments_tooltip' => 'Gesamtanzahl aller registrierten Instrumente im System, unabhängig vom Status.',
     'defective_instruments_tooltip' => 'Anzahl der Instrumente mit Status "Defekt" - diese sind beschädigt und dürfen nicht verwendet werden.',
@@ -221,7 +221,7 @@ return [
     'manage_containers' => 'Container verwalten',
     'report_defect' => 'Defekt melden',
     'manage_orders' => 'Bestellungen verwalten',
-    'reports_by_department' => 'Berichte nach Abteilung',
+    'reports_by_department' => 'Meldungen nach Abteilung',
     
     // Table Headers
     'report_number' => 'Meldungsnummer',

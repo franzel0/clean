@@ -103,7 +103,7 @@ class PurchaseOrder extends Model
 
     public function scopeOpen($query)
     {
-        return $query->whereNotIn('status', ['received', 'completed', 'cancelled']);
+        return $query->where('is_completed', false);
     }
 
     protected static function boot()

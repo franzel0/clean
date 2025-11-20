@@ -177,6 +177,24 @@
                                 Markieren Sie diese Option, wenn die Bestellung vollständig bearbeitet wurde.
                             </p>
                         </div>
+
+                        <!-- Defektmeldung Abgeschlossen Status -->
+                        @if($order->defectReport)
+                            <div class="mt-6">
+                                <div class="flex items-center">
+                                    <input type="checkbox" 
+                                           wire:model="defect_report_completed" 
+                                           id="defect_report_completed"
+                                           class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                                    <label for="defect_report_completed" class="ml-2 text-sm font-medium text-gray-700">
+                                        Defektmeldung ist abgeschlossen
+                                    </label>
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Markieren Sie diese Option, wenn die zugehörige Defektmeldung behoben wurde.
+                                </p>
+                            </div>
+                        @endif
                         
                         <div class="mt-6">
                             <button type="submit" 
@@ -237,172 +255,154 @@
                 </div>
             @endif
 
-            <!-- Timeline -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Verlauf</h2>
-                </div>
-                <div class="p-6">
-                    <div class="flow-root">
-                        <ul class="-mb-8">
-                            <!-- Requested -->
-                            <li>
-                                <div class="relative pb-8">
-                                    <div class="relative flex space-x-3">
-                                        <div>
-                                            <span class="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center ring-8 ring-white">
-                                                <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.293l-3-3a1 1 0 00-1.414-1.414L9 5.586 7.707 4.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4a1 1 0 00-1.414-1.414L10 7.586z" clip-rule="evenodd"/>
-                                                </svg>
-                                            </span>
-                                        </div>
-                                        <div class="min-w-0 flex-1 pt-1.5">
+            <!-- Statusverlauf Timeline -->
+            @if($order->defectReport && $order->defectReport->instrument)
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-gray-900">Statusverlauf</h2>
+                    </div>
+                    <div class="p-6">
+                        <div class="flow-root">
+                            <ul class="-mb-8">
+                                <!-- Bestellung erstellt -->
+                                <li>
+                                    <div class="relative pb-8">
+                                        @if($movements->count() > 0 || $order->is_completed)
+                                            <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                        @endif
+                                        <div class="relative flex space-x-3">
                                             <div>
-                                                <p class="text-sm text-gray-500">
-                                                    Bestellung angefordert von 
-                                                    <span class="font-medium text-gray-900">{{ $order->requestedBy->name }}</span>
-                                                </p>
+                                                <span class="h-8 w-8 rounded-full bg-yellow-500 flex items-center justify-center ring-8 ring-white">
+                                                    <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                                                    </svg>
+                                                </span>
                                             </div>
-                                            <div class="mt-2 text-sm text-gray-700">
-                                                <p>{{ $order->requested_at ? $order->requested_at->format('d.m.Y H:i') : 'Nicht verfügbar' }}</p>
+                                            <div class="min-w-0 flex-1 pt-1.5">
+                                                <div>
+                                                    <p class="text-sm text-gray-500">
+                                                        Bestellung erstellt von <span class="font-medium text-gray-900">{{ $order->requestedBy->name }}</span>
+                                                        <time datetime="{{ $order->created_at->toISOString() }}" class="block">
+                                                            {{ $order->created_at->format('d.m.Y H:i') }}
+                                                        </time>
+                                                    </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    @if($order->approved_at || $order->ordered_at || $order->received_at)
-                                        <div class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
-                                    @endif
-                                </div>
-                            </li>
+                                </li>
 
-                            <!-- Approved -->
-                            @if($order->approved_at)
-                            <li>
-                                <div class="relative pb-8">
-                                    <div class="relative flex space-x-3">
-                                        <div>
-                                            <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
-                                                <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                                </svg>
-                                            </span>
-                                        </div>
-                                        <div class="min-w-0 flex-1 pt-1.5">
-                                            <div>
-                                                <p class="text-sm text-gray-500">
-                                                    Bestellung genehmigt
-                                                    @if($order->approvedBy)
-                                                        von <span class="font-medium text-gray-900">{{ $order->approvedBy->name }}</span>
-                                                    @endif
-                                                </p>
+                                <!-- Instrumentenstatus-Änderungen -->
+                                @foreach($movements as $index => $movement)
+                                    <li>
+                                        <div class="relative pb-8">
+                                            @if($index < $movements->count() - 1 || $order->is_completed || ($order->defectReport && $order->defectReport->is_completed))
+                                                <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                            @endif
+                                            <div class="relative flex space-x-3">
+                                                <div>
+                                                    <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                                                        <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                                <div class="min-w-0 flex-1 pt-1.5">
+                                                    <div>
+                                                        <p class="text-sm text-gray-500">
+                                                            Instrumentenstatus geändert
+                                                            @if($movement->performedBy)
+                                                                von <span class="font-medium text-gray-900">{{ $movement->performedBy->name }}</span>
+                                                            @endif
+                                                            <span class="block mt-1">
+                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $movement->statusBeforeObject?->bg_class ?? 'bg-gray-100' }} {{ $movement->statusBeforeObject?->text_class ?? 'text-gray-800' }}">
+                                                                    {{ $movement->status_before_display }}
+                                                                </span>
+                                                                <svg class="inline w-3 h-3 mx-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                                                </svg>
+                                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $movement->statusAfterObject?->bg_class ?? 'bg-gray-100' }} {{ $movement->statusAfterObject?->text_class ?? 'text-gray-800' }}">
+                                                                    {{ $movement->status_after_display }}
+                                                                </span>
+                                                            </span>
+                                                            <time datetime="{{ $movement->performed_at->toISOString() }}" class="block">
+                                                                {{ $movement->performed_at->format('d.m.Y H:i') }}
+                                                            </time>
+                                                        </p>
+                                                        @if($movement->notes)
+                                                            <p class="text-xs text-gray-400 mt-1">{{ $movement->notes }}</p>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="mt-2 text-sm text-gray-700">
-                                                <p>{{ $order->approved_at ? $order->approved_at->format('d.m.Y H:i') : 'Nicht verfügbar' }}</p>
-                                            </div>
                                         </div>
-                                    </div>
-                                    @if($order->ordered_at || $order->received_at)
-                                        <div class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
-                                    @endif
-                                </div>
-                            </li>
-                            @endif
+                                    </li>
+                                @endforeach
 
-                            <!-- Ordered -->
-                            @if($order->ordered_at)
-                            <li>
-                                <div class="relative pb-8">
-                                    <div class="relative flex space-x-3">
-                                        <div>
-                                            <span class="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center ring-8 ring-white">
-                                                <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                                                </svg>
-                                            </span>
-                                        </div>
-                                        <div class="min-w-0 flex-1 pt-1.5">
-                                            <div>
-                                                <p class="text-sm text-gray-500">Bestellung aufgegeben</p>
+                                <!-- Bestellung abgeschlossen -->
+                                @if($order->is_completed)
+                                    <li>
+                                        <div class="relative pb-8">
+                                            @if($order->defectReport && $order->defectReport->is_completed)
+                                                <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                            @endif
+                                            <div class="relative flex space-x-3">
+                                                <div>
+                                                    <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                                        <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                                <div class="min-w-0 flex-1 pt-1.5">
+                                                    <div>
+                                                        <p class="text-sm text-gray-500">
+                                                            Bestellung abgeschlossen
+                                                            <time datetime="{{ $order->updated_at->toISOString() }}" class="block">
+                                                                {{ $order->updated_at->format('d.m.Y H:i') }}
+                                                            </time>
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="mt-2 text-sm text-gray-700">
-                                                <p>{{ $order->ordered_at ? $order->ordered_at->format('d.m.Y H:i') : 'Nicht verfügbar' }}</p>
-                                            </div>
                                         </div>
-                                    </div>
-                                    @if($order->status === 'shipped' || $order->received_at)
-                                        <div class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
-                                    @endif
-                                </div>
-                            </li>
-                            @endif
+                                    </li>
+                                @endif
 
-                            <!-- Shipped -->
-                            @if($order->status === 'shipped' || $order->received_at)
-                            <li>
-                                <div class="relative pb-8">
-                                    <div class="relative flex space-x-3">
-                                        <div>
-                                            <span class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center ring-8 ring-white">
-                                                <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
-                                                    <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-1-1h-3z"/>
-                                                </svg>
-                                            </span>
-                                        </div>
-                                        <div class="min-w-0 flex-1 pt-1.5">
-                                            <div>
-                                                <p class="text-sm text-gray-500">Bestellung versandt</p>
-                                            </div>
-                                            <div class="mt-2 text-sm text-gray-700">
-                                                <p>
-                                                    @if($order->received_at)
-                                                        Versandt (vor Lieferung)
-                                                    @else
-                                                        Status gesetzt
-                                                    @endif
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @if($order->received_at)
-                                        <div class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"></div>
-                                    @endif
-                                </div>
-                            </li>
-                            @endif
-
-                            <!-- Received -->
-                            @if($order->received_at)
-                            <li>
-                                <div class="relative">
-                                    <div class="relative flex space-x-3">
-                                        <div>
-                                            <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
-                                                <svg class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                </svg>
-                                            </span>
-                                        </div>
-                                        <div class="min-w-0 flex-1 pt-1.5">
-                                            <div>
-                                                <p class="text-sm text-gray-500">
-                                                    Bestellung erhalten
-                                                    @if($order->receivedBy)
-                                                        von <span class="font-medium text-gray-900">{{ $order->receivedBy->name }}</span>
-                                                    @endif
-                                                </p>
-                                            </div>
-                                            <div class="mt-2 text-sm text-gray-700">
-                                                <p>{{ $order->received_at ? $order->received_at->format('d.m.Y H:i') : 'Nicht verfügbar' }}</p>
+                                <!-- Defektmeldung abgeschlossen -->
+                                @if($order->defectReport && $order->defectReport->is_completed && $order->defectReport->resolved_at)
+                                    <li>
+                                        <div class="relative pb-8">
+                                            <div class="relative flex space-x-3">
+                                                <div>
+                                                    <span class="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center ring-8 ring-white">
+                                                        <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                                <div class="min-w-0 flex-1 pt-1.5">
+                                                    <div>
+                                                        <p class="text-sm text-gray-500">
+                                                            Defektmeldung abgeschlossen
+                                                            @if($order->defectReport->resolvedBy)
+                                                                von <span class="font-medium text-gray-900">{{ $order->defectReport->resolvedBy->name }}</span>
+                                                            @endif
+                                                            <time datetime="{{ $order->defectReport->resolved_at->toISOString() }}" class="block">
+                                                                {{ $order->defectReport->resolved_at->format('d.m.Y H:i') }}
+                                                            </time>
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </li>
-                            @endif
-                        </ul>
+                                    </li>
+                                @endif
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 </div>

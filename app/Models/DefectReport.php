@@ -158,7 +158,7 @@ class DefectReport extends Model
 
     public function scopeOpen($query)
     {
-        return $query->whereNotIn('status', ['closed']);
+        return $query->where('is_completed', false);
     }
 
     public function scopeByDepartment($query, $departmentId)

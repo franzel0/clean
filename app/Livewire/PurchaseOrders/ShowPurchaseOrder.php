@@ -23,6 +23,7 @@ class ShowPurchaseOrder extends Component
     public $expectedDelivery = '';
     public $instrumentStatusId = '';
     public $is_completed = false;
+    public $defect_report_completed = false;
 
     public function mount(PurchaseOrder $order)
     {
@@ -45,6 +46,7 @@ class ShowPurchaseOrder extends Component
         $this->expectedDelivery = $this->order->expected_delivery;
         $this->instrumentStatusId = $this->order->defectReport?->instrument?->status_id ?? '';
         $this->is_completed = $this->order->is_completed ?? false;
+        $this->defect_report_completed = $this->order->defectReport?->is_completed ?? false;
     }
 
     public function toggleStatusDropdown()
@@ -64,6 +66,7 @@ class ShowPurchaseOrder extends Component
             'notes' => 'nullable|string|max:2000', // Limit für Notes
             'instrumentStatusId' => 'nullable|exists:instrument_statuses,id',
             'is_completed' => 'boolean',
+            'defect_report_completed' => 'boolean',
         ], [
             'manufacturer_id.exists' => 'Bitte wählen Sie einen gültigen Hersteller aus.',
             'actualCost.numeric' => 'Die tatsächlichen Kosten müssen eine Zahl sein.',
@@ -85,8 +88,31 @@ class ShowPurchaseOrder extends Component
 
         // Instrumentenstatus aktualisieren falls vorhanden
         if ($this->instrumentStatusId && $this->order->defectReport?->instrument) {
-            $this->order->defectReport->instrument->update([
-                'status_id' => $this->instrumentStatusId
+            $oldStatusId = $this->order->defectReport->instrument->status_id;
+            
+            if ($oldStatusId != $this->instrumentStatusId) {
+                $this->order->defectReport->instrument->update([
+                    'status_id' => $this->instrumentStatusId
+                ]);
+                
+                // Log movement
+                \App\Services\MovementService::logMovementOnly(
+                    instrument: $this->order->defectReport->instrument,
+                    movementType: 'status_change',
+                    statusBefore: $oldStatusId,
+                    statusAfter: $this->instrumentStatusId,
+                    notes: 'Status aktualisiert via Bestellung: ' . $this->order->order_number,
+                    movedBy: Auth::user()->id
+                );
+            }
+        }
+
+        // Defektmeldung Status aktualisieren falls vorhanden
+        if ($this->order->defectReport) {
+            $this->order->defectReport->update([
+                'is_completed' => $this->defect_report_completed,
+                'resolved_at' => $this->defect_report_completed ? now() : $this->order->defectReport->resolved_at,
+                'resolved_by' => $this->defect_report_completed ? Auth::id() : $this->order->defectReport->resolved_by,
             ]);
         }
 
@@ -176,6 +202,17 @@ class ShowPurchaseOrder extends Component
         // Lade verfügbare Status-Übergänge basierend auf dem aktuellen Instrumentenstatus
         $availableStatuses = $this->getAvailableStatusTransitions();
 
-        return view('livewire.purchase-orders.show-purchase-order', compact('manufacturers', 'availableStatuses'));
+        // Hole alle Bewegungen für das Instrument der Defektmeldung ab dem Zeitpunkt der Bestellung
+        $movements = collect();
+        if ($this->order->defectReport?->instrument_id) {
+            $movements = \App\Models\InstrumentMovement::where('instrument_id', $this->order->defectReport->instrument_id)
+                ->where('performed_at', '>=', $this->order->created_at)
+                ->where('movement_type', 'status_change')
+                ->with(['performedBy', 'statusBeforeObject', 'statusAfterObject'])
+                ->orderBy('performed_at', 'asc')
+                ->get();
+        }
+
+        return view('livewire.purchase-orders.show-purchase-order', compact('manufacturers', 'availableStatuses', 'movements'));
     }
 }
