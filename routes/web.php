@@ -84,4 +84,5 @@ Route::get('/mail-test', function () {
 
     return 'Mail wurde gesendet!';
 });
+// --- IGNORE ---
 
