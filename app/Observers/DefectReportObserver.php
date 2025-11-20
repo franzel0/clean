@@ -27,8 +27,8 @@ class DefectReportObserver
      */
     public function updated(DefectReport $defectReport): void
     {
-        // Wenn die Defektmeldung als gelöst markiert wird
-        if ($defectReport->wasChanged('is_resolved') && $defectReport->is_resolved) {
+        // Wenn die Defektmeldung als abgeschlossen markiert wird
+        if ($defectReport->wasChanged('is_completed') && $defectReport->is_completed) {
             $this->statusService->updateStatusOnDefectReport($defectReport, 'resolved');
         }
     }
