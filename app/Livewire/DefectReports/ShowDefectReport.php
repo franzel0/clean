@@ -16,7 +16,7 @@ class ShowDefectReport extends Component
 
     public function mount(DefectReport $report)
     {
-        $this->report = $report->load(['defectType', 'instrument.instrumentStatus', 'reportedBy', 'reportingDepartment', 'resolvedBy']);
+        $this->report = $report->load(['defectType', 'instrument.instrumentStatus', 'instrument.currentLocation', 'reportedBy', 'reportingDepartment', 'resolvedBy', 'operatingRoom']);
     }
 
     public function render()
@@ -26,7 +26,7 @@ class ShowDefectReport extends Component
             ->where('performed_at', '>=', $this->report->created_at)
             ->where('movement_type', 'status_change')
             ->with(['performedBy', 'statusBeforeObject', 'statusAfterObject'])
-            ->orderBy('performed_at', 'asc')
+            ->orderBy('performed_at', 'desc')
             ->get();
         
         return view('livewire.defect-reports.show-defect-report', [

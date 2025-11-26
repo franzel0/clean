@@ -91,12 +91,26 @@
                                 <dt class="text-sm font-medium text-gray-700">Gemeldet von</dt>
                                 <dd class="text-sm text-gray-900">{{ $report->reportedBy->name }}</dd>
                             </div>
-                            @if($report->operating_room_id)
-                                <div>
-                                    <dt class="text-sm font-medium text-gray-700">OP-Saal</dt>
-                                    <dd class="text-sm text-gray-900">{{ $report->operatingRoom->name }}</dd>
-                                </div>
-                            @endif
+                            <div>
+                                <dt class="text-sm font-medium text-gray-700">Abteilung</dt>
+                                <dd class="text-sm text-gray-900">
+                                    @if($report->reporting_department_id && $report->reportingDepartment)
+                                        {{ $report->reportingDepartment->name }}
+                                    @else
+                                        Keine Abteilung
+                                    @endif
+                                </dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-700">OP-Saal</dt>
+                                <dd class="text-sm text-gray-900">
+                                    @if($report->operating_room_id && $report->operatingRoom)
+                                        {{ $report->operatingRoom->name }}
+                                    @else
+                                        Kein OP-Saal
+                                    @endif
+                                </dd>
+                            </div>
                         </dl>
                     </div>
                 </div>
@@ -150,15 +164,81 @@
                     <h3 class="text-lg font-medium text-gray-900 mb-3">Zeitlinie</h3>
                     <div class="flow-root">
                         <ul class="-mb-8">
-                            
+                            <!-- Meldung gelöst (oben = aktuell) -->
+                            @if($report->is_completed && $report->resolved_at)
+                                <li>
+                                    <div class="relative pb-8">
+                                        @if($report->acknowledged_at)
+                                            <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                        @endif
+                                        <div class="relative flex space-x-3">
+                                            <div>
+                                                <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                                    <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                            <div class="min-w-0 flex-1 pt-1.5">
+                                                <div>
+                                                    <p class="text-sm text-gray-500">
+                                                        Meldung abgeschlossen
+                                                        @if($report->resolvedBy)
+                                                            von <span class="font-medium text-gray-900">{{ $report->resolvedBy->name }}</span>
+                                                        @endif
+                                                        <time datetime="{{ $report->resolved_at->toISOString() }}" class="block">
+                                                            {{ $report->resolved_at->format('d.m.Y H:i') }}
+                                                        </time>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            @endif
+
+                            <!-- Instrumentenstatus Wechsel (neueste zuerst) -->
+                            @foreach($movements as $movement)
+                                <li>
+                                    <div class="relative pb-8">
+                                        @if($report->acknowledged_at || ($report->is_completed && $report->resolved_at) || !$loop->last)
+                                            <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                        @endif
+                                        <div class="relative flex space-x-3">
+                                            <div>
+                                                <span class="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center ring-8 ring-white">
+                                                    <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                </span>
+                                            </div>
+                                            <div class="min-w-0 flex-1 pt-1.5">
+                                                <div>
+                                                    <p class="text-sm text-gray-500">
+                                                        Instrumentenstatus geändert
+                                                        @if($movement->statusBeforeObject && $movement->statusAfterObject)
+                                                            von <span class="font-medium text-gray-900">{{ $movement->statusBeforeObject->name }}</span>
+                                                            zu <span class="font-medium text-gray-900">{{ $movement->statusAfterObject->name }}</span>
+                                                        @endif
+                                                        @if($movement->performedBy)
+                                                            von <span class="font-medium text-gray-900">{{ $movement->performedBy->name }}</span>
+                                                        @endif
+                                                        <time datetime="{{ $movement->performed_at->toISOString() }}" class="block">
+                                                            {{ $movement->performed_at->format('d.m.Y H:i') }}
+                                                        </time>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            @endforeach
 
                             <!-- Meldung bestätigt -->
                             @if($report->acknowledged_at)
                                 <li>
                                     <div class="relative pb-8">
-                                        @if($report->is_completed)
-                                            <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-                                        @endif
+                                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
                                         <div class="relative flex space-x-3">
                                             <div>
                                                 <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
@@ -185,35 +265,31 @@
                                 </li>
                             @endif
 
-                            <!-- Meldung gelöst -->
-                            @if($report->is_completed && $report->resolved_at)
-                                <li>
-                                    <div class="relative pb-8">
-                                        <div class="relative flex space-x-3">
+                            <!-- Meldung erstellt (unten = ältester Eintrag) -->
+                            <li>
+                                <div class="relative pb-8">
+                                    <div class="relative flex space-x-3">
+                                        <div>
+                                            <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                                                <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                        <div class="min-w-0 flex-1 pt-1.5">
                                             <div>
-                                                <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
-                                                    <svg class="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                </span>
-                                            </div>
-                                            <div class="min-w-0 flex-1 pt-1.5">
-                                                <div>
-                                                    <p class="text-sm text-gray-500">
-                                                        Meldung abgeschlossen
-                                                        @if($report->resolvedBy)
-                                                            von <span class="font-medium text-gray-900">{{ $report->resolvedBy->name }}</span>
-                                                        @endif
-                                                        <time datetime="{{ $report->resolved_at->toISOString() }}" class="block">
-                                                            {{ $report->resolved_at->format('d.m.Y H:i') }}
-                                                        </time>
-                                                    </p>
-                                                </div>
+                                                <p class="text-sm text-gray-500">
+                                                    Meldung erstellt
+                                                    von <span class="font-medium text-gray-900">{{ $report->reportedBy->name }}</span>
+                                                    <time datetime="{{ $report->created_at->toISOString() }}" class="block">
+                                                        {{ $report->created_at->format('d.m.Y H:i') }}
+                                                    </time>
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
-                                </li>
-                            @endif
+                                </div>
+                            </li>
                         </ul>
                     </div>
                 </div>

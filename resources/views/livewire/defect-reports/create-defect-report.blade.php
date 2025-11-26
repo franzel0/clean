@@ -48,7 +48,7 @@
                     <label for="operating_room" class="block text-sm font-medium text-gray-700 mb-2">OP-Saal</label>
                     <x-alpine-autocomplete 
                         :options="$operating_rooms->toArray()"
-                        wire-model="operating_room_id"
+                        wire:model="operating_room_id"
                         :value="$operating_room_id"
                         placeholder="OP-Saal auswählen..."
                         :required="false"

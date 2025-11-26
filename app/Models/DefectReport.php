@@ -17,6 +17,7 @@ class DefectReport extends Model
         'defect_type_id',
         'reported_by',
         'reporting_department_id',
+        'operating_room_id',
         'description',
         'severity',
         'reported_at',

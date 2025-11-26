@@ -19,6 +19,7 @@ class DefectReportFactory extends Factory
             'instrument_id' => Instrument::factory(),
             'reported_by' => User::factory(),
             'reporting_department_id' => Department::factory(),
+            'operating_room_id' => null,
             'defect_type_id' => DefectType::factory(),
             'description' => $this->faker->paragraph(),
             'severity' => $this->faker->randomElement(['niedrig', 'mittel', 'hoch', 'kritisch']),

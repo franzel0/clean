@@ -47,18 +47,19 @@
                         <!-- OP-Saal -->
                         <div>
                             <label for="operating_room" class="block text-sm font-medium text-gray-700 mb-2">OP-Saal</label>
-                            <x-alpine-autocomplete 
-                                :options="$operating_rooms->map(function($room) { return ['id' => $room->id, 'name' => $room->name, 'department' => $room->department->name]; })->toArray()"
-                                wire-model="operating_room_id"
-                                :value="$operating_room_id"
-                                placeholder="OP-Saal auswählen (optional)"
-                                display-field="name"
-                                value-field="id"
-                                :search-fields="['name', 'department']"
-                                secondary-display-field="department"
-                                :error="$errors->first('operating_room_id')"
-                                name="operating_room_id"
-                            />
+                            <select 
+                                wire:model="operating_room_id"
+                                id="operating_room"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="">-- Kein OP-Saal --</option>
+                                @foreach($operating_rooms as $room)
+                                    <option value="{{ $room->id }}">{{ $room->name }} ({{ $room->department->name }})</option>
+                                @endforeach
+                            </select>
+                            @error('operating_room_id')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
