@@ -18,7 +18,7 @@ class ShowPurchaseOrder extends Component
     public PurchaseOrder $order;
     public $showStatusDropdown = false;
     public $notes = '';
-    public $actualCost = '';
+    public $totalAmount = '';
     public $manufacturer_id = '';
     public $expectedDelivery = '';
     public $instrumentStatusId = '';
@@ -41,7 +41,7 @@ class ShowPurchaseOrder extends Component
         ]);
         
         $this->manufacturer_id = $this->order->manufacturer_id;
-        $this->actualCost = $this->order->actual_cost;
+        $this->totalAmount = $this->order->total_amount;
         $this->notes = $this->order->notes;
         $this->expectedDelivery = $this->order->expected_delivery;
         $this->instrumentStatusId = $this->order->defectReport?->instrument?->status_id ?? '';
@@ -61,17 +61,17 @@ class ShowPurchaseOrder extends Component
         
         $this->validate([
             'manufacturer_id' => 'nullable|exists:manufacturers,id',
-            'actualCost' => 'nullable|numeric|min:0|max:999999.99', // Max-Limit für Sicherheit
+            'totalAmount' => 'nullable|numeric|min:0|max:999999.99',
             'expectedDelivery' => 'nullable|date|after_or_equal:today',
-            'notes' => 'nullable|string|max:2000', // Limit für Notes
+            'notes' => 'nullable|string|max:2000',
             'instrumentStatusId' => 'nullable|exists:instrument_statuses,id',
             'is_completed' => 'boolean',
             'defect_report_completed' => 'boolean',
         ], [
             'manufacturer_id.exists' => 'Bitte wählen Sie einen gültigen Hersteller aus.',
-            'actualCost.numeric' => 'Die tatsächlichen Kosten müssen eine Zahl sein.',
-            'actualCost.min' => 'Die tatsächlichen Kosten können nicht negativ sein.',
-            'actualCost.max' => 'Die tatsächlichen Kosten sind zu hoch (max. 999.999,99 €).',
+            'totalAmount.numeric' => 'Die tatsächlichen Kosten müssen eine Zahl sein.',
+            'totalAmount.min' => 'Die tatsächlichen Kosten können nicht negativ sein.',
+            'totalAmount.max' => 'Die tatsächlichen Kosten sind zu hoch (max. 999.999,99 €).',
             'expectedDelivery.date' => 'Bitte geben Sie ein gültiges Lieferdatum ein.',
             'expectedDelivery.after_or_equal' => 'Das Lieferdatum kann nicht in der Vergangenheit liegen.',
             'notes.max' => 'Notizen dürfen maximal 2000 Zeichen lang sein.',
@@ -80,7 +80,7 @@ class ShowPurchaseOrder extends Component
 
         $this->order->update([
             'manufacturer_id' => $this->manufacturer_id,
-            'actual_cost' => $this->actualCost,
+            'total_amount' => $this->totalAmount,
             'expected_delivery' => $this->expectedDelivery,
             'notes' => $this->notes,
             'is_completed' => $this->is_completed,
@@ -116,8 +116,12 @@ class ShowPurchaseOrder extends Component
             ]);
         }
 
-        // Reload the manufacturer relationship after update
-        $this->order->load(['manufacturer', 'defectReport.instrument.instrumentStatus']);
+        // Reload relationships after update to refresh the view
+        $this->order->load([
+            'manufacturer', 
+            'defectReport.instrument.instrumentStatus',
+            'defectReport.instrument.movements' // Lade auch die Bewegungen neu
+        ]);
 
         session()->flash('message', 'Bestelldetails erfolgreich aktualisiert.');
     }

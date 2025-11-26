@@ -114,7 +114,8 @@ class InstrumentStatusService
      */
     public function calculateContainerStatus($container): string
     {
-        $instruments = $container->instruments;
+        // Eager load the instrumentStatus relationship to ensure the status name is available
+        $instruments = $container->instruments()->with('instrumentStatus')->get();
         
         if ($instruments->isEmpty()) {
             return 'Nicht betriebsbereit';

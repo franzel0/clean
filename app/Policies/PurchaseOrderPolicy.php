@@ -56,9 +56,9 @@ class PurchaseOrderPolicy
             return true;
         }
 
-        // Users can only update orders they requested (before approval)
-        return $user->id === $purchaseOrder->requested_by 
-            && in_array($purchaseOrder->status, ['requested']);
+        // Users can only update orders they requested (before delivery)
+        return $user->id === $purchaseOrder->ordered_by 
+            && !$purchaseOrder->received_at;
     }
 
     /**
@@ -77,7 +77,7 @@ class PurchaseOrderPolicy
         }
 
         // Sterilization staff can mark as received
-        if ($user->role === 'sterilization_staff' && $purchaseOrder->status === 'shipped') {
+        if ($user->role === 'sterilization_staff') {
             return true;
         }
 
@@ -89,9 +89,10 @@ class PurchaseOrderPolicy
      */
     public function delete(User $user, PurchaseOrder $purchaseOrder): bool
     {
-        // Only admins can delete orders, and only if not yet approved
+        // Only admins can delete orders, and only if not yet delivered
         return $user->role === 'admin' 
-            && in_array($purchaseOrder->status, ['requested']);
+            && !$purchaseOrder->is_delivered 
+            && !$purchaseOrder->received_at;
     }
 
     /**

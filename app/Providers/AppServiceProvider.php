@@ -23,8 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Observer deaktiviert - manuelle Status-Verwaltung ist einfacher und zuverlässiger
-        // DefectReport::observe(DefectReportObserver::class);
-        // PurchaseOrder::observe(PurchaseOrderObserver::class);
+        DefectReport::observe(DefectReportObserver::class);
+        PurchaseOrder::observe(PurchaseOrderObserver::class);
     }
 }

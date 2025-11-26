@@ -11,11 +11,12 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     $this->department = Department::factory()->create();
     $this->defectType = DefectType::factory()->create();
-    $this->instrument = Instrument::factory()->create();
     $this->defectStatus = InstrumentStatus::factory()->create([
-        'name' => 'Defekt gemeldet',
         'bg_class' => 'bg-orange-100',
         'text_class' => 'text-orange-800'
+    ]);
+    $this->instrument = Instrument::factory()->create([
+        'status_id' => $this->defectStatus->id,
     ]);
 });
 

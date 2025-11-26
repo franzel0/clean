@@ -190,7 +190,7 @@
         <div class="header-right">
             <div class="company-info">
                 Erstellt am<br>
-                {{ $order->requested_at->format('d.m.Y H:i') }}<br><br>
+                {{ $order->created_at->format('d.m.Y H:i') }}<br><br>
                 Status: <strong>{{ $order->status_display }}</strong>
             </div>
         </div>
@@ -297,8 +297,8 @@
         <div class="timeline">
             <!-- Requested -->
             <div class="timeline-item">
-                <strong>Bestellung angefordert</strong> von {{ $order->requestedBy->name }}
-                <div class="timeline-date">{{ $order->requested_at->format('d.m.Y H:i') }}</div>
+                <strong>Bestellung erstellt</strong> von {{ $order->orderedBy->name }}
+                <div class="timeline-date">{{ $order->created_at->format('d.m.Y H:i') }}</div>
             </div>
 
             <!-- Approved -->

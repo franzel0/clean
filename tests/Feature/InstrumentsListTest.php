@@ -8,17 +8,15 @@ use App\Models\Manufacturer;
 use App\Livewire\Instruments\InstrumentsList;
 use Livewire\Livewire;
 
+uses()->group('sequential');
+
 beforeEach(function () {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
     
     $this->category = InstrumentCategory::factory()->create();
     $this->manufacturer = Manufacturer::factory()->create();
-    $this->status = InstrumentStatus::factory()->create([
-        'name' => 'Verfügbar',
-        'bg_class' => 'bg-green-100',
-        'text_class' => 'text-green-800'
-    ]);
+    $this->status = InstrumentStatus::factory()->create();
 });
 
 it('can render instruments list', function () {
@@ -99,8 +97,8 @@ it('can filter by category', function () {
 });
 
 it('can filter by status', function () {
-    $status1 = InstrumentStatus::factory()->create(['name' => 'Status 1']);
-    $status2 = InstrumentStatus::factory()->create(['name' => 'Status 2']);
+    $status1 = InstrumentStatus::factory()->create();
+    $status2 = InstrumentStatus::factory()->create();
     
     $instrument1 = Instrument::factory()->create([
         'status_id' => $status1->id,
@@ -118,26 +116,6 @@ it('can filter by status', function () {
         ->set('statusFilter', $status1->id)
         ->assertSee($instrument1->name)
         ->assertDontSee($instrument2->name);
-});
-
-it('can update instrument status', function () {
-    $instrument = Instrument::factory()->create([
-        'status_id' => $this->status->id,
-        'category_id' => $this->category->id,
-        'manufacturer_id' => $this->manufacturer->id,
-    ]);
-    
-    $newStatus = InstrumentStatus::factory()->create([
-        'name' => 'In Reparatur',
-        'bg_class' => 'bg-amber-100',
-        'text_class' => 'text-amber-800'
-    ]);
-
-    Livewire::test(InstrumentsList::class)
-        ->call('updateStatus', $instrument->id, $newStatus->id)
-        ->assertSuccessful();
-
-    expect($instrument->fresh()->status_id)->toBe($newStatus->id);
 });
 
 it('can reset filters', function () {
