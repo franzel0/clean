@@ -184,6 +184,11 @@
                    class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-6 py-3 rounded-md text-sm font-bold border-2 border-gray-400 transition-all duration-200">
                     Abbrechen
                 </a>
+                <button type="button"
+                        wire:click="saveAndCreateDefectReport"
+                        class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md text-sm font-bold border-2 border-red-700 shadow-lg hover:shadow-xl transition-all duration-200">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Erstellen und Defektmeldung
+                </button>
                 <button type="submit" 
                         class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md text-sm font-bold border-2 border-blue-700 shadow-lg hover:shadow-xl transition-all duration-200">
                     <i class="fas fa-save mr-2"></i>Instrument erstellen

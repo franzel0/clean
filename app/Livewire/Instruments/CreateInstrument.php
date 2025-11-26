@@ -74,6 +74,31 @@ class CreateInstrument extends Component
         return redirect()->route('instruments.show', $instrument);
     }
 
+    public function saveAndCreateDefectReport()
+    {
+        $this->validate();
+
+        $instrument = Instrument::create([
+            'name' => $this->name,
+            'serial_number' => $this->serial_number,
+            'manufacturer' => $this->manufacturer,
+            'model' => $this->model,
+            'category' => $this->category,
+            'purchase_price' => $this->purchase_price ?: null,
+            'purchase_date' => $this->purchase_date ?: null,
+            'warranty_until' => $this->warranty_until ?: null,
+            'description' => $this->description,
+            'status' => $this->status,
+            'current_container_id' => $this->current_container_id ?: null,
+            'current_location_id' => $this->current_location_id ?: null,
+            'is_active' => true,
+        ]);
+
+        session()->flash('message', 'Instrument erfolgreich erstellt! Erstelle jetzt eine Defektmeldung...');
+        
+        return redirect()->route('defect-reports.create', ['instrument' => $instrument->id]);
+    }
+
     public function render()
     {
         $containers = Container::where('is_active', true)->get();

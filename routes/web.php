@@ -7,6 +7,7 @@ use App\Livewire\Settings\Profile;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Dashboard;
 use App\Livewire\Instruments\InstrumentsList;
+use App\Livewire\Instruments\CreateInstrument;
 use App\Livewire\Instruments\EditInstrument;
 use App\Livewire\DefectReports\CreateDefectReport;
 use App\Livewire\DefectReports\DefectReportsList;
@@ -26,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
     
     // Instrumente
     Route::get('/instruments', InstrumentsList::class)->name('instruments.index');
-    Route::get('/instruments/create', EditInstrument::class)->name('instruments.create');
+    Route::get('/instruments/create', CreateInstrument::class)->name('instruments.create');
     Route::get('/instruments/{instrument}/edit', EditInstrument::class)->name('instruments.edit');
     Route::get('/instruments/{instrument}', \App\Livewire\Instruments\ShowInstrument::class)->name('instruments.show');
     

@@ -116,7 +116,15 @@ class CreateDefectReport extends Component
 
     public function render()
     {
-        $instruments = Instrument::active()->get();
+        // Get instruments that don't have any active defect reports
+        $instruments = Instrument::active()
+            ->whereNotIn('id', function ($query) {
+                $query->select('instrument_id')
+                    ->from('defect_reports')
+                    ->where('is_completed', false);
+            })
+            ->get();
+        
         $operating_rooms = OperatingRoom::active()->get();
         $defectTypes = DefectType::active()->ordered()->get();
         

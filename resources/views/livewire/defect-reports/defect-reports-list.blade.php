@@ -12,7 +12,7 @@
 
     <!-- Filter -->
     <div class="dashboard-card p-6 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
                 <input type="text" 
                        wire:model.live="search" 
@@ -44,6 +44,16 @@
                     <option value="">Alle Abteilungen</option>
                     @foreach($departments as $department)
                         <option value="{{ $department->id }}">{{ $department->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <select wire:model.live="statusFilter" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">Alle Status</option>
+                    @foreach($statuses as $status)
+                        <option value="{{ $status->id }}">{{ $status->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -85,9 +95,9 @@
                                     <span class="text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                                 @endif
                             </th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 {{ $sortBy === 'defect_type_id' ? 'bg-blue-50' : '' }}" wire:click="sort('defect_type_id')">
-                                Defekttyp
-                                @if($sortBy === 'defect_type_id')
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 {{ $sortBy === 'instrument_id' ? 'bg-blue-50' : '' }}" wire:click="sort('instrument_id')">
+                                Instrumentenstatus
+                                @if($sortBy === 'instrument_id')
                                     <span class="text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
                                 @endif
                             </th>
@@ -129,7 +139,13 @@
                                     <div class="text-sm text-gray-600">{{ $report->instrument->serial_number }}</div>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <div class="text-sm text-gray-900">{{ $report->defect_type_display }}</div>
+                                    @if($report->instrument && $report->instrument->instrumentStatus)
+                                        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $report->instrument->instrumentStatus->bg_class }} {{ $report->instrument->instrumentStatus->text_class }}">
+                                            {{ $report->instrument->instrumentStatus->name }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-500 text-sm">-</span>
+                                    @endif
                                 </td>
                                 <td class="py-3 px-4">
                                     <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $report->severity_badge_class }}">

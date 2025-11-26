@@ -15,11 +15,12 @@ class DefectReportsList extends Component
     public $search = '';
     public $severityFilter = '';
     public $departmentFilter = '';
+    public $statusFilter = '';
     public $completionFilter = 'active';
     public $sortBy = 'reported_at';
     public $sortDirection = 'desc';
 
-    protected $queryString = ['search', 'severityFilter', 'departmentFilter', 'completionFilter', 'sortBy', 'sortDirection'];
+    protected $queryString = ['search', 'severityFilter', 'departmentFilter', 'statusFilter', 'completionFilter', 'sortBy', 'sortDirection'];
 
     public function updatingSearch()
     {
@@ -32,6 +33,11 @@ class DefectReportsList extends Component
     }
 
     public function updatingDepartmentFilter()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingStatusFilter()
     {
         $this->resetPage();
     }
@@ -125,6 +131,11 @@ class DefectReportsList extends Component
         ->when($this->departmentFilter, function ($query) {
             $query->where('reporting_department_id', $this->departmentFilter);
         })
+        ->when($this->statusFilter, function ($query) {
+            $query->whereHas('instrument', function ($q) {
+                $q->where('status_id', $this->statusFilter);
+            });
+        })
         ->when($this->completionFilter, function ($query) {
             if ($this->completionFilter === 'active') {
                 $query->where('is_completed', false);
@@ -137,11 +148,13 @@ class DefectReportsList extends Component
 
         $severities = ['niedrig', 'mittel', 'hoch', 'kritisch'];
         $departments = \App\Models\Department::active()->get();
+        $statuses = \App\Models\InstrumentStatus::active()->get();
 
         return view('livewire.defect-reports.defect-reports-list', compact(
             'reports',
             'severities',
-            'departments'
+            'departments',
+            'statuses'
         ));
     }
 }
