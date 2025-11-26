@@ -13,17 +13,15 @@ class DefectReportsList extends Component
     use WithPagination;
 
     public $search = '';
-    public $statusFilter = '';
     public $severityFilter = '';
     public $departmentFilter = '';
     public $completionFilter = 'active';
+    public $sortBy = 'reported_at';
+    public $sortDirection = 'desc';
+
+    protected $queryString = ['search', 'severityFilter', 'departmentFilter', 'completionFilter', 'sortBy', 'sortDirection'];
 
     public function updatingSearch()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingStatusFilter()
     {
         $this->resetPage();
     }
@@ -41,6 +39,22 @@ class DefectReportsList extends Component
     public function updatingCompletionFilter()
     {
         $this->resetPage();
+    }
+
+    public function sort($column)
+    {
+        if ($this->sortBy === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $column;
+            $this->sortDirection = 'asc';
+        }
+        $this->resetPage();
+    }
+
+    public function gotoPage($page)
+    {
+        $this->setPage($page);
     }
 
     public function acknowledgeReport($reportId)
@@ -105,13 +119,6 @@ class DefectReportsList extends Component
             ->orWhere('report_number', 'like', '%' . $this->search . '%')
             ->orWhere('description', 'like', '%' . $this->search . '%');
         })
-        ->when($this->statusFilter, function ($query) {
-            if ($this->statusFilter === 'resolved') {
-                $query->where('is_completed', true);
-            } elseif ($this->statusFilter === 'open') {
-                $query->where('is_completed', false);
-            }
-        })
         ->when($this->severityFilter, function ($query) {
             $query->where('severity', $this->severityFilter);
         })
@@ -126,15 +133,13 @@ class DefectReportsList extends Component
             }
         });
 
-        $reports = $query->latest()->paginate(15);
+        $reports = $query->orderBy($this->sortBy, $this->sortDirection)->paginate(20);
 
-        $statuses = ['open' => 'Offen', 'resolved' => 'Gelöst'];
         $severities = ['niedrig', 'mittel', 'hoch', 'kritisch'];
         $departments = \App\Models\Department::active()->get();
 
         return view('livewire.defect-reports.defect-reports-list', compact(
             'reports',
-            'statuses',
             'severities',
             'departments'
         ));

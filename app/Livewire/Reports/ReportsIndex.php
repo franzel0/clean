@@ -92,7 +92,7 @@ class ReportsIndex extends Component
             // Simple Top Defective Instruments (avoid complex queries)
             $topDefectiveInstruments = collect();
 
-            $departments = Department::all();
+            $departments = Department::where('is_active', true)->get();
 
             return view('livewire.reports.reports-index', [
                 'totalInstruments' => $totalInstruments,

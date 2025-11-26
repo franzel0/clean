@@ -88,6 +88,7 @@ class CreatePurchaseOrder extends Component
             'notes' => $this->notes,
             'ordered_by' => Auth::id(),
             'order_date' => now(),
+            'old_instrument_id' => DefectReport::find($this->defect_report_id)?->instrument?->id,
         ]);
 
         // Update instrument status directly if selected

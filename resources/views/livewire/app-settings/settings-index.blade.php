@@ -725,6 +725,18 @@
                                 wire:model="editingLocation"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                         </div>
+
+                        @if($activeTab === 'departments')
+                            <div class="mb-4">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        wire:model="editingIsActive"
+                                        class="w-5 h-5 text-blue-600 bg-gray-100 border-2 border-gray-300 rounded focus:ring-blue-500">
+                                    <span class="text-sm font-medium text-gray-700">Abteilung ist aktiv</span>
+                                </label>
+                            </div>
+                        @endif
                     @endif
 
                     @if($activeTab === 'operating-rooms')

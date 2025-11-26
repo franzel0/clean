@@ -76,6 +76,88 @@
                     <h2 class="text-lg font-semibold text-gray-900">Bestelldetails</h2>
                 </div>
                 <div class="p-6">
+                    <!-- Replacement Instrument Section -->
+                    <div class="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h3 class="text-sm font-semibold text-gray-900 mb-4">Instrumentenaustausch</h3>
+                        
+                        <!-- Old Instrument Display -->
+                        @if($order->oldInstrument)
+                            <div class="mb-4 p-3 bg-white rounded border border-gray-300">
+                                <p class="text-xs font-medium text-gray-600 mb-1">Zu ersetzendes Instrument</p>
+                                <p class="text-sm font-medium text-gray-900">{{ $order->oldInstrument->name }}</p>
+                                @if($order->oldInstrument->serial_number)
+                                    <p class="text-xs text-gray-600">Seriennummer: {{ $order->oldInstrument->serial_number }}</p>
+                                @endif
+                            </div>
+                        @endif
+                        
+                        <!-- Replacement Type Selection -->
+                        <div class="mb-4">
+                            <label class="text-sm font-medium text-gray-700 mb-3 block">Art des Austauschs</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" 
+                                           wire:model.live="replacement_type" 
+                                           value="same" 
+                                           class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                    <span class="ml-2 text-sm text-gray-700">Gleiches Instrument nachbestellen</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" 
+                                           wire:model.live="replacement_type" 
+                                           value="alternative" 
+                                           class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                    <span class="ml-2 text-sm text-gray-700">Alternative aus Katalog wählen</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" 
+                                           wire:model.live="replacement_type" 
+                                           value="description" 
+                                           class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                    <span class="ml-2 text-sm text-gray-700">Beschreibung eingeben</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Alternative Instrument Selection -->
+                        @if($replacement_type === 'alternative')
+                            <div class="mb-4">
+                                <label for="new_instrument_id" class="text-sm font-medium text-gray-700 mb-2 block">Alternatives Instrument</label>
+                                <x-alpine-autocomplete 
+                                    :options="$this->availableInstruments->toArray()"
+                                    wire-model="new_instrument_id"
+                                    :value="$new_instrument_id"
+                                    placeholder="Instrument auswählen..."
+                                    display-field="name"
+                                    value-field="id"
+                                    :search-fields="['name', 'serial_number']"
+                                    secondary-display-field="serial_number"
+                                    :error="$errors->first('new_instrument_id')"
+                                />
+                                @error('new_instrument_id') 
+                                    <span class="text-red-500 text-sm">{{ $message }}</span> 
+                                @enderror
+                            </div>
+                        @endif
+                        
+                        <!-- Description Input -->
+                        @if($replacement_type === 'description')
+                            <div class="mb-4">
+                                <label for="replacement_instrument_description" class="text-sm font-medium text-gray-700 mb-2 block">Beschreibung des Ersatzinstruments</label>
+                                <textarea id="replacement_instrument_description" 
+                                          wire:model="replacement_instrument_description" 
+                                          rows="3" 
+                                          maxlength="500"
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                          placeholder="Beschreiben Sie das gewünschte Ersatzinstrument..."></textarea>
+                                <p class="text-xs text-gray-500 mt-1">{{ strlen($replacement_instrument_description) }}/500 Zeichen</p>
+                                @error('replacement_instrument_description') 
+                                    <span class="text-red-500 text-sm">{{ $message }}</span> 
+                                @enderror
+                            </div>
+                        @endif
+                    </div>
+                    
                     <!-- Current Details Display -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 p-4 bg-gray-50 rounded-lg">
                         <div>

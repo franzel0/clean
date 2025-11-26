@@ -24,6 +24,9 @@ class ShowPurchaseOrder extends Component
     public $instrumentStatusId = '';
     public $is_completed = false;
     public $defect_report_completed = false;
+    public $replacement_type = 'same'; // 'same', 'alternative', 'description'
+    public $new_instrument_id = '';
+    public $replacement_instrument_description = '';
 
     public function mount(PurchaseOrder $order)
     {
@@ -34,6 +37,8 @@ class ShowPurchaseOrder extends Component
             'defectReport.instrument.instrumentStatus',
             'defectReport.reportedBy',
             'defectReport.reportingDepartment',
+            'oldInstrument',
+            'newInstrument',
             'requestedBy',
             'approvedBy',
             'receivedBy',
@@ -47,6 +52,17 @@ class ShowPurchaseOrder extends Component
         $this->instrumentStatusId = $this->order->defectReport?->instrument?->status_id ?? '';
         $this->is_completed = $this->order->is_completed ?? false;
         $this->defect_report_completed = $this->order->defectReport?->is_completed ?? false;
+        $this->new_instrument_id = $this->order->new_instrument_id;
+        $this->replacement_instrument_description = $this->order->replacement_instrument_description;
+        
+        // Bestimme den Replacement-Typ basierend auf den gespeicherten Daten
+        if ($this->replacement_instrument_description) {
+            $this->replacement_type = 'description';
+        } elseif ($this->new_instrument_id) {
+            $this->replacement_type = 'alternative';
+        } else {
+            $this->replacement_type = 'same';
+        }
     }
 
     public function toggleStatusDropdown()
@@ -59,7 +75,7 @@ class ShowPurchaseOrder extends Component
         // Authorization: Nur berechtigt Benutzer können Bestelldetails ändern
         $this->authorize('update', $this->order);
         
-        $this->validate([
+        $validationRules = [
             'manufacturer_id' => 'nullable|exists:manufacturers,id',
             'totalAmount' => 'nullable|numeric|min:0|max:999999.99',
             'expectedDelivery' => 'nullable|date|after_or_equal:today',
@@ -67,7 +83,16 @@ class ShowPurchaseOrder extends Component
             'instrumentStatusId' => 'nullable|exists:instrument_statuses,id',
             'is_completed' => 'boolean',
             'defect_report_completed' => 'boolean',
-        ], [
+            'replacement_type' => 'required|in:same,alternative,description',
+        ];
+
+        if ($this->replacement_type === 'alternative') {
+            $validationRules['new_instrument_id'] = 'required|exists:instruments,id';
+        } elseif ($this->replacement_type === 'description') {
+            $validationRules['replacement_instrument_description'] = 'required|string|max:500';
+        }
+
+        $validationMessages = [
             'manufacturer_id.exists' => 'Bitte wählen Sie einen gültigen Hersteller aus.',
             'totalAmount.numeric' => 'Die tatsächlichen Kosten müssen eine Zahl sein.',
             'totalAmount.min' => 'Die tatsächlichen Kosten können nicht negativ sein.',
@@ -76,15 +101,26 @@ class ShowPurchaseOrder extends Component
             'expectedDelivery.after_or_equal' => 'Das Lieferdatum kann nicht in der Vergangenheit liegen.',
             'notes.max' => 'Notizen dürfen maximal 2000 Zeichen lang sein.',
             'instrumentStatusId.exists' => 'Bitte wählen Sie einen gültigen Instrumentenstatus aus.',
-        ]);
+            'new_instrument_id.required' => 'Bitte wählen Sie ein alternatives Instrument aus.',
+            'new_instrument_id.exists' => 'Das ausgewählte Instrument existiert nicht.',
+            'replacement_instrument_description.required' => 'Bitte beschreiben Sie das Ersatzinstrument.',
+            'replacement_instrument_description.max' => 'Die Beschreibung darf maximal 500 Zeichen lang sein.',
+        ];
 
-        $this->order->update([
+        $this->validate($validationRules, $validationMessages);
+
+        $updateData = [
             'manufacturer_id' => $this->manufacturer_id,
             'total_amount' => $this->totalAmount,
             'expected_delivery' => $this->expectedDelivery,
             'notes' => $this->notes,
             'is_completed' => $this->is_completed,
-        ]);
+            'old_instrument_id' => $this->order->defectReport?->instrument?->id,
+            'new_instrument_id' => $this->replacement_type === 'alternative' ? $this->new_instrument_id : null,
+            'replacement_instrument_description' => $this->replacement_type === 'description' ? $this->replacement_instrument_description : null,
+        ];
+
+        $this->order->update($updateData);
 
         // Instrumentenstatus aktualisieren falls vorhanden
         if ($this->instrumentStatusId && $this->order->defectReport?->instrument) {
@@ -129,6 +165,11 @@ class ShowPurchaseOrder extends Component
     public function getAvailableInstrumentStatusesProperty()
     {
         return \App\Models\InstrumentStatus::availableInPurchaseOrders()->active()->get();
+    }
+
+    public function getAvailableInstrumentsProperty()
+    {
+        return \App\Models\Instrument::active()->orderBy('name')->get();
     }
 
     public function getAvailableStatusTransitions()

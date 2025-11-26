@@ -21,16 +21,6 @@
             </div>
             
             <div>
-                <select wire:model.live="statusFilter" 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">{{ __('messages.all_status') }}</option>
-                    @foreach($statuses as $value => $label)
-                        <option value="{{ $value }}">{{ $label }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div>
                 <select wire:model.live="severityFilter" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                     <option value="">{{ __('messages.all_severities') }}</option>
@@ -66,16 +56,13 @@
                     <option value="completed">Nur abgeschlossene</option>
                 </select>
             </div>
-        </div>
-        
-        <div class="mt-4 flex justify-between items-center">
-            <div class="text-sm text-gray-500">
-                {{ $reports->count() }} von {{ $reports->total() }} Meldungen angezeigt
+
+            <div class="flex space-x-2">
+                <button wire:click="resetFilters" 
+                        class="px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
+                    Filter zurücksetzen
+                </button>
             </div>
-            <button wire:click="resetFilters" 
-                    class="px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50">
-                Filter zurücksetzen
-            </button>
         </div>
     </div>
 
@@ -86,14 +73,48 @@
                 <table class="w-full">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                         <tr>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.report_number') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.instruments') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Defekttyp</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.severity') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.status') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">Abgeschlossen</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.reported_by') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.date') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 {{ $sortBy === 'report_number' ? 'bg-blue-50' : '' }}" wire:click="sort('report_number')">
+                                {{ __('messages.report_number') }} 
+                                @if($sortBy === 'report_number')
+                                    <span class="text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 {{ $sortBy === 'instrument_id' ? 'bg-blue-50' : '' }}" wire:click="sort('instrument_id')">
+                                {{ __('messages.instruments') }}
+                                @if($sortBy === 'instrument_id')
+                                    <span class="text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 {{ $sortBy === 'defect_type_id' ? 'bg-blue-50' : '' }}" wire:click="sort('defect_type_id')">
+                                Defekttyp
+                                @if($sortBy === 'defect_type_id')
+                                    <span class="text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 {{ $sortBy === 'severity' ? 'bg-blue-50' : '' }}" wire:click="sort('severity')">
+                                {{ __('messages.severity') }}
+                                @if($sortBy === 'severity')
+                                    <span class="text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 {{ $sortBy === 'acknowledged_by' ? 'bg-blue-50' : '' }}" wire:click="sort('acknowledged_by')">
+                                {{ __('messages.reported_by') }}
+                                @if($sortBy === 'acknowledged_by')
+                                    <span class="text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 {{ $sortBy === 'reported_at' ? 'bg-blue-50' : '' }}" wire:click="sort('reported_at')">
+                                {{ __('messages.date') }}
+                                @if($sortBy === 'reported_at')
+                                    <span class="text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 {{ $sortBy === 'is_completed' ? 'bg-blue-50' : '' }}" wire:click="sort('is_completed')">
+                                Status
+                                @if($sortBy === 'is_completed')
+                                    <span class="text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
@@ -116,9 +137,11 @@
                                     </span>
                                 </td>
                                 <td class="py-3 px-4">
-                                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full {{ $report->instrument->instrumentStatus->bg_class }} {{ $report->instrument->instrumentStatus->text_class }}">
-                                        {{ $report->instrument->instrumentStatus->name }}
-                                    </span>
+                                    <div class="text-sm text-gray-900">{{ $report->reportedBy->name }}</div>
+                                    <div class="text-xs text-gray-600">{{ $report->reportingDepartment->name }}</div>
+                                </td>
+                                <td class="py-3 px-4 text-sm text-gray-900">
+                                    {{ $report->reported_at->format('d.m.Y H:i') }}
                                 </td>
                                 <td class="py-3 px-4">
                                     @if($report->is_completed)
@@ -130,13 +153,6 @@
                                             Aktiv
                                         </span>
                                     @endif
-                                </td>
-                                <td class="py-3 px-4">
-                                    <div class="text-sm text-gray-900">{{ $report->reportedBy->name }}</div>
-                                    <div class="text-xs text-gray-600">{{ $report->reportingDepartment->name }}</div>
-                                </td>
-                                <td class="py-3 px-4 text-sm text-gray-900">
-                                    {{ $report->reported_at->format('d.m.Y H:i') }}
                                 </td>
                                 <td class="py-3 px-4">
                                     <div class="flex space-x-2">
@@ -168,7 +184,47 @@
             </div>
 
             <div class="px-6 py-4 border-t border-gray-200">
-                {{ $reports->links() }}
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="text-sm text-gray-600">
+                        Zeige {{ ($reports->currentPage() - 1) * 20 + 1 }} bis {{ min($reports->currentPage() * 20, $reports->total()) }} von {{ $reports->total() }} Meldungen
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        @if ($reports->onFirstPage())
+                            <button disabled class="px-3 py-2 border border-gray-300 rounded-md text-gray-400 cursor-not-allowed">
+                                ← Zurück
+                            </button>
+                        @else
+                            <button wire:click="gotoPage({{ $reports->currentPage() - 1 }})" class="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                ← Zurück
+                            </button>
+                        @endif
+
+                        <div class="flex gap-1">
+                            @for ($i = 1; $i <= $reports->lastPage(); $i++)
+                                @if ($i >= $reports->currentPage() - 2 && $i <= $reports->currentPage() + 2)
+                                    @if ($i === $reports->currentPage())
+                                        <button class="px-3 py-2 bg-blue-600 text-white rounded-md">{{ $i }}</button>
+                                    @else
+                                        <button wire:click="gotoPage({{ $i }})" class="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">{{ $i }}</button>
+                                    @endif
+                                @elseif (($i === $reports->currentPage() - 3 || $i === $reports->currentPage() + 3) && $reports->lastPage() > 5)
+                                    <span class="px-2 py-2">...</span>
+                                @endif
+                            @endfor
+                        </div>
+
+                        @if ($reports->hasMorePages())
+                            <button wire:click="gotoPage({{ $reports->currentPage() + 1 }})" class="px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                                Weiter →
+                            </button>
+                        @else
+                            <button disabled class="px-3 py-2 border border-gray-300 rounded-md text-gray-400 cursor-not-allowed">
+                                Weiter →
+                            </button>
+                        @endif
+                    </div>
+                </div>
             </div>
         @else
             <div class="text-center py-8">

@@ -20,8 +20,10 @@ class InstrumentsList extends Component
     public $categoryFilter = '';
     public $containerFilter = '';
     public $activeOnly = true; // Default to show only active instruments
+    public $sortBy = 'name';
+    public $sortDirection = 'asc';
     
-    protected $queryString = ['search', 'statusFilter', 'categoryFilter', 'containerFilter', 'activeOnly'];
+    protected $queryString = ['search', 'statusFilter', 'categoryFilter', 'containerFilter', 'activeOnly', 'sortBy', 'sortDirection'];
     
     public function updatingSearch()
     {
@@ -70,6 +72,24 @@ class InstrumentsList extends Component
 
     public function updatedActiveOnly()
     {
+        $this->resetPage();
+    }
+
+    public function gotoPage($page)
+    {
+        $this->setPage($page);
+    }
+
+    public function sort($column)
+    {
+        if ($this->sortBy === $column) {
+            // Toggle direction if clicking the same column
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            // Set new column and default to asc
+            $this->sortBy = $column;
+            $this->sortDirection = 'asc';
+        }
         $this->resetPage();
     }
 
@@ -200,7 +220,7 @@ class InstrumentsList extends Component
             $query->where('current_container_id', $this->containerFilter);
         }
 
-        $instruments = $query->orderBy('name')->paginate(20);
+        $instruments = $query->orderBy($this->sortBy, $this->sortDirection)->paginate(20);
 
         $containers = Container::all();
         $statuses = InstrumentStatus::active()->ordered()->get();

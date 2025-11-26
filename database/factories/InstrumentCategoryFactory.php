@@ -11,8 +11,11 @@ class InstrumentCategoryFactory extends Factory
 
     public function definition(): array
     {
+        static $counter = 0;
+        $counter++;
+        
         return [
-            'name' => $this->faker->words(2, true),
+            'name' => 'Category ' . $counter . ' ' . $this->faker->unique()->word(),
             'description' => $this->faker->sentence(),
             'sort_order' => $this->faker->numberBetween(1, 100),
             'is_active' => true,

@@ -84,7 +84,7 @@ class EditInstrument extends Component
             $this->categories = InstrumentCategory::active()->ordered()->get();
             $this->statuses = InstrumentStatus::active()->ordered()->get();
             $this->containers = Container::where('is_active', true)->orderBy('name')->get();
-            $this->departments = Department::orderBy('name')->get();
+            $this->departments = Department::where('is_active', true)->orderBy('name')->get();
         } catch (\Exception $e) {
             Log::error('Error loading lookup data: ' . $e->getMessage());
             // Fallback mit leeren Collections
@@ -229,7 +229,7 @@ class EditInstrument extends Component
     public function render()
     {
         $containers = Container::all();
-        $departments = Department::all();
+        $departments = Department::where('is_active', true)->orderBy('name')->get();
         $statuses = InstrumentStatus::active()->ordered()->get();
         $categories = InstrumentCategory::active()->ordered()->get();
         $manufacturers = Manufacturer::active()->ordered()->get();

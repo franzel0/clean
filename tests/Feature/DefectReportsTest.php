@@ -88,7 +88,7 @@ it('can filter by completion status', function () {
     ]);
 
     Livewire::test(DefectReportsList::class)
-        ->set('statusFilter', 'open')
+        ->set('completionFilter', 'active')
         ->assertSee('Open Report Instrument')
         ->assertDontSee('Completed Report Instrument');
 });

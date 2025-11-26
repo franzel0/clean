@@ -15,6 +15,9 @@ class PurchaseOrder extends Model
         'supplier_id',
         'manufacturer_id',
         'defect_report_id',
+        'old_instrument_id',
+        'new_instrument_id',
+        'replacement_instrument_description',
         'ordered_by',
         'approved_by',
         'received_by',
@@ -45,6 +48,16 @@ class PurchaseOrder extends Model
     public function defectReport(): BelongsTo
     {
         return $this->belongsTo(DefectReport::class);
+    }
+
+    public function oldInstrument(): BelongsTo
+    {
+        return $this->belongsTo(Instrument::class, 'old_instrument_id');
+    }
+
+    public function newInstrument(): BelongsTo
+    {
+        return $this->belongsTo(Instrument::class, 'new_instrument_id');
     }
 
     public function orderedBy(): BelongsTo

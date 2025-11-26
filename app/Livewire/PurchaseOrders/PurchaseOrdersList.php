@@ -20,6 +20,10 @@ class PurchaseOrdersList extends Component
     public $search = '';
     public $departmentFilter = '';
     public $completionFilter = 'active';
+    public $sortBy = 'order_date';
+    public $sortDirection = 'desc';
+
+    protected $queryString = ['search', 'departmentFilter', 'completionFilter', 'sortBy', 'sortDirection'];
 
     public function updatingSearch()
     {
@@ -34,6 +38,22 @@ class PurchaseOrdersList extends Component
     public function updatingCompletionFilter()
     {
         $this->resetPage();
+    }
+
+    public function sort($column)
+    {
+        if ($this->sortBy === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $column;
+            $this->sortDirection = 'asc';
+        }
+        $this->resetPage();
+    }
+
+    public function gotoPage($page)
+    {
+        $this->setPage($page);
     }
 
     public function resetFilters()
@@ -114,7 +134,7 @@ class PurchaseOrdersList extends Component
             }
         });
 
-        $orders = $query->latest()->paginate(15);
+        $orders = $query->orderBy($this->sortBy, $this->sortDirection)->paginate(20);
 
         $departments = Department::active()->get();
 

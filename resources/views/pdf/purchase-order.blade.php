@@ -45,15 +45,17 @@
         
         .header-brand {
             display: inline-block;
-            width: 80px;
+            width: 100px;
             height: 80px;
-            background: #2563eb;
-            border-radius: 12px;
-            color: white;
-            font-size: 32px;
-            font-weight: bold;
             line-height: 80px;
             text-align: center;
+        }
+
+        .header-brand img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
         }
         
         .company-info {
@@ -176,7 +178,9 @@
 <body>
     <div class="header">
         <div class="header-left">
-            <div class="header-brand">IMS</div>
+            <div class="header-brand">
+                <img src="{{ public_path('img/jg.svg') }}" alt="Logo">
+            </div>
             <div class="company-info">
                 Instrumenten-<br>
                 Management-<br>
@@ -259,35 +263,58 @@
                 <div class="info-label">Meldungsnummer:</div>
                 <div class="info-value">{{ $order->defectReport->report_number }}</div>
             </div>
+        </div>
+    </div>
+
+    <!-- Instrumentenaustausch -->
+    <div class="section">
+        <div class="section-title">Instrumentenaustausch</div>
+        <div class="info-grid">
+            @if($order->oldInstrument)
             <div class="info-row">
-                <div class="info-label">Instrument:</div>
-                <div class="info-value">{{ $order->defectReport->instrument->name }}</div>
+                <div class="info-label">Zu ersetzendes Instrument:</div>
+                <div class="info-value">{{ $order->oldInstrument->name }}</div>
             </div>
+            @if($order->oldInstrument->serial_number)
             <div class="info-row">
                 <div class="info-label">Seriennummer:</div>
-                <div class="info-value">{{ $order->defectReport->instrument->serial_number }}</div>
+                <div class="info-value">{{ $order->oldInstrument->serial_number }}</div>
             </div>
+            @endif
+            @endif
+            
             <div class="info-row">
-                <div class="info-label">Gemeldet von:</div>
-                <div class="info-value">{{ $order->defectReport->reportedBy->name }}</div>
+                <div class="info-label">Art des Austauschs:</div>
+                <div class="info-value">
+                    @if($order->replacement_type === 'same')
+                        Gleiches Instrument nachbestellen
+                    @elseif($order->replacement_type === 'alternative')
+                        Alternative aus Katalog
+                    @else
+                        Beschreibung eingeben
+                    @endif
+                </div>
             </div>
+            
+            @if($order->replacement_type === 'alternative' && $order->newInstrument)
             <div class="info-row">
-                <div class="info-label">Abteilung:</div>
-                <div class="info-value">{{ $order->defectReport->reportingDepartment->name }}</div>
+                <div class="info-label">Alternatives Instrument:</div>
+                <div class="info-value">{{ $order->newInstrument->name }}</div>
             </div>
+            @if($order->newInstrument->serial_number)
             <div class="info-row">
-                <div class="info-label">Defekttyp:</div>
-                <div class="info-value">{{ $order->defectReport->defect_type_display }}</div>
+                <div class="info-label">Seriennummer:</div>
+                <div class="info-value">{{ $order->newInstrument->serial_number }}</div>
             </div>
+            @endif
+            @endif
+            
+            @if($order->replacement_type === 'description' && $order->replacement_instrument_description)
             <div class="info-row">
-                <div class="info-label">Schweregrad:</div>
-                <div class="info-value">{{ $order->defectReport->severity_display }}</div>
+                <div class="info-label">Beschreibung:</div>
+                <div class="info-value">{{ $order->replacement_instrument_description }}</div>
             </div>
-        </div>
-        
-        <div>
-            <strong>Defektbeschreibung:</strong>
-            <div class="description">{{ $order->defectReport->description }}</div>
+            @endif
         </div>
     </div>
 

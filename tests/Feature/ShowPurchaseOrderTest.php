@@ -133,3 +133,96 @@ it('can download purchase order as PDF', function () {
         ->call('downloadPdf')
         ->assertSuccessful();
 });
+
+it('can select same instrument replacement type', function () {
+    Livewire::test(ShowPurchaseOrder::class, ['order' => $this->purchaseOrder])
+        ->set('replacement_type', 'same')
+        ->call('updateDetails')
+        ->assertSuccessful();
+    
+    $this->purchaseOrder->refresh();
+    expect($this->purchaseOrder->old_instrument_id)->toBe($this->instrument->id);
+    expect($this->purchaseOrder->new_instrument_id)->toBeNull();
+    expect($this->purchaseOrder->replacement_instrument_description)->toBeNull();
+});
+
+it('can select alternative instrument replacement type', function () {
+    $alternativeInstrument = Instrument::factory()->create([
+        'status_id' => $this->confirmedStatus->id,
+    ]);
+    
+    Livewire::test(ShowPurchaseOrder::class, ['order' => $this->purchaseOrder])
+        ->set('replacement_type', 'alternative')
+        ->set('new_instrument_id', $alternativeInstrument->id)
+        ->call('updateDetails')
+        ->assertSuccessful();
+    
+    $this->purchaseOrder->refresh();
+    expect($this->purchaseOrder->old_instrument_id)->toBe($this->instrument->id);
+    expect($this->purchaseOrder->new_instrument_id)->toBe($alternativeInstrument->id);
+    expect($this->purchaseOrder->replacement_instrument_description)->toBeNull();
+});
+
+it('requires new instrument for alternative replacement type', function () {
+    Livewire::test(ShowPurchaseOrder::class, ['order' => $this->purchaseOrder])
+        ->set('replacement_type', 'alternative')
+        ->set('new_instrument_id', '')
+        ->call('updateDetails')
+        ->assertHasErrors(['new_instrument_id']);
+});
+
+it('can enter description for replacement', function () {
+    $description = 'Alternative model with improved specifications';
+    
+    Livewire::test(ShowPurchaseOrder::class, ['order' => $this->purchaseOrder])
+        ->set('replacement_type', 'description')
+        ->set('replacement_instrument_description', $description)
+        ->call('updateDetails')
+        ->assertSuccessful();
+    
+    $this->purchaseOrder->refresh();
+    expect($this->purchaseOrder->old_instrument_id)->toBe($this->instrument->id);
+    expect($this->purchaseOrder->new_instrument_id)->toBeNull();
+    expect($this->purchaseOrder->replacement_instrument_description)->toBe($description);
+});
+
+it('requires description for description replacement type', function () {
+    Livewire::test(ShowPurchaseOrder::class, ['order' => $this->purchaseOrder])
+        ->set('replacement_type', 'description')
+        ->set('replacement_instrument_description', '')
+        ->call('updateDetails')
+        ->assertHasErrors(['replacement_instrument_description']);
+});
+
+it('validates max 500 characters for replacement description', function () {
+    $description = str_repeat('a', 501);
+    
+    Livewire::test(ShowPurchaseOrder::class, ['order' => $this->purchaseOrder])
+        ->set('replacement_type', 'description')
+        ->set('replacement_instrument_description', $description)
+        ->call('updateDetails')
+        ->assertHasErrors(['replacement_instrument_description']);
+});
+
+it('loads old instrument from defect report', function () {
+    Livewire::test(ShowPurchaseOrder::class, ['order' => $this->purchaseOrder])
+        ->assertSuccessful()
+        ->assertSee($this->instrument->name)
+        ->assertSee($this->instrument->serial_number);
+});
+
+it('auto-detects replacement type from saved data', function () {
+    $alternativeInstrument = Instrument::factory()->create([
+        'status_id' => $this->confirmedStatus->id,
+    ]);
+    
+    $this->purchaseOrder->update([
+        'old_instrument_id' => $this->instrument->id,
+        'new_instrument_id' => $alternativeInstrument->id,
+    ]);
+    
+    Livewire::test(ShowPurchaseOrder::class, ['order' => $this->purchaseOrder->fresh()])
+        ->assertSuccessful()
+        ->assertSet('replacement_type', 'alternative');
+});
+

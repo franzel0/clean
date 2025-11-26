@@ -404,6 +404,10 @@ class SettingsIndex extends Component
             $data['department_id'] = $this->editingDepartmentId;
         }
 
+        if ($this->activeTab === 'departments') {
+            $data['is_active'] = $this->editingIsActive;
+        }
+
         if ($this->activeTab === 'manufacturers') {
             $data['contact_person'] = $this->editingContactPerson;
             $data['contact_email'] = $this->editingContactEmail;

@@ -87,12 +87,42 @@
                 <table class="w-full">
                     <thead class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
                         <tr>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.instrument') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.serial_number') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.category') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.status') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.containers') }}</th>
-                            <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.current_location') }}</th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 transition {{ $sortBy === 'name' ? 'bg-blue-50' : '' }}" wire:click="sort('name')">
+                                {{ __('messages.instrument') }}
+                                @if($sortBy === 'name')
+                                    <span class="inline-block ml-2 text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 transition {{ $sortBy === 'serial_number' ? 'bg-blue-50' : '' }}" wire:click="sort('serial_number')">
+                                {{ __('messages.serial_number') }}
+                                @if($sortBy === 'serial_number')
+                                    <span class="inline-block ml-2 text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 transition {{ $sortBy === 'category_id' ? 'bg-blue-50' : '' }}" wire:click="sort('category_id')">
+                                {{ __('messages.category') }}
+                                @if($sortBy === 'category_id')
+                                    <span class="inline-block ml-2 text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 transition {{ $sortBy === 'status_id' ? 'bg-blue-50' : '' }}" wire:click="sort('status_id')">
+                                {{ __('messages.status') }}
+                                @if($sortBy === 'status_id')
+                                    <span class="inline-block ml-2 text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 transition {{ $sortBy === 'current_container_id' ? 'bg-blue-50' : '' }}" wire:click="sort('current_container_id')">
+                                {{ __('messages.containers') }}
+                                @if($sortBy === 'current_container_id')
+                                    <span class="inline-block ml-2 text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
+                            <th class="text-left py-3 px-4 font-medium text-gray-900 cursor-pointer hover:bg-gray-200 transition {{ $sortBy === 'current_location_id' ? 'bg-blue-50' : '' }}" wire:click="sort('current_location_id')">
+                                {{ __('messages.current_location') }}
+                                @if($sortBy === 'current_location_id')
+                                    <span class="inline-block ml-2 text-blue-600 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                                @endif
+                            </th>
                             <th class="text-left py-3 px-4 font-medium text-gray-900">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>
@@ -203,8 +233,53 @@
                 </table>
             </div>
 
-            <div class="px-6 py-4 border-t border-gray-200">
-                {{ $instruments->links() }}
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm text-gray-600">
+                        Zeige <strong>{{ ($instruments->currentPage() - 1) * $instruments->perPage() + 1 }}</strong> bis 
+                        <strong>{{ min($instruments->currentPage() * $instruments->perPage(), $instruments->total()) }}</strong> von 
+                        <strong>{{ $instruments->total() }}</strong> Instrumenten
+                    </p>
+                    
+                    <div class="flex items-center space-x-2">
+                        @if ($instruments->onFirstPage())
+                            <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-gray-200 rounded-md cursor-not-allowed">
+                                ← Zurück
+                            </span>
+                        @else
+                            <button wire:click="previousPage" 
+                                    class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                ← Zurück
+                            </button>
+                        @endif
+                        
+                        <div class="flex items-center space-x-1">
+                            @for ($i = 1; $i <= $instruments->lastPage(); $i++)
+                                @if ($i === $instruments->currentPage())
+                                    <span class="px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md">
+                                        {{ $i }}
+                                    </span>
+                                @else
+                                    <button wire:click="gotoPage({{ $i }})" 
+                                            class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                        {{ $i }}
+                                    </button>
+                                @endif
+                            @endfor
+                        </div>
+                        
+                        @if ($instruments->hasMorePages())
+                            <button wire:click="nextPage" 
+                                    class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                Weiter →
+                            </button>
+                        @else
+                            <span class="px-3 py-2 text-sm font-medium text-gray-400 bg-gray-200 rounded-md cursor-not-allowed">
+                                Weiter →
+                            </span>
+                        @endif
+                    </div>
+                </div>
             </div>
         @else
             <div class="text-center py-8">
